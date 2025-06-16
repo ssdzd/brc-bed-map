@@ -56,12 +56,11 @@ const SearchPanel = ({
   }, [searchTerm, selectedFilter, camps, onFilterChange]);
   
   if (!isVisible) {
-    // Collapsed state - just show search toggle button
     return (
       <div
         style={{
           position: 'absolute',
-          top: '1rem',
+          bottom: '1rem',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 20
@@ -110,7 +109,7 @@ const SearchPanel = ({
     <div
       style={{
         position: 'absolute',
-        top: '1rem',
+        bottom: '1rem',
         left: '50%',
         transform: 'translateX(-50%)',
         width: '420px',

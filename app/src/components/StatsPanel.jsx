@@ -55,8 +55,9 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
       <div
         style={{
           position: 'absolute',
-          top: '6rem',
+          top: '50%',
           right: '1rem',
+          transform: 'translateY(-50%)',
           zIndex: 15
         }}
       >
@@ -126,8 +127,9 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
     <div
       style={{
         position: 'absolute',
-        top: '6rem',
+        top: '50%',
         right: '1rem',
+        transform: 'translateY(-50%)',
         width: '320px',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',

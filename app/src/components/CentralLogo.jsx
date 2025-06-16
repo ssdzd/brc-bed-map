@@ -1,5 +1,6 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
+import logoImage from '../assets/logo@4x.png';
 
 const CentralLogo = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
@@ -8,8 +9,8 @@ const CentralLogo = ({ theme = '2025' }) => {
     <div
       style={{
         position: 'absolute',
-        top: '272px', // The Man's Y coordinate from SVG
-        left: '622px', // The Man's X coordinate from SVG  
+        top: '50%',
+        left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '200px',
         height: '200px',
@@ -28,24 +29,17 @@ const CentralLogo = ({ theme = '2025' }) => {
         animation: theme === '2024' ? 'glow 3s ease-in-out infinite alternate' : 'none'
       }}
     >
-      {/* Main B.E.D. Logo */}
-      <div
+      {/* Main B.E.D. Logo Image */}
+      <img 
+        src={logoImage}
+        alt="B.E.D. Logo"
         style={{
-          fontSize: '2.5rem',
-          fontWeight: '900',
-          fontFamily: themeConfig.typography.displayFont,
-          color: themeConfig.centerCircle.textColor,
-          letterSpacing: '0.2em',
-          textAlign: 'center',
-          lineHeight: '1',
-          marginBottom: '0.5rem',
-          textShadow: theme === '2024' 
-            ? '2px 2px 4px rgba(173, 20, 87, 0.3)'
-            : '1px 1px 2px rgba(0, 0, 0, 0.1)'
+          width: '80%',
+          height: 'auto',
+          objectFit: 'contain',
+          marginBottom: '0.5rem'
         }}
-      >
-        B.E.D.
-      </div>
+      />
       
       {/* Subtitle */}
       <div

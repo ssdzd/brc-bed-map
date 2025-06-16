@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export const useUrlState = () => {
   const [urlState, setUrlState] = useState({
@@ -169,11 +169,10 @@ export const useUrlState = () => {
     }
   }, [generateShareUrl]);
 
-  // Memoize the return object to prevent unnecessary re-renders
-  return useMemo(() => ({
+  return {
     urlState,
     updateUrl,
     generateShareUrl,
     copyToClipboard
-  }), [urlState, updateUrl, generateShareUrl, copyToClipboard]);
+  };
 };

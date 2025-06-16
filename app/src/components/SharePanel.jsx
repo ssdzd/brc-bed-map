@@ -51,7 +51,7 @@ const SharePanel = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '8rem',
+          bottom: '1rem',
           right: '1rem',
           zIndex: 15
         }}
@@ -99,7 +99,7 @@ const SharePanel = ({
     <div
       style={{
         position: 'absolute',
-        bottom: '8rem',
+        bottom: '1rem',
         right: '1rem',
         width: '280px',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',

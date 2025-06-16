@@ -43,9 +43,9 @@ const MapView = () => {
   
   useEffect(() => {
     if (!initializedFromUrl) {
-      if (urlState.theme) setCurrentTheme(urlState.theme);
-      if (urlState.zoom) setZoom(urlState.zoom);
-      if (urlState.pan) setPan(urlState.pan);
+      setCurrentTheme(urlState.theme);
+      setZoom(urlState.zoom);
+      setPan(urlState.pan);
       if (urlState.selectedBlock) setSelectedBlock(urlState.selectedBlock);
       setInitializedFromUrl(true);
     }
