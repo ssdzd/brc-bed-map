@@ -8,6 +8,7 @@ import ThemeSwitcher from './ThemeSwitcher';
 import CentralLogo from './CentralLogo';
 import BackgroundOverlay from './BackgroundOverlay';
 import ThinkHeader from './ThinkHeader';
+import mapSvg from '/merged_map_full.svg';
 
 const MapView = () => {
   const svgRef = useRef(null);
@@ -234,14 +235,9 @@ const MapView = () => {
       >
         <object
           ref={svgRef}
-          data="/merged_map_full.svg"
+          data={mapSvg}
           type="image/svg+xml"
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            pointerEvents: 'auto',
-            display: 'block'
-          }}
+          className="w-full h-full"
           onLoad={() => console.log('SVG loaded')}
         />
         
