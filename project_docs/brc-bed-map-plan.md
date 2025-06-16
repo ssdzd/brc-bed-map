@@ -1,7 +1,7 @@
 # Interactive Burning Man Map MVP Development Plan
 
 ## Project Overview
-An interactive map system for tracking BED (Burner Empowerment & Development) program progress across theme camps in Black Rock City. This MVP will serve as the foundation for a generalizable framework supporting multiple map overlays.
+An interactive map system for tracking BED (Bureau of Erotic Discourse) program progress across theme camps in Black Rock City. This MVP will serve as the foundation for a generalizable framework supporting multiple map overlays.
 
 ## Architecture Overview
 

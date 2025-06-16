@@ -1,7 +1,7 @@
 # BRC BED Map - Simplified Implementation
 
 ## Project Overview
-Build an interactive Burning Man map that tracks BED (Burner Empowerment & Development) program progress. The map colors city blocks based on camp participation status and allows clicking blocks to see camp details.
+Build an interactive Burning Man map that tracks BED (Bureau of Erotic Discourse) program progress. The map colors city blocks based on camp participation status and allows clicking blocks to see camp details.
 
 ## Key Simplification
 We have a pre-made SVG (`merged_map_full.svg`) with polygon blocks already defined. Each block has an ID like `A_8`, `B_15`, etc. We just need to:
