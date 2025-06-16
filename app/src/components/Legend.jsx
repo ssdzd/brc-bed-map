@@ -1,5 +1,6 @@
 import React from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
+import { StatusIcon } from './PlayaIcons';
 
 const Legend = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
@@ -93,12 +94,11 @@ const Legend = ({ theme = '2025' }) => {
                 }}
               />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{
-                  fontSize: '0.875rem',
-                  opacity: 0.7
-                }}>
-                  {item.icon}
-                </span>
+                <StatusIcon 
+                  status={item.status} 
+                  size="0.875rem" 
+                  animated={theme === '2024'}
+                />
               </div>
             </div>
             <div style={{ flex: 1 }}>

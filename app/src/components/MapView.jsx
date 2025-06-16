@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useMapData } from '../hooks/useMapData';
-import { getBlockColor, THEMES } from '../utils/blockUtils';
+import { getBlockColor, THEMES, campInBlock } from '../utils/blockUtils';
 import InfoPanel from './InfoPanel';
 import Legend from './Legend';
 import ZoomControls from './ZoomControls';
@@ -8,6 +8,14 @@ import ThemeSwitcher from './ThemeSwitcher';
 import CentralLogo from './CentralLogo';
 import BackgroundOverlay from './BackgroundOverlay';
 import ThinkHeader from './ThinkHeader';
+import Tooltip from './Tooltip';
+import CornerCharacters from './CornerCharacters';
+import CompassRose from './CompassRose';
+import SearchPanel from './SearchPanel';
+import StreetTimeLabels from './StreetTimeLabels';
+import StatsPanel from './StatsPanel';
+import SharePanel from './SharePanel';
+import { useUrlState } from '../hooks/useUrlState';
 import mapSvg from '/merged_map_full.svg';
 
 const MapView = () => {
@@ -20,8 +28,42 @@ const MapView = () => {
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [currentTheme, setCurrentTheme] = useState('2025');
+  const [tooltip, setTooltip] = useState({ visible: false, content: null, position: { x: 0, y: 0 } });
+  const [hoveredBlock, setHoveredBlock] = useState(null);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [selectedCamp, setSelectedCamp] = useState(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
+  const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
   console.log('MapView rendering, loading:', loading, 'camps:', camps);
+
+  // Initialize state from URL on mount (only once)
+  const [initializedFromUrl, setInitializedFromUrl] = useState(false);
+  
+  useEffect(() => {
+    if (!initializedFromUrl) {
+      if (urlState.theme) setCurrentTheme(urlState.theme);
+      if (urlState.zoom) setZoom(urlState.zoom);
+      if (urlState.pan) setPan(urlState.pan);
+      if (urlState.selectedBlock) setSelectedBlock(urlState.selectedBlock);
+      setInitializedFromUrl(true);
+    }
+  }, [urlState, initializedFromUrl]);
+
+  // Update URL when key state changes (only after initialization)
+  useEffect(() => {
+    if (initializedFromUrl) {
+      const newState = {
+        theme: currentTheme,
+        zoom,
+        pan,
+        selectedBlock,
+        search: '' // Could be connected to search state if needed
+      };
+      updateUrl(newState);
+    }
+  }, [currentTheme, zoom, pan, selectedBlock, updateUrl, initializedFromUrl]);
 
   useEffect(() => {
     console.log('MapView useEffect triggered');
@@ -39,27 +81,84 @@ const MapView = () => {
     console.log('Found blocks:', blocks.length);
     blocks.forEach(block => {
       const color = getBlockColor(block.id, camps, currentTheme);
+      const campsInBlock = camps.filter(camp => 
+        campInBlock(camp.placement_address, block.id)
+      );
+      
       block.style.fill = color;
       block.style.fillOpacity = '0.6';
       block.style.cursor = 'pointer';
-      block.style.transition = 'all 0.2s';
+      block.style.transition = 'all 0.3s ease';
+      block.style.stroke = currentTheme === '2024' ? '#FFFFFF' : '#374151';
+      block.style.strokeWidth = '0.5';
       
-      // Add hover effect
-      block.onmouseenter = () => {
-        block.style.fillOpacity = '0.8';
+      // Enhanced hover effect with tooltip
+      block.onmouseenter = (e) => {
+        block.style.fillOpacity = '0.9';
+        block.style.strokeWidth = '2';
+        block.style.filter = 'brightness(1.1)';
+        setHoveredBlock(block.id);
+        
+        // Show tooltip
+        const rect = svgRef.current.getBoundingClientRect();
+        const tooltipContent = {
+          title: `Block ${block.id}`,
+          description: campsInBlock.length > 0 
+            ? `${campsInBlock.length} camp${campsInBlock.length > 1 ? 's' : ''} registered`
+            : 'No camps registered',
+          camps: campsInBlock
+        };
+        
+        setTooltip({
+          visible: true,
+          content: tooltipContent,
+          position: {
+            x: e.clientX - rect.left + rect.left,
+            y: e.clientY - rect.top + rect.top - 10
+          }
+        });
       };
+      
       block.onmouseleave = () => {
-        block.style.fillOpacity = '0.6';
+        if (selectedBlock !== block.id) {
+          block.style.fillOpacity = '0.6';
+          block.style.strokeWidth = '0.5';
+          block.style.filter = 'none';
+        }
+        setHoveredBlock(null);
+        setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
       };
       
-      // Add click handler
-      block.onclick = () => {
+      // Enhanced click handler with animation
+      block.onclick = (e) => {
+        e.stopPropagation();
+        
         // Remove previous selection
-        blocks.forEach(b => b.style.strokeWidth = '0.5');
-        // Highlight selected
-        block.style.strokeWidth = '3';
-        block.style.stroke = '#1E40AF';
+        blocks.forEach(b => {
+          if (b.id !== block.id) {
+            const blockColor = getBlockColor(b.id, camps, currentTheme);
+            b.style.fill = blockColor;
+            b.style.fillOpacity = '0.6';
+            b.style.strokeWidth = '0.5';
+            b.style.stroke = currentTheme === '2024' ? '#FFFFFF' : '#374151';
+            b.style.filter = 'none';
+          }
+        });
+        
+        // Highlight selected with enhanced styling
+        block.style.strokeWidth = '4';
+        block.style.stroke = currentTheme === '2024' ? '#FFD700' : '#3B82F6';
+        block.style.fillOpacity = '0.9';
+        block.style.filter = 'brightness(1.2) drop-shadow(0 0 10px rgba(59, 130, 246, 0.5))';
+        
+        // Add pulse animation
+        block.style.animation = 'blockPulse 0.6s ease-out';
+        setTimeout(() => {
+          block.style.animation = '';
+        }, 600);
+        
         setSelectedBlock(block.id);
+        setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
       };
     });
   }, [camps, loading, currentTheme]);
@@ -76,6 +175,20 @@ const MapView = () => {
   const handleResetZoom = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
+  };
+
+  const handleCampSelect = (camp) => {
+    setSelectedCamp(camp);
+    setSearchVisible(false);
+    
+    // Find the block this camp is in and select it
+    const blockId = `${camp.placement_address.split(' ')[0]}_${camp.placement_address.split(' ')[2]}`;
+    setSelectedBlock(blockId);
+  };
+  
+  const handleFilterChange = (filterData) => {
+    // Could be used to highlight filtered camps on the map
+    console.log('Filter changed:', filterData);
   };
 
   const handleMouseDown = (e) => {
@@ -174,6 +287,16 @@ const MapView = () => {
       {/* THINK header for 2024 theme */}
       <ThinkHeader theme={currentTheme} />
       
+      {/* Search Panel */}
+      <SearchPanel
+        camps={camps}
+        theme={currentTheme}
+        onCampSelect={handleCampSelect}
+        onFilterChange={handleFilterChange}
+        isVisible={searchVisible}
+        onToggle={() => setSearchVisible(!searchVisible)}
+      />
+      
       <h1 style={{ 
         position: 'absolute', 
         top: '1rem', 
@@ -206,6 +329,32 @@ const MapView = () => {
       <ThemeSwitcher 
         currentTheme={currentTheme}
         onThemeChange={setCurrentTheme}
+      />
+      
+      {/* Compass Rose */}
+      <CompassRose theme={currentTheme} zoom={zoom} />
+      
+      {/* Stats Panel */}
+      <StatsPanel
+        camps={camps}
+        theme={currentTheme}
+        isVisible={statsVisible}
+        onToggle={() => setStatsVisible(!statsVisible)}
+      />
+      
+      {/* Share Panel */}
+      <SharePanel
+        theme={currentTheme}
+        isVisible={shareVisible}
+        onToggle={() => setShareVisible(!shareVisible)}
+        onCopyUrl={copyToClipboard}
+        currentState={{
+          theme: currentTheme,
+          zoom,
+          pan,
+          selectedBlock,
+          search: '' // Could be connected to search state
+        }}
       />
       
       <div className="zoom-controls">
@@ -241,6 +390,9 @@ const MapView = () => {
           onLoad={() => console.log('SVG loaded')}
         />
         
+        {/* Street and Time Labels - inside map container so they move with zoom/pan */}
+        <StreetTimeLabels theme={currentTheme} zoom={zoom} />
+        
         {/* Central B.E.D. Logo - inside map container so it moves with zoom/pan */}
         <CentralLogo theme={currentTheme} />
       </div>
@@ -259,6 +411,26 @@ const MapView = () => {
           />
         </div>
       )}
+      
+      {/* Tooltip */}
+      <Tooltip
+        theme={currentTheme}
+        content={tooltip.content}
+        position={tooltip.position}
+        visible={tooltip.visible}
+      />
+      
+      {/* Corner Characters - only shown in 2024 theme */}
+      <CornerCharacters theme={currentTheme} />
+      
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes blockPulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 };

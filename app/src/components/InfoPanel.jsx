@@ -1,5 +1,6 @@
 import React from 'react';
 import { parseBlockId, campInBlock, THEMES, getThemeColors } from '../utils/blockUtils';
+import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
 const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
   const { street, approximateTime } = parseBlockId(blockId);
@@ -103,13 +104,11 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                  <div style={{
-                    width: '1rem',
-                    height: '1rem',
-                    borderRadius: '50%',
-                    backgroundColor: getBEDColor(camp.bed_status, theme),
-                    boxShadow: `0 2px 8px ${getBEDColor(camp.bed_status, theme)}50`
-                  }} />
+                  <StatusIcon 
+                    status={camp.bed_status} 
+                    size="1rem" 
+                    animated={theme === '2024'}
+                  />
                   <div style={{ 
                     fontWeight: '600', 
                     fontSize: '0.95rem',
@@ -124,9 +123,13 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
                   fontFamily: themeConfig.typography.primaryFont,
                   color: themeConfig.textColor,
                   opacity: 0.75,
-                  marginLeft: '1.75rem'
+                  marginLeft: '1.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}>
-                  📍 {camp.placement_address}
+                  <PlayaIcons.Camp size="0.8rem" />
+                  {camp.placement_address}
                 </div>
                 <div style={{ 
                   fontSize: '0.8rem',
@@ -150,7 +153,9 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
           borderRadius: '0.5rem',
           border: `2px dashed ${themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`
         }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5 }}>🏕️</div>
+          <div style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.5 }}>
+            <PlayaIcons.Camp size="2rem" />
+          </div>
           <p style={{ 
             fontSize: '0.875rem',
             fontFamily: themeConfig.typography.primaryFont,
