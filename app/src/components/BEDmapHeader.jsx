@@ -1,10 +1,11 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
+import logoImage from '../assets/logo@4x.png';
 
-const ThinkHeader = ({ theme = '2025' }) => {
+const BEDmapHeader = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
   
-  // Only show the THINK header in 2024 theme to match original design
+  // Only show the BED map header in 2024 theme to match original design
   if (theme !== '2024') {
     return null;
   }
@@ -16,52 +17,47 @@ const ThinkHeader = ({ theme = '2025' }) => {
         top: '2rem',
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 15,
-        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem',
+        zIndex: 10,
         pointerEvents: 'none'
       }}
     >
-      {/* Main THINK text */}
-      <div
-        style={{
-          position: 'relative',
-          display: 'inline-block'
-        }}
-      >
-        {/* Background THINK text - bold sans-serif */}
-        <div
+      {/* Main Logo with Pink Overlay */}
+      <div style={{ position: 'relative' }}>
+        {/* BED Logo */}
+        <img 
+          src={logoImage}
+          alt="BED Logo"
           style={{
-            fontFamily: themeConfig.typography.displayFont,
-            fontSize: '4rem',
-            fontWeight: '900',
-            color: '#FFFFFF',
-            letterSpacing: '0.2em',
-            textShadow: '3px 3px 6px rgba(0, 0, 0, 0.5)',
-            lineHeight: '1',
-            position: 'relative',
-            zIndex: 1
+            width: '400px',
+            height: 'auto',
+            objectFit: 'contain',
+            filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))',
+            marginLeft: '-15px'
           }}
-        >
-          THINK
-        </div>
+        />
         
         {/* Script overlay - positioned over the THINK text */}
         <div
           style={{
             position: 'absolute',
-            top: '20%',
-            left: '15%',
+            top: '25%',
+            left: '50%',
             fontFamily: themeConfig.typography.scriptFont,
-            fontSize: '2.5rem',
+            fontSize: '5rem',
             fontWeight: '400',
-            color: '#FFD700',
-            textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
+            color: '#000000',
+            textShadow: '2px 2px 4px rgba(255, 255, 255, 0.8)',
             transform: 'rotate(-8deg)',
             zIndex: 2,
-            letterSpacing: '0.1em'
+            letterSpacing: '0.1em',
+            WebkitTextFillColor: '#000000'
           }}
         >
-          pink
+          map
         </div>
         
         {/* Additional decorative elements */}
@@ -95,7 +91,7 @@ const ThinkHeader = ({ theme = '2025' }) => {
       </div>
       
       {/* Subtle tagline */}
-      <div
+      {/*<div
         style={{
           marginTop: '0.5rem',
           fontFamily: themeConfig.typography.primaryFont,
@@ -109,7 +105,7 @@ const ThinkHeader = ({ theme = '2025' }) => {
         }}
       >
         Bureau of Erotic Discourse
-      </div>
+      </div>*/}
       
       {/* CSS animations */}
       <style>{`
@@ -128,4 +124,4 @@ const ThinkHeader = ({ theme = '2025' }) => {
   );
 };
 
-export default ThinkHeader;
+export default BEDmapHeader;

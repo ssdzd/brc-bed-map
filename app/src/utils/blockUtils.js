@@ -1,17 +1,17 @@
 // BED status colors - 2025 Theme (Clean/Professional)
 export const BED_COLORS_2025 = {
   none: '#9CA3AF',           // Gray
-  video_complete: '#FDE047',  // Yellow
-  buddy_assigned: '#FB923C',  // Orange
-  fully_implemented: '#4ADE80' // Green
+  registered: '#FE8803',  // Orange
+  consent_policy: '#9807AB',  // Purple
+  bed_talk: '#FF1493' //  Hot pink
 };
 
 // BED status colors - 2024 Theme (Vibrant/Fun)
 export const BED_COLORS_2024 = {
   none: '#F8F9FA',              // Light gray/white
-  video_complete: '#FFD60A',    // Bright yellow
-  buddy_assigned: '#FF6B35',    // Orange  
-  fully_implemented: '#FF1493'  // Hot pink
+  registered: '#FE8803',    // Orange
+  consent_policy: '#9807AB',    // Purple  
+  bed_talk: '#FF1493'  // Hot pink
 };
 
 // Default to 2025 theme for backward compatibility
@@ -111,9 +111,9 @@ export const getBlockColor = (blockId, camps, theme = '2025') => {
   
   // Use highest progress level
   const statuses = campsInBlock.map(c => c.bed_status);
-  if (statuses.includes('fully_implemented')) return colors.fully_implemented;
-  if (statuses.includes('buddy_assigned')) return colors.buddy_assigned;
-  if (statuses.includes('video_complete')) return colors.video_complete;
+  if (statuses.includes('bed_talk')) return colors.bed_talk;
+  if (statuses.includes('consent_policy')) return colors.consent_policy;
+  if (statuses.includes('registered')) return colors.registered;
   
   return colors.none;
 };

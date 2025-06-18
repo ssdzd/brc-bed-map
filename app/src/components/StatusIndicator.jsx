@@ -6,10 +6,10 @@ const StatusIndicator = ({ status, theme = '2025', size = 'medium', showIcon = t
   const colors = getThemeColors(theme);
   
   const statusConfig = {
-    none: { icon: '○', label: 'No Engagement', color: colors.none },
-    video_complete: { icon: '▶', label: 'Video Complete', color: colors.video_complete },
-    buddy_assigned: { icon: '👥', label: 'Buddy Assigned', color: colors.buddy_assigned },
-    fully_implemented: { icon: '✓', label: 'Fully Implemented', color: colors.fully_implemented }
+    none: { icon: '○', label: 'Not Registered', color: colors.none },
+    registered: { icon: '▶', label: 'Registered and started BEDucator program', color: colors.registered },
+    consent_policy: { icon: '📜', label: 'Distributed Unique Consent Policy', color: colors.consent_policy },
+    bed_talk: { icon: '🗣️', label: 'Scheduled BED talk', color: colors.bed_talk }
   };
   
   const sizeConfig = {

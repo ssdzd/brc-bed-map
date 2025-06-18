@@ -12,9 +12,9 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
         total: 0,
         byStatus: {
           none: 0,
-          video_complete: 0,
-          buddy_assigned: 0,
-          fully_implemented: 0
+          registered: 0,
+          consent_policy: 0,
+          bed_talk: 0
         },
         completionRate: 0,
         activeBlocks: 0
@@ -26,13 +26,14 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
       return acc;
     }, {
       none: 0,
-      video_complete: 0,
-      buddy_assigned: 0,
-      fully_implemented: 0
+      registered: 0,
+      consent_policy: 0,
+      bed_talk: 0
     });
     
-    const activePrograms = camps.filter(camp => camp.bed_status !== 'none').length;
-    const completionRate = camps.length > 0 ? (activePrograms / camps.length) * 100 : 0;
+    const registeredCamps = camps.filter(camp => camp.bed_status !== 'none').length;
+    const completedCamps = camps.filter(camp => camp.bed_status === 'bed_talk').length;
+    const completionRate = registeredCamps > 0 ? (completedCamps / registeredCamps) * 100 : 0;
     
     // Count unique blocks with camps
     const uniqueBlocks = new Set(camps.map(camp => {
@@ -40,13 +41,20 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
       const parts = address.split(' ');
       return `${parts[0]}_${parts[2]}`;
     }));
+
+    // Calculate blocks without registered camps
+    const totalBlocks = 256; // Total number of blocks in the city
+    const blocksWithoutCamps = totalBlocks - uniqueBlocks.size;
     
     return {
       total: camps.length,
       byStatus,
       completionRate: Math.round(completionRate),
       activeBlocks: uniqueBlocks.size,
-      activePrograms
+      activePrograms: registeredCamps,
+      completedCamps,
+      blocksWithoutCamps,
+      totalBlocks
     };
   }, [camps]);
   
@@ -101,25 +109,25 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
   }
   
   const statusItems = [
-    { 
-      status: 'none', 
-      label: 'No Engagement',
-      count: stats.byStatus.none
+    {
+      status: 'none',
+      label: 'Not Registered',
+      count: stats.blocksWithoutCamps
     },
-    { 
-      status: 'video_complete', 
-      label: 'Video Complete',
-      count: stats.byStatus.video_complete
+    {
+      status: 'registered',
+      label: 'Registered and started BEDucator program',
+      count: stats.byStatus.registered
     },
-    { 
-      status: 'buddy_assigned', 
-      label: 'Buddy Assigned',
-      count: stats.byStatus.buddy_assigned
+    {
+      status: 'consent_policy',
+      label: 'Distributed Unique Consent Policy',
+      count: stats.byStatus.consent_policy
     },
-    { 
-      status: 'fully_implemented', 
-      label: 'Fully Implemented',
-      count: stats.byStatus.fully_implemented
+    {
+      status: 'bed_talk',
+      label: 'Scheduled BED talk',
+      count: stats.byStatus.bed_talk
     }
   ];
   
@@ -245,7 +253,7 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
               opacity: 0.8,
               marginTop: '0.25rem'
             }}>
-              Engagement Rate
+              Completion Rate
             </div>
           </div>
         </div>
@@ -289,7 +297,7 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
             opacity: 0.7,
             marginTop: '0.25rem'
           }}>
-            {stats.activePrograms} of {stats.total} camps actively participating
+            {stats.completedCamps} of {stats.activePrograms} registered camps have scheduled their BED talk on playa
           </div>
         </div>
         
@@ -306,7 +314,9 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {statusItems.map((item, index) => {
-              const percentage = stats.total > 0 ? (item.count / stats.total) * 100 : 0;
+              const percentage = item.status === 'none' 
+                ? (item.count / stats.totalBlocks) * 100 
+                : (item.count / stats.total) * 100;
               
               return (
                 <div

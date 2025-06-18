@@ -1,5 +1,6 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
+import dkImage from '../assets/DK-large@3x.png';
 
 const CornerCharacters = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
@@ -16,7 +17,7 @@ const CornerCharacters = ({ theme = '2025' }) => {
         style={{
           position: 'absolute',
           bottom: '2rem',
-          left: '2rem',
+          right: '2rem',
           zIndex: 15,
           pointerEvents: 'none'
         }}
@@ -39,10 +40,22 @@ const CornerCharacters = ({ theme = '2025' }) => {
         >
           {/* Character Face */}
           <div style={{
-            fontSize: '3rem',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             animation: 'bounce 2s ease-in-out infinite'
           }}>
-            🥽
+            <img 
+              src={dkImage} 
+              alt="DK Character"
+              style={{
+                width: '80%',
+                height: '80%',
+                objectFit: 'contain'
+              }}
+            />
           </div>
           
           {/* Goggles reflection effect */}
@@ -61,7 +74,7 @@ const CornerCharacters = ({ theme = '2025' }) => {
         </div>
         
         {/* Character Info */}
-        <div
+        {/*<div
           style={{
             marginTop: '1rem',
             textAlign: 'center',
@@ -89,81 +102,21 @@ const CornerCharacters = ({ theme = '2025' }) => {
           }}>
             "Ready for adventure!"
           </div>
-        </div>
+        </div>*/}
       </div>
       
-      {/* Top Right Character - Festival-goer */}
+      {/* Bottom Right - Action Badges */}
+      {/*
       <div
         style={{
-          position: 'absolute',
-          top: '8rem',
-          right: '2rem',
+          bottom: '1rem',
+          right: '1rem',
+          display: 'flex',
+          gap: '1rem',
           zIndex: 15,
           pointerEvents: 'none'
         }}
       >
-        <div
-          style={{
-            width: '100px',
-            height: '100px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #FF6B35 0%, #FFD60A 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '3px solid #FFFFFF',
-            boxShadow: '0 8px 25px rgba(255, 107, 53, 0.4)',
-            animation: 'float 3s ease-in-out infinite reverse',
-            position: 'relative'
-          }}
-        >
-          {/* Character Face */}
-          <div style={{
-            fontSize: '2.5rem',
-            animation: 'wiggle 4s ease-in-out infinite'
-          }}>
-            🎭
-          </div>
-        </div>
-        
-        {/* Walking direction indicator */}
-        <div
-          style={{
-            marginTop: '1rem',
-            textAlign: 'center',
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            padding: '0.5rem',
-            borderRadius: '0.75rem',
-            border: '1px solid rgba(255,255,255,0.2)',
-            backdropFilter: 'blur(10px)'
-          }}
-        >
-          <div style={{
-            color: '#FFFFFF',
-            fontSize: '0.7rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            fontWeight: '500'
-          }}>
-            🚶‍♀️ Walking Zone
-          </div>
-        </div>
-      </div>
-      
-      {/* Bottom Right - Action Labels */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '8rem',
-          right: '2rem',
-          zIndex: 15,
-          pointerEvents: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          alignItems: 'flex-end'
-        }}
-      >
-        {/* Action Badge 1 */}
         <div
           style={{
             backgroundColor: '#FF6B35',
@@ -177,10 +130,10 @@ const CornerCharacters = ({ theme = '2025' }) => {
           }}
         >
           <div style={{
-            fontSize: '1.2rem',
+            fontSize: '2rem',
             marginBottom: '0.25rem'
           }}>
-            🎬
+            ▶️
           </div>
           <div style={{
             fontSize: '0.7rem',
@@ -194,24 +147,24 @@ const CornerCharacters = ({ theme = '2025' }) => {
           </div>
         </div>
         
-        {/* Action Badge 2 */}
-        <div
+        {/* Consent Policy Badge */}
+        {/* <div
           style={{
-            backgroundColor: '#AD1457',
+            backgroundColor: '#800080',
             color: '#FFFFFF',
             padding: '0.75rem 1.25rem',
             borderRadius: '2rem',
             border: '2px solid #FFFFFF',
-            boxShadow: '0 6px 20px rgba(173, 20, 87, 0.3)',
+            boxShadow: '0 6px 20px rgba(128, 0, 128, 0.3)',
             animation: 'slideInRight 0.8s ease-out 1s both',
             textAlign: 'center'
           }}
         >
           <div style={{
-            fontSize: '1.2rem',
+            fontSize: '2rem',
             marginBottom: '0.25rem'
           }}>
-            💝
+            📜
           </div>
           <div style={{
             fontSize: '0.7rem',
@@ -223,10 +176,10 @@ const CornerCharacters = ({ theme = '2025' }) => {
             <br />
             FOR OUR CAMP AND SENT IT OUT
           </div>
-        </div>
+        </div>*/}
         
-        {/* Action Badge 3 */}
-        <div
+        {/* BED Talk Badge */}
+        {/*<div
           style={{
             backgroundColor: '#FF1493',
             color: '#FFFFFF',
@@ -239,10 +192,10 @@ const CornerCharacters = ({ theme = '2025' }) => {
           }}
         >
           <div style={{
-            fontSize: '1.2rem',
+            fontSize: '2rem',
             marginBottom: '0.25rem'
           }}>
-            🎪
+            🗣️
           </div>
           <div style={{
             fontSize: '0.7rem',
@@ -255,55 +208,7 @@ const CornerCharacters = ({ theme = '2025' }) => {
             BED TALK ON PLAYA
           </div>
         </div>
-      </div>
-      
-      {/* Top Left - Website Reference */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '12rem',
-          left: '2rem',
-          zIndex: 15,
-          pointerEvents: 'none'
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: 'rgba(0,0,0,0.4)',
-            color: '#FFFFFF',
-            padding: '1rem 1.5rem',
-            borderRadius: '1rem',
-            border: '2px solid rgba(255,255,255,0.3)',
-            backdropFilter: 'blur(15px)',
-            textAlign: 'center',
-            animation: 'fadeInUp 1s ease-out 2s both'
-          }}
-        >
-          <div style={{
-            fontSize: '1.5rem',
-            marginBottom: '0.5rem'
-          }}>
-            🌐
-          </div>
-          <div style={{
-            fontSize: '0.9rem',
-            fontFamily: themeConfig.typography.displayFont,
-            fontWeight: '700',
-            letterSpacing: '0.1em',
-            color: '#FFD700'
-          }}>
-            BEDtalks.org
-          </div>
-          <div style={{
-            fontSize: '0.7rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            marginTop: '0.25rem',
-            opacity: 0.9
-          }}>
-            Bureau of Erotic Discourse
-          </div>
-        </div>
-      </div>
+      </div>*/}
       
       {/* CSS Animations */}
       <style>{`
@@ -331,7 +236,7 @@ const CornerCharacters = ({ theme = '2025' }) => {
         @keyframes slideInRight {
           from {
             opacity: 0;
-            transform: translateX(50px);
+            transform: translateX(30px);
           }
           to {
             opacity: 1;

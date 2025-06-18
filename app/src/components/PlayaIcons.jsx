@@ -154,9 +154,9 @@ export const AnimatedIcon = ({
 export const StatusIcon = ({ status, size = '1rem', animated = false }) => {
   const statusConfig = {
     none: { icon: PlayaIcons.Camp, animation: 'none' },
-    video_complete: { icon: PlayaIcons.VideoPlay, animation: 'pulse' },
-    buddy_assigned: { icon: PlayaIcons.Buddy, animation: 'bounce' },
-    fully_implemented: { icon: PlayaIcons.CheckMark, animation: 'spin' }
+    registered: { icon: PlayaIcons.VideoPlay, animation: 'pulse' },
+    consent_policy: { icon: PlayaIcons.Buddy, animation: 'bounce' },
+    bed_talk: { icon: PlayaIcons.CheckMark, animation: 'spin' }
   };
   
   const config = statusConfig[status] || statusConfig.none;

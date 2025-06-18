@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 
 // Mock data for Week 1 testing
 const mockCamps = [
-  { id: 1, camp_name: "Dusty Data", placement_address: "A & 3:00", bed_status: "video_complete" },
-  { id: 2, camp_name: "Consent Camp", placement_address: "C & 4:30", bed_status: "buddy_assigned" },
-  { id: 3, camp_name: "Starr's Oasis", placement_address: "E & 7:30", bed_status: "fully_implemented" },
-  { id: 4, camp_name: "Tech Tent", placement_address: "B & 9:00", bed_status: "video_complete" },
-  { id: 5, camp_name: "BED Headquarters", placement_address: "D & 6:00", bed_status: "fully_implemented" },
+  { id: 1, camp_name: "Dusty Data", placement_address: "A & 3:00", bed_status: "registered" },
+  { id: 2, camp_name: "Consent Camp", placement_address: "C & 4:30", bed_status: "consent_policy" },
+  { id: 3, camp_name: "Starr's Oasis", placement_address: "E & 7:30", bed_status: "bed_talk" },
+  { id: 4, camp_name: "Tech Tent", placement_address: "B & 9:00", bed_status: "registered" },
+  { id: 5, camp_name: "BED Headquarters", placement_address: "D & 6:00", bed_status: "bed_talk" },
 ];
 
 export const useMapData = () => {

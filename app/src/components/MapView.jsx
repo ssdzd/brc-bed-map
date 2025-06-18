@@ -7,7 +7,7 @@ import ZoomControls from './ZoomControls';
 import ThemeSwitcher from './ThemeSwitcher';
 import CentralLogo from './CentralLogo';
 import BackgroundOverlay from './BackgroundOverlay';
-import ThinkHeader from './ThinkHeader';
+import BEDmapHeader from './BEDmapHeader';
 import Tooltip from './Tooltip';
 import CornerCharacters from './CornerCharacters';
 import CompassRose from './CompassRose';
@@ -284,8 +284,8 @@ const MapView = () => {
       {/* Background overlay effects */}
       <BackgroundOverlay theme={currentTheme} />
       
-      {/* THINK header for 2024 theme */}
-      <ThinkHeader theme={currentTheme} />
+      {/* BED map header for 2024 theme */}
+      <BEDmapHeader theme={currentTheme} />
       
       {/* Search Panel */}
       <SearchPanel

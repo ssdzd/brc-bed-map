@@ -19,10 +19,10 @@ const SearchPanel = ({
   
   const filterOptions = [
     { value: 'all', label: 'All Camps', icon: PlayaIcons.Camp },
-    { value: 'none', label: 'No Engagement', icon: PlayaIcons.Camp },
-    { value: 'video_complete', label: 'Video Complete', icon: PlayaIcons.VideoPlay },
-    { value: 'buddy_assigned', label: 'Buddy Assigned', icon: PlayaIcons.Buddy },
-    { value: 'fully_implemented', label: 'Fully Implemented', icon: PlayaIcons.CheckMark }
+    { value: 'none', label: 'Not Registered', icon: PlayaIcons.Camp },
+    { value: 'registered', label: 'Registered and started BEDucator program', icon: PlayaIcons.VideoPlay },
+    { value: 'consent_policy', label: 'Distributed Unique Consent Policy', icon: PlayaIcons.Buddy },
+    { value: 'bed_talk', label: 'Scheduled BED talk', icon: PlayaIcons.CheckMark }
   ];
   
   useEffect(() => {

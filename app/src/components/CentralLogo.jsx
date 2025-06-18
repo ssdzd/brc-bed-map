@@ -1,6 +1,7 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 import logoImage from '../assets/logo@4x.png';
+import fullnameImage from '../assets/fullname@4x.png';
 
 const CentralLogo = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
@@ -9,24 +10,17 @@ const CentralLogo = ({ theme = '2025' }) => {
     <div
       style={{
         position: 'absolute',
-        top: '50%',
-        left: '50%',
+        top: '66%',
+        left: '53%',
         transform: 'translate(-50%, -50%)',
-        width: '200px',
-        height: '200px',
-        background: themeConfig.centerCircle.background,
-        border: themeConfig.centerCircle.border,
-        borderRadius: '50%',
+        width: '400px',
+        height: '400px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 5,
-        boxShadow: theme === '2024' 
-          ? '0 0 30px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2)'
-          : '0 10px 25px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
-        transition: 'all 0.5s ease',
-        animation: theme === '2024' ? 'glow 3s ease-in-out infinite alternate' : 'none'
+        transition: 'all 0.5s ease'
       }}
     >
       {/* Main B.E.D. Logo Image */}
@@ -37,26 +31,45 @@ const CentralLogo = ({ theme = '2025' }) => {
           width: '80%',
           height: 'auto',
           objectFit: 'contain',
-          marginBottom: '0.5rem'
+          marginBottom: '0.5rem',
+          transform: 'translateX(-5px)',
+          filter: theme === '2024' 
+          ? 'drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5))'
+          : 'drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.3))'
         }}
       />
-      
-      {/* Subtitle */}
+      {/*
+      {/* Full Name Image */}
+      {/*<img 
+        src={fullnameImage}
+        alt="Bureau of Erotic Discourse"
+        style={{
+          width: '90%',
+          height: 'auto',
+          objectFit: 'contain',
+          marginBottom: '0.5rem',
+          filter: theme === '2024' 
+            ? 'drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5))'
+            : 'drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.3))'
+        }}
+      >*/}
+      {/* BEDtalks.org Text */}
       <div
         style={{
-          fontSize: '0.75rem',
+          fontSize: '2rem',
+          marginTop: '40rem',
           fontWeight: '600',
           fontFamily: themeConfig.typography.primaryFont,
-          color: themeConfig.centerCircle.textColor,
+          color: themeConfig.textColor,
           opacity: 0.8,
           textAlign: 'center',
           letterSpacing: '0.1em',
-          textTransform: 'uppercase'
+          filter: theme === '2024' 
+            ? 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))'
+            : 'drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.3))'
         }}
       >
-        Bureau of Erotic
-        <br />
-        Discourse
+        BEDtalks.org
       </div>
       
       {/* Decorative elements for 2024 theme */}

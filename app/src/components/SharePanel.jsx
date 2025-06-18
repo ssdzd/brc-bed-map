@@ -51,9 +51,13 @@ const SharePanel = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '1rem',
-          right: '1rem',
-          zIndex: 15
+          left: '1rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 15,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
         }}
       >
         <button
@@ -74,7 +78,8 @@ const SharePanel = ({
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.5rem',
+            pointerEvents: 'auto'
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = 'translateY(-2px)';
@@ -99,8 +104,9 @@ const SharePanel = ({
     <div
       style={{
         position: 'absolute',
-        bottom: '1rem',
-        right: '1rem',
+        left: '1rem',
+        top: '50%',
+        transform: 'translateY(-50%)',
         width: '280px',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',
@@ -111,7 +117,8 @@ const SharePanel = ({
         backdropFilter: 'blur(20px)',
         zIndex: 15,
         transition: 'all 0.3s ease',
-        animation: 'slideInUp 0.3s ease-out'
+        animation: 'slideInLeft 0.3s ease-out',
+        pointerEvents: 'auto'
       }}
     >
       {/* Header */}

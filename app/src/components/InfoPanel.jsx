@@ -12,138 +12,128 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
   const colors = getThemeColors(theme);
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: '1rem',
-      right: '1rem',
-      backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
-      padding: '1.5rem',
-      borderRadius: '0.75rem',
-      boxShadow: themeConfig.isDark 
-        ? '0 25px 50px rgba(255, 105, 180, 0.15), 0 10px 20px rgba(0, 0, 0, 0.4)'
-        : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
-      maxWidth: '28rem',
-      zIndex: 20,
-      border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
-      backdropFilter: 'blur(20px)',
-      transition: 'all 0.3s ease',
-      animation: 'slideIn 0.3s ease-out'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+    <div
+      style={{
+        position: 'absolute',
+        top: '1rem',
+        right: '17rem',
+        width: '280px',
+        backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
+        borderRadius: '1rem',
+        boxShadow: themeConfig.isDark 
+          ? '0 25px 50px rgba(255, 105, 180, 0.15), 0 10px 20px rgba(0, 0, 0, 0.4)'
+          : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
+        border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
+        backdropFilter: 'blur(20px)',
+        zIndex: 15,
+        transition: 'all 0.3s ease',
+        animation: 'slideInRight 0.3s ease-out',
+        padding: '1.5rem'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
         <div>
-          <h3 style={{ 
-            fontSize: '1.125rem', 
-            fontWeight: 'bold',
-            fontFamily: themeConfig.typography.headingFont,
-            color: themeConfig.textColor,
-            margin: 0
-          }}>
-            Block {blockId}
-          </h3>
-          <p style={{ 
-            fontSize: '0.875rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            color: themeConfig.textColor,
-            opacity: 0.7,
-            margin: '0.25rem 0 0 0'
-          }}>
-            Street {street} near {approximateTime}
-          </p>
-        </div>
-        <button 
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: themeConfig.textColor,
-            opacity: 0.6,
-            cursor: 'pointer',
+          <h2 style={{
             fontSize: '1.25rem',
-            padding: '0.25rem',
-            borderRadius: '0.25rem',
-            transition: 'opacity 0.2s ease'
-          }}
-          onMouseOver={(e) => e.target.style.opacity = '1'}
-          onMouseOut={(e) => e.target.style.opacity = '0.6'}
-        >
-          ✕
-        </button>
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            color: themeConfig.isDark ? '#FFFFFF' : '#000000',
+            fontFamily: themeConfig.typography.displayFont
+          }}>
+            {blockId ? `Block ${blockId}` : 'Select a Block'}
+          </h2>
+          {blockId && (
+            <p style={{
+              fontSize: '0.875rem',
+              color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+              margin: 0,
+              fontFamily: themeConfig.typography.bodyFont
+            }}>
+              {camps.length} {camps.length === 1 ? 'Camp' : 'Camps'}
+            </p>
+          )}
+        </div>
+        {blockId && (
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+              cursor: 'pointer',
+              padding: '0.5rem',
+              fontSize: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.2s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.color = themeConfig.isDark ? '#FFFFFF' : '#000000'}
+            onMouseOut={(e) => e.currentTarget.style.color = themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+          >
+            ×
+          </button>
+        )}
       </div>
       
       {campsInBlock.length > 0 ? (
-        <div>
-          <p style={{ 
-            fontSize: '0.875rem', 
-            fontWeight: '500', 
-            fontFamily: themeConfig.typography.primaryFont,
-            marginBottom: '0.5rem',
-            color: themeConfig.textColor
-          }}>
-            {campsInBlock.length} camp{campsInBlock.length > 1 ? 's' : ''} in this block:
-          </p>
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {campsInBlock.map((camp, index) => (
-              <li 
-                key={camp.id} 
-                style={{ 
-                  background: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+        <div style={{ maxHeight: 'calc(100vh - 12rem)', overflowY: 'auto' }}>
+          {campsInBlock.map((camp, index) => (
+            <div
+              key={camp.id}
+              style={{
+                padding: '1rem',
+                backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                borderRadius: '0.75rem',
+                marginBottom: index < campsInBlock.length - 1 ? '1rem' : 0
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
                   borderRadius: '0.5rem',
+                  backgroundColor: themeConfig.isDark 
+                    ? `${getBEDColor(camp.bed_status, theme)}20`  // 20% opacity background
+                    : `${getBEDColor(camp.bed_status, theme)}10`, // 10% opacity background
                   border: `2px solid ${getBEDColor(camp.bed_status, theme)}`,
-                  padding: '0.875rem',
-                  transition: 'all 0.2s ease',
-                  animation: `campSlideIn 0.3s ease-out ${index * 0.1}s both`,
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = `0 8px 25px ${getBEDColor(camp.bed_status, theme)}30`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0px)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                  <StatusIcon 
-                    status={camp.bed_status} 
-                    size="1rem" 
-                    animated={theme === '2024'}
-                  />
-                  <div style={{ 
-                    fontWeight: '600', 
-                    fontSize: '0.95rem',
-                    fontFamily: themeConfig.typography.primaryFont,
-                    color: themeConfig.textColor
-                  }}>
-                    {camp.camp_name}
-                  </div>
-                </div>
-                <div style={{ 
-                  fontSize: '0.8rem',
-                  fontFamily: themeConfig.typography.primaryFont,
-                  color: themeConfig.textColor,
-                  opacity: 0.75,
-                  marginLeft: '1.75rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  justifyContent: 'center',
+                  fontSize: '1.5rem',
+                  color: getBEDColor(camp.bed_status, theme)
                 }}>
-                  <PlayaIcons.Camp size="0.8rem" />
-                  {camp.placement_address}
+                  {getStatusIcon(camp.bed_status)}
                 </div>
-                <div style={{ 
-                  fontSize: '0.8rem',
-                  fontFamily: themeConfig.typography.primaryFont,
-                  color: getBEDColor(camp.bed_status, theme),
-                  fontWeight: '500',
-                  marginLeft: '1.75rem',
-                  marginTop: '0.25rem'
-                }}>
-                  {getStatusIcon(camp.bed_status)} {formatStatus(camp.bed_status)}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    margin: '0 0 0.5rem 0',
+                    color: themeConfig.isDark ? '#FFFFFF' : '#000000',
+                    fontFamily: themeConfig.typography.displayFont
+                  }}>
+                    {camp.camp_name}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                    margin: '0 0 0.5rem 0',
+                    fontFamily: themeConfig.typography.bodyFont
+                  }}>
+                    {camp.placement_address}
+                  </p>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: themeConfig.isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                    fontFamily: themeConfig.typography.bodyFont
+                  }}>
+                    {formatStatus(camp.bed_status)}
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div style={{
@@ -204,15 +194,21 @@ const getBEDColor = (status, theme = '2025') => {
 const getStatusIcon = (status) => {
   const icons = {
     none: '○',
-    video_complete: '▶',
-    buddy_assigned: '👥',
-    fully_implemented: '✓'
+    registered: '▶',
+    consent_policy: '📜',
+    bed_talk: '🗣️'
   };
   return icons[status] || icons.none;
 };
 
 const formatStatus = (status) => {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const statusLabels = {
+    none: 'Not Registered',
+    registered: 'Registered and started BEDucator program',
+    consent_policy: 'Distributed Unique Consent Policy',
+    bed_talk: 'Scheduled BED talk'
+  };
+  return statusLabels[status] || statusLabels.none;
 };
 
 export default InfoPanel;

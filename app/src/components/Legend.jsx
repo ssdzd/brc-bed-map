@@ -9,27 +9,27 @@ const Legend = ({ theme = '2025' }) => {
   const items = [
     { 
       status: 'none', 
-      label: 'No Engagement', 
+      label: 'Unregistered', 
       icon: '○',
-      description: 'Not yet contacted'
+      description: 'Not yet registered'
     },
     { 
-      status: 'video_complete', 
-      label: 'Video Complete', 
+      status: 'registered', 
+      label: 'Registered and started BEDucator program', 
       icon: '▶',
-      description: 'Training video watched'
+      //description: 'Started BEDucator training'
     },
     { 
-      status: 'buddy_assigned', 
-      label: 'Buddy Assigned', 
-      icon: '👥',
-      description: 'B.E.D. buddy connected'
+      status: 'consent_policy', 
+      label: 'Distributed Unique Consent Policy', 
+      icon: '📜',
+      //description: 'Consent policy implemented'
     },
     { 
-      status: 'fully_implemented', 
-      label: 'Fully Implemented', 
-      icon: '✓',
-      description: 'Complete program adoption'
+      status: 'bed_talk', 
+      label: 'Scheduled BED talk', 
+      icon: '🗣️',
+      //description: 'BED talk scheduled'
     }
   ];
 
@@ -53,7 +53,7 @@ const Legend = ({ theme = '2025' }) => {
         marginBottom: '0.5rem',
         color: themeConfig.textColor
       }}>
-        B.E.D. Progress
+        BEDucator Program Progress
       </h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {items.map(item => (
