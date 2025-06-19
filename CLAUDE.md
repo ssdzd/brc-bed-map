@@ -5,60 +5,112 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 Interactive Burning Man map system for tracking B.E.D. (Bureau of Erotic Discourse) program progress across theme camps in Black Rock City. The system colors city blocks based on camp participation status and allows clicking blocks to see camp details.
 
-## Architecture
-- **Frontend**: React with Vite
-- **Map Rendering**: React Simple Maps + Paper.js for complex geometric processing
-- **State Management**: Zustand
-- **Data Layer**: React Query + Airtable API
-- **SVG Processing**: Paper.js for block generation from SVG paths
+**Current Status**: Fully functional web application with comprehensive UI, ready for production data integration.
 
-## Key Components Structure
+## Architecture
+- **Frontend**: React 19.1.0 with Vite 6.3.5
+- **Styling**: Tailwind CSS 4.1.10 with dual theme system
+- **Map Rendering**: Direct SVG manipulation with interactive overlays
+- **State Management**: React hooks with URL state persistence
+- **Data Layer**: Mock data structure ready for Airtable API integration
+- **Deployment**: GitHub Pages with automated deployment
+
+## Current Implementation Structure
 ```
-src/
-├── components/BurningManMap/     # Main map display components
-├── utils/
-│   ├── svgParser.js             # Extracts rings, radials, landmarks from SVG
-│   ├── mapGeometry.js           # Generates clickable blocks from SVG paths
-│   ├── addressParser.js         # Parses BRC addresses ("C & 3:45" format)
-│   └── bedProgress.js           # BED status color mapping
-├── services/airtable.js         # Airtable API integration
-└── store/mapStore.js            # Zustand state management
+app/src/
+├── components/              # 17 interactive components
+│   ├── MapView.jsx         # Main map container with zoom/pan
+│   ├── BEDmapHeader.jsx    # Theme-aware header component
+│   ├── Legend.jsx          # BED status legend with tooltips
+│   ├── InfoPanel.jsx       # Block details with camp information
+│   ├── SearchPanel.jsx     # Camp search with filtering
+│   ├── StatsPanel.jsx      # Progress statistics and metrics
+│   ├── SharePanel.jsx      # URL sharing functionality
+│   ├── PlayaIcons/         # Custom SVG icon components
+│   └── [10 more UI components]
+├── hooks/
+│   ├── useMapData.js       # Data fetching (currently mock data)
+│   └── useUrlState.js      # URL state management and sharing
+└── utils/
+    └── blockUtils.js       # Block coloring and theme utilities
+```
+
+## Polygon Generation System
+Uses external Python polygonizer tool instead of runtime processing:
+```
+polygonizer/
+├── polygonizer.py          # Generates precise block geometries
+├── requirements.txt        # Dependencies (geopandas, shapely, etc.)
+├── brc_base_clean.svg     # Input template for manual edits
+└── output/                # Generated polygon files
+    ├── brc_polygons.svg   # 256 optimized polygonal blocks
+    └── validation files   # Visual verification overlays
 ```
 
 ## Data Flow
-1. SVG parser extracts geometric data from `brc-2025-base.svg`
-2. Block generator creates clickable regions from ring/radial intersections  
-3. Airtable provides camp data with B.E.D. status and placement addresses
-4. Address parser maps camps to blocks using "Street & Time" format
-5. Blocks are colored based on highest B.E.D. progress level within each block
+1. Python polygonizer generates precise block geometries from SVG template
+2. React app loads merged SVG map with pre-generated polygon overlays
+3. Mock data provides camp information with B.E.D. status (ready for Airtable)
+4. Block coloring applies based on highest B.E.D. progress level per block
+5. Interactive overlays handle click/hover events with visual feedback
 
 ## B.E.D. Progress Color System
-- **Gray (#9CA3AF)**: No engagement
-- **Yellow (#FDE047)**: Video training completed  
-- **Orange (#FB923C)**: B.E.D. Buddy assigned
-- **Green (#4ADE80)**: Full implementation with policy
+- **Gray (#9CA3AF)**: None - no program engagement
+- **Orange (#FE8803)**: Registered - signed up for program
+- **Purple (#9807AB)**: Consent Policy - policy implemented
+- **Hot Pink (#FF1493)**: BED Talk - full program with presentation
 
 ## Development Commands
-Currently in planning phase - no package.json exists yet. When implemented:
-- `npm run dev` - Start development server
-- `npm run build` - Build for production  
-- `npm run preview` - Preview production build
+Fully operational development environment:
+- `npm run dev` - Start development server at http://localhost:5173
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+- `npm run deploy` - Deploy to GitHub Pages
+- `npm run lint` - Run ESLint code quality checks
 
-## Critical Implementation Notes
-- SVG contains pre-defined blocks with IDs like `A_8`, `B_15` (Street_TimeSegment)
-- Camp addresses use format "C & 3:45" (Street & Clock time)
-- Block generation uses Paper.js for geometric calculations and intersection finding
-- Interactive overlay sits above base SVG for click detection
-- Address parsing must handle all BRC address variations accurately
+## Theme System
+Dual theme support with complete styling:
+- **2025 Professional**: Clean, modern design with muted colors
+- **2024 Vibrant**: Bright, colorful Burning Man aesthetic
+- Theme persistence in URL state and localStorage
 
-## Airtable Schema
-Table: "BED_Camp_Progress"
-- camp_name, user_name, email, placement_address
-- bed_status (single select): none, video_complete, buddy_assigned, fully_implemented
-- buddy_name, last_updated, notes
-- Computed fields: block_id, color_hex
+## Critical Implementation Features
+- **Block Interaction**: Click/hover with tooltips and visual feedback
+- **Zoom/Pan Controls**: Mouse wheel zoom, drag to pan, reset controls
+- **Search Functionality**: Real-time camp search with highlighting
+- **URL State Management**: Shareable URLs preserve map state and selections
+- **Responsive Design**: Mobile-friendly with touch gesture support
+- **Statistics Panel**: Real-time progress tracking and camp metrics
+- **Error Boundaries**: Graceful handling of component failures
 
-## Development Priority
-Week 1 focus is on SVG parsing and block generation with Paper.js before adding Airtable integration.
+## Ready for Production Integration
+**Implemented and Working**:
+- Complete UI/UX with all interactive features
+- Comprehensive component library
+- Dual theme system with persistence
+- Mock data structure matching Airtable schema
+- GitHub Pages deployment pipeline
+- Responsive design for all screen sizes
+
+**Next Steps for Production**:
+- Replace mock data in `useMapData.js` with Airtable API calls
+- Implement proper address parsing for "C & 3:45" format to block mapping
+- Add error handling for API failures and data validation
+- Implement proper loading states and error boundaries
+- Add analytics and performance monitoring
+
+## Airtable Integration Schema
+Table: "BED_Camp_Progress" (ready for integration)
+- camp_name, placement_address, bed_status
+- Status values: "none", "registered", "consent_policy", "bed_talk"
+- Mock data structure in `useMapData.js` matches expected schema
 
 Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps at Burning Man.
+
+## Git Workflow Instructions for Claude Code
+When making changes to files:
+1. Always commit changes after user approval with descriptive commit messages
+2. Include the standard Claude Code footer in all commits
+3. Use conventional commit format: `feat:`, `fix:`, `refactor:`, etc.
+4. Run any available linting/validation before committing
+5. Never commit without explicit user approval
