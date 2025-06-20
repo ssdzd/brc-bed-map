@@ -3,7 +3,7 @@ import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
 const Legend = ({ theme = '2025' }) => {
-  const themeConfig = THEMES[theme];
+  const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
   
   const items = [
@@ -38,11 +38,21 @@ const Legend = ({ theme = '2025' }) => {
       position: 'absolute',
       bottom: '1rem',
       left: '1rem',
-      backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.9)',
+      backgroundColor: themeConfig.isOfficial 
+        ? 'rgba(0,0,0,0.6)' 
+        : themeConfig.isDark 
+          ? 'rgba(0,0,0,0.3)' 
+          : 'rgba(255,255,255,0.9)',
       padding: '1rem',
       borderRadius: '0.5rem',
-      boxShadow: '0 10px 15px rgba(0, 0, 0, 0.1)',
-      border: themeConfig.isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
+      boxShadow: themeConfig.isOfficial 
+        ? '0 10px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255,255,255,0.1)' 
+        : '0 10px 15px rgba(0, 0, 0, 0.1)',
+      border: themeConfig.isOfficial 
+        ? '1px solid rgba(255,255,255,0.3)' 
+        : themeConfig.isDark 
+          ? '1px solid rgba(255,255,255,0.2)' 
+          : '1px solid rgba(0,0,0,0.1)',
       backdropFilter: 'blur(10px)',
       transition: 'all 0.3s ease'
     }}>
@@ -51,7 +61,7 @@ const Legend = ({ theme = '2025' }) => {
         fontSize: '0.875rem',
         fontFamily: themeConfig.typography.headingFont,
         marginBottom: '0.5rem',
-        color: themeConfig.textColor
+        color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor
       }}>
         BEDucator Program Progress
       </h4>
@@ -106,7 +116,7 @@ const Legend = ({ theme = '2025' }) => {
                 fontSize: '0.8rem',
                 fontFamily: themeConfig.typography.primaryFont,
                 fontWeight: '500',
-                color: themeConfig.textColor,
+                color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
                 lineHeight: '1.2'
               }}>
                 {item.label}
@@ -114,7 +124,7 @@ const Legend = ({ theme = '2025' }) => {
               <div style={{ 
                 fontSize: '0.7rem',
                 fontFamily: themeConfig.typography.primaryFont,
-                color: themeConfig.textColor,
+                color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
                 opacity: 0.6,
                 lineHeight: '1.1',
                 marginTop: '0.125rem'

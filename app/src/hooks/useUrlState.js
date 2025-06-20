@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 
 export const useUrlState = () => {
   const [urlState, setUrlState] = useState({
-    theme: '2025',
-    zoom: 1,
-    pan: { x: 0, y: 0 },
+    theme: '2024',
+    zoom: 0.67,
+    pan: { x: -32, y: 84 },
     selectedBlock: null,
     search: ''
   });
@@ -13,9 +13,9 @@ export const useUrlState = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const newState = {
-      theme: '2025',
-      zoom: 1,
-      pan: { x: 0, y: 0 },
+      theme: '2024',
+      zoom: 0.67,
+      pan: { x: -32, y: 84 },
       selectedBlock: null,
       search: ''
     };
@@ -67,21 +67,21 @@ export const useUrlState = () => {
     const params = url.searchParams;
     
     // Update theme
-    if (newState.theme && newState.theme !== '2025') {
+    if (newState.theme && newState.theme !== '2024') {
       params.set('theme', newState.theme);
     } else {
       params.delete('theme');
     }
     
     // Update zoom
-    if (newState.zoom && newState.zoom !== 1) {
+    if (newState.zoom && newState.zoom !== 0.67) {
       params.set('zoom', newState.zoom.toFixed(2));
     } else {
       params.delete('zoom');
     }
     
     // Update pan
-    if (newState.pan && (newState.pan.x !== 0 || newState.pan.y !== 0)) {
+    if (newState.pan && (newState.pan.x !== -32 || newState.pan.y !== 84)) {
       params.set('panX', newState.pan.x.toFixed(0));
       params.set('panY', newState.pan.y.toFixed(0));
     } else {
@@ -115,15 +115,15 @@ export const useUrlState = () => {
     const url = new URL(window.location.origin + window.location.pathname);
     const params = url.searchParams;
     
-    if (state.theme && state.theme !== '2025') {
+    if (state.theme && state.theme !== '2024') {
       params.set('theme', state.theme);
     }
     
-    if (state.zoom && state.zoom !== 1) {
+    if (state.zoom && state.zoom !== 0.67) {
       params.set('zoom', state.zoom.toFixed(2));
     }
     
-    if (state.pan && (state.pan.x !== 0 || state.pan.y !== 0)) {
+    if (state.pan && (state.pan.x !== -32 || state.pan.y !== 84)) {
       params.set('panX', state.pan.x.toFixed(0));
       params.set('panY', state.pan.y.toFixed(0));
     }
