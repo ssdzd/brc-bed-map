@@ -83,8 +83,9 @@
     
     <!-- City-wide gradients for different themes -->
     <svg:radialGradient id="cityGradient-2025" gradientUnits="userSpaceOnUse" cx="622.5" cy="272.04" r="70%">
-      <svg:stop offset="0%" style="stop-color:rgba(135, 206, 235, 0.5)" />
-      <svg:stop offset="70%" style="stop-color:rgba(255, 255, 255, 0.5)" />
+      <svg:stop offset="0%" style="stop-color:rgba(135, 206, 235, 1)" />
+      <svg:stop offset="55%" style="stop-color:rgba(135, 206, 235, 1)" />
+      <svg:stop offset="70%" style="stop-color:rgba(255, 255, 255, 1)" />
     </svg:radialGradient>
     
     <svg:radialGradient id="cityGradient-2024" gradientUnits="userSpaceOnUse" cx="622.5" cy="272.04" r="70%">

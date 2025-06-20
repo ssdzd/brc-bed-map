@@ -8,15 +8,20 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }) => {
     <div style={{
       position: 'absolute',
       top: '1rem',
-      right: '5rem',
+      right: '1rem',
       display: 'flex',
       gap: '0.5rem',
-      zIndex: 15,
-      backgroundColor: theme.isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.9)',
+      zIndex: 50,
+      backgroundColor: theme.isDark 
+          ? 'rgba(0,0,0,0.3)' 
+          : 'rgba(255,255,255,0.9)',
       padding: '0.5rem',
       borderRadius: '0.5rem',
-      border: theme.isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
-      backdropFilter: 'blur(10px)'
+      border: theme.isDark 
+          ? '1px solid rgba(255,255,255,0.2)' 
+          : '1px solid rgba(0,0,0,0.1)',
+      backdropFilter: 'blur(10px)',
+      boxShadow: 'none'
     }}>
       <span style={{ 
         fontSize: '12px', 
@@ -62,7 +67,7 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }) => {
             }
           }}
         >
-          {themeKey}
+          {THEMES[themeKey].name}
         </button>
       ))}
     </div>

@@ -53,9 +53,7 @@ const CentralLogo = ({ theme = '2025' }) => {
             width: '100%',
             height: 'auto',
             objectFit: 'contain',
-            filter: themeConfig.isOfficial
-              ? 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.7))'
-              : theme === '2024' 
+            filter: theme === '2024' 
                 ? 'drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5))'
                 : 'drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.3))'
           }}
@@ -73,13 +71,11 @@ const CentralLogo = ({ theme = '2025' }) => {
           fontSize: '1.2rem',
           fontWeight: '600',
           fontFamily: themeConfig.typography.primaryFont,
-          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+          color: themeConfig.textColor,
           opacity: 0.9,
           textAlign: 'center',
           letterSpacing: '0.1em',
-          textShadow: themeConfig.isOfficial 
-            ? '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255,255,255,0.3)'
-            : theme === '2024' 
+          textShadow: theme === '2024' 
               ? '2px 2px 4px rgba(0, 0, 0, 0.5)'
               : '0px 0px 0px rgba(0, 0, 0, 0.3)',
           transition: 'all 0.5s ease'

@@ -14,20 +14,6 @@ export const BED_COLORS_2024 = {
   bed_talk: '#FF1493'  // Hot pink
 };
 
-// Official Map BED colors (semi-transparent overlays)
-export const BED_COLORS_OFFICIAL_2025 = {
-  none: 'transparent',                    // Completely transparent
-  registered: 'rgba(254, 136, 3, 0.4)',   // Orange with 40% opacity
-  consent_policy: 'rgba(152, 7, 171, 0.4)', // Purple with 40% opacity  
-  bed_talk: 'rgba(255, 20, 147, 0.5)'     // Hot pink with 50% opacity
-};
-
-export const BED_COLORS_OFFICIAL_2024 = {
-  none: 'transparent',                     // Completely transparent
-  registered: 'rgba(254, 136, 3, 0.5)',    // Orange with 50% opacity
-  consent_policy: 'rgba(152, 7, 171, 0.5)', // Purple with 50% opacity
-  bed_talk: 'rgba(255, 20, 147, 0.6)'      // Hot pink with 60% opacity
-};
 
 // Default to 2025 theme for backward compatibility
 export const BED_COLORS = BED_COLORS_2025;
@@ -37,33 +23,13 @@ export const THEMES = {
   '2025': {
     name: '2025 Professional',
     colors: BED_COLORS_2025,
-    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 30%, #e2e8f0 70%, #cbd5e1 100%)',
+    background: '#ffffff',
     containerBg: '#f3f4f6',
     textColor: '#374151',
     isDark: false,
     centerCircle: {
       background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
       border: '2px solid #e2e8f0',
-      textColor: '#1e293b'
-    },
-    typography: {
-      primaryFont: 'Inter, system-ui, sans-serif',
-      headingFont: 'Inter, system-ui, sans-serif',
-      scriptFont: 'Dancing Script, cursive',
-      displayFont: 'Bebas Neue, sans-serif'
-    }
-  },
-  '2025-official': {
-    name: '2025 Official Map',
-    colors: BED_COLORS_OFFICIAL_2025,
-    background: 'transparent', // Uses OfficialMapBackground component
-    containerBg: 'transparent',
-    textColor: '#1e293b',
-    isDark: false,
-    isOfficial: true,
-    centerCircle: {
-      background: 'transparent',
-      border: 'none',
       textColor: '#1e293b'
     },
     typography: {
@@ -92,26 +58,6 @@ export const THEMES = {
       displayFont: 'Bebas Neue, sans-serif'
     }
   },
-  '2024-official': {
-    name: '2024 Official Map',
-    colors: BED_COLORS_OFFICIAL_2024,
-    background: 'transparent', // Uses OfficialMapBackground component
-    containerBg: 'transparent',
-    textColor: '#FFFFFF',
-    isDark: true,
-    isOfficial: true,
-    centerCircle: {
-      background: 'transparent',
-      border: 'none',
-      textColor: '#FFFFFF'
-    },
-    typography: {
-      primaryFont: 'Inter, system-ui, sans-serif',
-      headingFont: 'Bebas Neue, sans-serif',
-      scriptFont: 'Pacifico, cursive',
-      displayFont: 'Bebas Neue, sans-serif'
-    }
-  }
 };
 
 // Parse block ID like "polygon_A_2:00" or "A_8" into components

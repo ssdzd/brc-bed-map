@@ -15,8 +15,6 @@ import SearchPanel from './SearchPanel';
 import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
 import { useUrlState } from '../hooks/useUrlState';
-import OfficialMapBackground from './OfficialMapBackground';
-import RoadSystem from './RoadSystem';
 import mapSvg from '/brc_combined_validation.svg';
 
 const MapView = () => {
@@ -94,7 +92,7 @@ const MapView = () => {
       if (color !== THEMES[currentTheme].colors.none) {
         // BED status override - use solid color fill
         block.style.setProperty('fill', color, 'important');
-        const fillOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
+        const fillOpacity = '0.7';
         block.style.setProperty('fill-opacity', fillOpacity, 'important');
         console.log(`Block ${block.id} - BED status color:`, color);
       } else {
@@ -116,14 +114,10 @@ const MapView = () => {
       
       // Enhanced hover effect with tooltip
       block.onmouseenter = (e) => {
-        const hoverOpacity = THEMES[currentTheme].isOfficial ? '0.9' : '1.0';
+        const hoverOpacity = '1.0';
         block.style.setProperty('fill-opacity', hoverOpacity, 'important');
         
-        if (THEMES[currentTheme].isOfficial) {
-          block.style.setProperty('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.3)) brightness(1.05)', 'important');
-        } else {
-          block.style.setProperty('filter', 'brightness(1.1)', 'important');
-        }
+        block.style.setProperty('filter', 'brightness(1.1)', 'important');
         setHoveredBlock(block.id);
         
         // Show tooltip
@@ -150,17 +144,12 @@ const MapView = () => {
         if (selectedBlock !== block.id) {
           // Restore normal opacity based on BED status
           if (color !== THEMES[currentTheme].colors.none) {
-            const normalOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
-            block.style.setProperty('fill-opacity', normalOpacity, 'important');
+            block.style.setProperty('fill-opacity', '0.7', 'important');
           } else {
             block.style.setProperty('fill-opacity', '1.0', 'important');
           }
           
-          if (THEMES[currentTheme].isOfficial) {
-            block.style.setProperty('filter', 'drop-shadow(0 0 2px rgba(0,0,0,0.2))', 'important');
-          } else {
-            block.style.setProperty('filter', 'none', 'important');
-          }
+          block.style.setProperty('filter', 'none', 'important');
         }
         setHoveredBlock(null);
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
@@ -178,8 +167,7 @@ const MapView = () => {
             // Restore normal fill and opacity for unselected blocks
             if (blockColor !== THEMES[currentTheme].colors.none) {
               b.style.setProperty('fill', blockColor, 'important');
-              const normalOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
-              b.style.setProperty('fill-opacity', normalOpacity, 'important');
+              b.style.setProperty('fill-opacity', '0.7', 'important');
             } else {
               b.style.setProperty('fill', `url(#${gradientId})`, 'important');
               b.style.setProperty('fill-opacity', '1.0', 'important');
@@ -237,50 +225,23 @@ const MapView = () => {
   };
 
   const handleMouseDown = (e) => {
-    // Don't pan if clicking on UI elements or SVG content
-    if (e.target.closest('.zoom-controls') || 
-        e.target.closest('.info-panel') || 
-        e.target.closest('.legend') ||
-        e.target.closest('object') ||
-        e.target.tagName === 'path' ||
-        e.target.tagName === 'svg') {
-      return;
-    }
-    setIsPanning(true);
-    setLastPanPoint({ x: e.clientX, y: e.clientY });
-    e.preventDefault();
-    e.stopPropagation();
-    // Prevent text selection
-    document.body.style.userSelect = 'none';
+    // Pan disabled
+    return;
   };
 
   const handleMouseMove = (e) => {
-    if (!isPanning) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const deltaX = e.clientX - lastPanPoint.x;
-    const deltaY = e.clientY - lastPanPoint.y;
-    
-    setPan(prevPan => ({
-      x: prevPan.x + deltaX,
-      y: prevPan.y + deltaY
-    }));
-    
-    setLastPanPoint({ x: e.clientX, y: e.clientY });
+    // Pan disabled
+    return;
   };
 
   const handleMouseUp = () => {
-    setIsPanning(false);
-    // Re-enable text selection
-    document.body.style.userSelect = '';
+    // Pan disabled
+    return;
   };
 
   const handleWheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prevZoom => Math.max(0.5, Math.min(5, prevZoom * delta)));
+    // Zoom disabled
+    return;
   };
 
   // Add event listeners for pan and zoom
@@ -310,10 +271,6 @@ const MapView = () => {
 
   return (
     <>
-      {/* Full-screen background for official themes */}
-      {theme.isOfficial && (
-        <OfficialMapBackground theme={currentTheme} zoom={zoom} />
-      )}
       
       <div 
         ref={containerRef}
@@ -321,9 +278,9 @@ const MapView = () => {
           position: 'relative', 
           width: '100%', 
           height: '100vh', 
-          background: theme.isOfficial ? 'transparent' : theme.background,
+          background: theme.background,
           overflow: 'hidden',
-          cursor: isPanning ? 'grabbing' : 'grab',
+          cursor: 'default',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
@@ -333,10 +290,8 @@ const MapView = () => {
           zIndex: 15 // Above the background
         }}
       >
-        {/* Background overlay for non-official themes */}
-        {!theme.isOfficial && (
-          <BackgroundOverlay theme={currentTheme} />
-        )}
+        {/* Background overlay */}
+        <BackgroundOverlay theme={currentTheme} />
       
       {/* BED map header for 2024 theme */}
       <BEDmapHeader theme={currentTheme} />
@@ -359,9 +314,7 @@ const MapView = () => {
         fontWeight: 'bold', 
         zIndex: 40,
         color: theme.textColor,
-        textShadow: theme.isOfficial 
-          ? '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.3)'
-          : theme.isDark 
+        textShadow: theme.isDark 
             ? '2px 2px 4px rgba(0,0,0,0.5)' 
             : '1px 1px 2px rgba(0,0,0,0.1)',
         transition: 'color 0.3s ease',
@@ -380,9 +333,7 @@ const MapView = () => {
         opacity: 0.8,
         transition: 'color 0.3s ease',
         fontFamily: theme.typography.primaryFont,
-        textShadow: theme.isOfficial 
-          ? '1px 1px 2px rgba(0,0,0,0.7), 0 0 4px rgba(255,255,255,0.3)'
-          : 'none'
+        textShadow: 'none'
       }}>
         Loading: {loading ? 'Yes' : 'No'}, Camps: {camps.length}
         {error && <span style={{ color: '#ef4444', marginLeft: '1rem' }}>({error})</span>}
@@ -426,14 +377,17 @@ const MapView = () => {
         }}
       />
       
-      <div className="zoom-controls">
-        <ZoomControls
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onResetZoom={handleResetZoom}
-          currentZoom={zoom}
-        />
-      </div>
+      {/* Zoom controls hidden */}
+      {false && (
+        <div className="zoom-controls">
+          <ZoomControls
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onResetZoom={handleResetZoom}
+            currentZoom={zoom}
+          />
+        </div>
+      )}
       
       <div
         className="map-container"
@@ -443,7 +397,7 @@ const MapView = () => {
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: 'center center',
           transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
-          cursor: isPanning ? 'grabbing' : 'grab',
+          cursor: 'default',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
@@ -452,16 +406,6 @@ const MapView = () => {
           zIndex: 20 // Ensure map is above background
         }}
       >
-        {/* Semi-transparent overlay for official maps to improve contrast */}
-        {theme.isOfficial && (
-          <div 
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.2) 100%)',
-              zIndex: 2
-            }}
-          />
-        )}
         
         <object
           ref={svgRef}
@@ -470,7 +414,7 @@ const MapView = () => {
           className="w-full h-full"
           style={{ 
             zIndex: 25,
-            filter: theme.isOfficial ? 'contrast(1.2) brightness(1.1)' : 'none'
+            filter: 'none'
           }}
           onLoad={() => {
             console.log('SVG loaded');
@@ -478,10 +422,6 @@ const MapView = () => {
           }}
         />
         
-        {/* Road system styling for official themes only (SVG handles base styling) */}
-        {theme.isOfficial && (
-          <RoadSystem theme={currentTheme} svgRef={svgRef} />
-        )}
         
         {/* Central B.E.D. Logo - positioned at The Man */}
         <CentralLogo theme={currentTheme} />

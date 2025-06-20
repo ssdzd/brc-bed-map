@@ -5,8 +5,8 @@ import logoImage from '../assets/logo@4x.png';
 const BEDmapHeader = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme];
   
-  // Only show the BED map header in 2024 theme to match original design
-  if (theme !== '2024') {
+  // Show the BED map header in both 2024 and 2025 themes
+  if (theme !== '2024' && theme !== '2025') {
     return null;
   }
   
@@ -35,7 +35,9 @@ const BEDmapHeader = ({ theme = '2025' }) => {
             width: '400px',
             height: 'auto',
             objectFit: 'contain',
-            filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))',
+            filter: theme === '2025' 
+              ? 'drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2))' 
+              : 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))',
             marginLeft: '-15px'
           }}
         />
@@ -49,12 +51,14 @@ const BEDmapHeader = ({ theme = '2025' }) => {
             fontFamily: themeConfig.typography.scriptFont,
             fontSize: '5rem',
             fontWeight: '400',
-            color: '#000000',
-            textShadow: '2px 2px 4px rgba(255, 255, 255, 0.8)',
+            color: theme === '2025' ? '#374151' : '#000000',
+            textShadow: theme === '2025' 
+              ? '1px 1px 2px rgba(0, 0, 0, 0.1)' 
+              : '2px 2px 4px rgba(255, 255, 255, 0.8)',
             transform: 'rotate(-8deg)',
             zIndex: 2,
             letterSpacing: '0.1em',
-            WebkitTextFillColor: '#000000'
+            WebkitTextFillColor: theme === '2025' ? '#374151' : '#000000'
           }}
         >
           map
