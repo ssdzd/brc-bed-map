@@ -9,6 +9,7 @@
         fill: none;
         stroke-opacity: 1;
         stroke-miterlimit: 10;
+        filter: url(#roadShadow);
       }
 
       /* cls-2: Landmarks and portals (white fill) */
@@ -17,6 +18,7 @@
         fill-opacity: 1;
         stroke: #FFFFFF;
         stroke-miterlimit: 10;
+        filter: url(#plazaShadow);
       }
 
       /* cls-3: Secondary roads (thin white stroke) */
@@ -26,6 +28,7 @@
         fill: none;
         stroke-opacity: 1;
         stroke-miterlimit: 10;
+        filter: url(#radialShadow);
       }
 
       /* cls-4: Borders (very thick white stroke) */
@@ -35,6 +38,7 @@
         fill: none;
         stroke-opacity: 1;
         stroke-miterlimit: 10;
+        filter: url(#roadShadow);
       }
     
       .inner {
@@ -81,6 +85,53 @@
       <svg:stop offset="55%" style="stop-color:rgba(135, 206, 235, 1)" />
       <svg:stop offset="70%" style="stop-color:rgba(255, 255, 255, 1)" />
     </svg:radialGradient>
+    
+    <!-- Shadow filter definitions for road elements -->
+    <!-- Subtle shadows that minimize overlap interference -->
+    
+    <!-- Main road shadow - subtle and close -->
+    <svg:filter id="roadShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <svg:feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="shadowBlur"/>
+      <svg:feOffset in="shadowBlur" dx="0.5" dy="0.8" result="offsetShadow"/>
+      <svg:feFlood flood-color="rgba(0,0,0,0.25)" result="shadowColor"/>
+      <svg:feComposite in="shadowColor" in2="offsetShadow" operator="in" result="shadow"/>
+      <svg:feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </svg:filter>
+    
+    <!-- Street ring shadow - very subtle -->
+    <svg:filter id="streetShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <svg:feGaussianBlur in="SourceAlpha" stdDeviation="0.8" result="shadowBlur"/>
+      <svg:feOffset in="shadowBlur" dx="0.3" dy="0.5" result="offsetShadow"/>
+      <svg:feFlood flood-color="rgba(0,0,0,0.18)" result="shadowColor"/>
+      <svg:feComposite in="shadowColor" in2="offsetShadow" operator="in" result="shadow"/>
+      <svg:feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </svg:filter>
+    
+    <!-- Radial road shadow - minimal -->
+    <svg:filter id="radialShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <svg:feGaussianBlur in="SourceAlpha" stdDeviation="0.6" result="shadowBlur"/>
+      <svg:feOffset in="shadowBlur" dx="0.2" dy="0.3" result="offsetShadow"/>
+      <svg:feFlood flood-color="rgba(0,0,0,0.12)" result="shadowColor"/>
+      <svg:feComposite in="shadowColor" in2="offsetShadow" operator="in" result="shadow"/>
+      <svg:feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </svg:filter>
+    
+    <!-- Portal glow - no offset, just glow -->
+    <svg:filter id="portalShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <svg:feGaussianBlur in="SourceAlpha" stdDeviation="1.0" result="shadowBlur"/>
+      <svg:feFlood flood-color="rgba(255,215,0,0.3)" result="shadowColor"/>
+      <svg:feComposite in="shadowColor" in2="shadowBlur" operator="in" result="shadow"/>
+      <svg:feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </svg:filter>
+    
+    <!-- Plaza shadow - clean and contained -->
+    <svg:filter id="plazaShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <svg:feGaussianBlur in="SourceAlpha" stdDeviation="1.0" result="shadowBlur"/>
+      <svg:feOffset in="shadowBlur" dx="0.4" dy="0.6" result="offsetShadow"/>
+      <svg:feFlood flood-color="rgba(0,0,0,0.2)" result="shadowColor"/>
+      <svg:feComposite in="shadowColor" in2="offsetShadow" operator="in" result="shadow"/>
+      <svg:feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </svg:filter>
     
   </svg:defs>
   <svg:g id="BRC_Polygons_Overlay" class="cls-7">
