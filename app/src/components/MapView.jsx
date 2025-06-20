@@ -5,33 +5,34 @@ import InfoPanel from './InfoPanel';
 import Legend from './Legend';
 import ZoomControls from './ZoomControls';
 import ThemeSwitcher from './ThemeSwitcher';
+import DataSourceSelector from './DataSourceSelector';
 import CentralLogo from './CentralLogo';
 import BackgroundOverlay from './BackgroundOverlay';
 import BEDmapHeader from './BEDmapHeader';
 import Tooltip from './Tooltip';
 import CornerCharacters from './CornerCharacters';
-import CompassRose from './CompassRose';
 import SearchPanel from './SearchPanel';
-import StreetTimeLabels from './StreetTimeLabels';
 import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
 import { useUrlState } from '../hooks/useUrlState';
-import mapSvg from '/merged_map_full.svg';
+import OfficialMapBackground from './OfficialMapBackground';
+import RoadSystem from './RoadSystem';
+import mapSvg from '/brc_combined_validation.svg';
 
 const MapView = () => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
-  const { camps, loading } = useMapData();
+  const [dataSource, setDataSource] = useState('airtable');
+  const { camps, loading, error, mockDataStats, refresh } = useMapData(dataSource);
   const [selectedBlock, setSelectedBlock] = useState(null);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(0.67);
+  const [pan, setPan] = useState({ x: -32, y: 84 });
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
-  const [currentTheme, setCurrentTheme] = useState('2025');
+  const [currentTheme, setCurrentTheme] = useState('2024');
   const [tooltip, setTooltip] = useState({ visible: false, content: null, position: { x: 0, y: 0 } });
   const [hoveredBlock, setHoveredBlock] = useState(null);
   const [searchVisible, setSearchVisible] = useState(false);
-  const [selectedCamp, setSelectedCamp] = useState(null);
   const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
@@ -76,27 +77,53 @@ const MapView = () => {
     console.log('SVG doc:', svgDoc);
     if (!svgDoc) return;
 
-    // Color all blocks based on camp data
-    const blocks = svgDoc.querySelectorAll('#Block_Overlays path');
-    console.log('Found blocks:', blocks.length);
+    // Update gradient references based on current theme
+    const gradientId = currentTheme.includes('2024') ? 'cityGradient-2024' : 'cityGradient-2025';
+    console.log('Using gradient ID:', gradientId, 'for theme:', currentTheme);
+
+    // Color all blocks and plaza quarters based on camp data - BED colors override gradient
+    const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
+    console.log('Found blocks and plaza-quarters:', blocks.length);
     blocks.forEach(block => {
       const color = getBlockColor(block.id, camps, currentTheme);
       const campsInBlock = camps.filter(camp => 
         campInBlock(camp.placement_address, block.id)
       );
       
-      block.style.fill = color;
-      block.style.fillOpacity = '0.6';
-      block.style.cursor = 'pointer';
-      block.style.transition = 'all 0.3s ease';
-      block.style.stroke = currentTheme === '2024' ? '#FFFFFF' : '#374151';
-      block.style.strokeWidth = '0.5';
+      // Use BED status color as fill if present, otherwise use gradient
+      if (color !== THEMES[currentTheme].colors.none) {
+        // BED status override - use solid color fill
+        block.style.setProperty('fill', color, 'important');
+        const fillOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
+        block.style.setProperty('fill-opacity', fillOpacity, 'important');
+        console.log(`Block ${block.id} - BED status color:`, color);
+      } else {
+        // No BED status - show gradient with full opacity
+        const gradientFill = `url(#${gradientId})`;
+        block.style.setProperty('fill', gradientFill, 'important');
+        block.style.setProperty('fill-opacity', '1.0', 'important');
+        console.log(`Block ${block.id} - Using gradient:`, gradientFill);
+        
+        // Gradient should now be visible
+      }
+      
+      block.style.setProperty('cursor', 'pointer', 'important');
+      block.style.setProperty('transition', 'all 0.3s ease', 'important');
+      
+      // Remove stroke borders for clean look
+      block.style.setProperty('stroke', 'none', 'important');
+      block.style.setProperty('stroke-width', '0', 'important');
       
       // Enhanced hover effect with tooltip
       block.onmouseenter = (e) => {
-        block.style.fillOpacity = '0.9';
-        block.style.strokeWidth = '2';
-        block.style.filter = 'brightness(1.1)';
+        const hoverOpacity = THEMES[currentTheme].isOfficial ? '0.9' : '1.0';
+        block.style.setProperty('fill-opacity', hoverOpacity, 'important');
+        
+        if (THEMES[currentTheme].isOfficial) {
+          block.style.setProperty('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.3)) brightness(1.05)', 'important');
+        } else {
+          block.style.setProperty('filter', 'brightness(1.1)', 'important');
+        }
         setHoveredBlock(block.id);
         
         // Show tooltip
@@ -121,9 +148,19 @@ const MapView = () => {
       
       block.onmouseleave = () => {
         if (selectedBlock !== block.id) {
-          block.style.fillOpacity = '0.6';
-          block.style.strokeWidth = '0.5';
-          block.style.filter = 'none';
+          // Restore normal opacity based on BED status
+          if (color !== THEMES[currentTheme].colors.none) {
+            const normalOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
+            block.style.setProperty('fill-opacity', normalOpacity, 'important');
+          } else {
+            block.style.setProperty('fill-opacity', '1.0', 'important');
+          }
+          
+          if (THEMES[currentTheme].isOfficial) {
+            block.style.setProperty('filter', 'drop-shadow(0 0 2px rgba(0,0,0,0.2))', 'important');
+          } else {
+            block.style.setProperty('filter', 'none', 'important');
+          }
         }
         setHoveredBlock(null);
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
@@ -137,24 +174,28 @@ const MapView = () => {
         blocks.forEach(b => {
           if (b.id !== block.id) {
             const blockColor = getBlockColor(b.id, camps, currentTheme);
-            b.style.fill = blockColor;
-            b.style.fillOpacity = '0.6';
-            b.style.strokeWidth = '0.5';
-            b.style.stroke = currentTheme === '2024' ? '#FFFFFF' : '#374151';
-            b.style.filter = 'none';
+            
+            // Restore normal fill and opacity for unselected blocks
+            if (blockColor !== THEMES[currentTheme].colors.none) {
+              b.style.setProperty('fill', blockColor, 'important');
+              const normalOpacity = THEMES[currentTheme].isOfficial ? '0.8' : '0.7';
+              b.style.setProperty('fill-opacity', normalOpacity, 'important');
+            } else {
+              b.style.setProperty('fill', `url(#${gradientId})`, 'important');
+              b.style.setProperty('fill-opacity', '1.0', 'important');
+            }
+            b.style.setProperty('filter', 'none', 'important');
           }
         });
         
         // Highlight selected with enhanced styling
-        block.style.strokeWidth = '4';
-        block.style.stroke = currentTheme === '2024' ? '#FFD700' : '#3B82F6';
-        block.style.fillOpacity = '0.9';
-        block.style.filter = 'brightness(1.2) drop-shadow(0 0 10px rgba(59, 130, 246, 0.5))';
+        block.style.setProperty('fill-opacity', '1.0', 'important');
+        block.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 10px rgba(59, 130, 246, 0.5))', 'important');
         
         // Add pulse animation
-        block.style.animation = 'blockPulse 0.6s ease-out';
+        block.style.setProperty('animation', 'blockPulse 0.6s ease-out', 'important');
         setTimeout(() => {
-          block.style.animation = '';
+          block.style.setProperty('animation', '', 'important');
         }, 600);
         
         setSelectedBlock(block.id);
@@ -178,7 +219,6 @@ const MapView = () => {
   };
 
   const handleCampSelect = (camp) => {
-    setSelectedCamp(camp);
     setSearchVisible(false);
     
     // Find the block this camp is in and select it
@@ -189,6 +229,11 @@ const MapView = () => {
   const handleFilterChange = (filterData) => {
     // Could be used to highlight filtered camps on the map
     console.log('Filter changed:', filterData);
+  };
+
+  const handleDataSourceChange = (newSource) => {
+    setDataSource(newSource);
+    console.log('Data source changed to:', newSource);
   };
 
   const handleMouseDown = (e) => {
@@ -264,25 +309,34 @@ const MapView = () => {
   const theme = THEMES[currentTheme];
 
   return (
-    <div 
-      ref={containerRef}
-      style={{ 
-        position: 'relative', 
-        width: '100%', 
-        height: '100vh', 
-        background: theme.background,
-        overflow: 'hidden',
-        cursor: isPanning ? 'grabbing' : 'grab',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        MozUserSelect: 'none',
-        msUserSelect: 'none',
-        transition: 'background 0.5s ease',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Background overlay effects */}
-      <BackgroundOverlay theme={currentTheme} />
+    <>
+      {/* Full-screen background for official themes */}
+      {theme.isOfficial && (
+        <OfficialMapBackground theme={currentTheme} zoom={zoom} />
+      )}
+      
+      <div 
+        ref={containerRef}
+        style={{ 
+          position: 'relative', 
+          width: '100%', 
+          height: '100vh', 
+          background: theme.isOfficial ? 'transparent' : theme.background,
+          overflow: 'hidden',
+          cursor: isPanning ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          transition: 'background 0.5s ease',
+          backgroundAttachment: 'fixed',
+          zIndex: 15 // Above the background
+        }}
+      >
+        {/* Background overlay for non-official themes */}
+        {!theme.isOfficial && (
+          <BackgroundOverlay theme={currentTheme} />
+        )}
       
       {/* BED map header for 2024 theme */}
       <BEDmapHeader theme={currentTheme} />
@@ -303,9 +357,13 @@ const MapView = () => {
         left: '1rem', 
         fontSize: '1.5rem', 
         fontWeight: 'bold', 
-        zIndex: 10,
+        zIndex: 40,
         color: theme.textColor,
-        textShadow: theme.isDark ? '2px 2px 4px rgba(0,0,0,0.5)' : '1px 1px 2px rgba(0,0,0,0.1)',
+        textShadow: theme.isOfficial 
+          ? '2px 2px 4px rgba(0,0,0,0.7), 0 0 8px rgba(255,255,255,0.3)'
+          : theme.isDark 
+            ? '2px 2px 4px rgba(0,0,0,0.5)' 
+            : '1px 1px 2px rgba(0,0,0,0.1)',
         transition: 'color 0.3s ease',
         fontFamily: theme.typography.headingFont
       }}>
@@ -316,14 +374,19 @@ const MapView = () => {
         position: 'absolute', 
         top: '4rem', 
         left: '1rem', 
-        zIndex: 10,
+        zIndex: 40,
         color: theme.textColor,
         fontSize: '0.875rem',
         opacity: 0.8,
         transition: 'color 0.3s ease',
-        fontFamily: theme.typography.primaryFont
+        fontFamily: theme.typography.primaryFont,
+        textShadow: theme.isOfficial 
+          ? '1px 1px 2px rgba(0,0,0,0.7), 0 0 4px rgba(255,255,255,0.3)'
+          : 'none'
       }}>
         Loading: {loading ? 'Yes' : 'No'}, Camps: {camps.length}
+        {error && <span style={{ color: '#ef4444', marginLeft: '1rem' }}>({error})</span>}
+        {dataSource === 'mock' && <span style={{ color: '#10b981', marginLeft: '1rem' }}>(Mock Data)</span>}
       </p>
       
       <ThemeSwitcher 
@@ -331,8 +394,14 @@ const MapView = () => {
         onThemeChange={setCurrentTheme}
       />
       
-      {/* Compass Rose */}
-      <CompassRose theme={currentTheme} zoom={zoom} />
+      {/* Data Source Selector */}
+      <DataSourceSelector
+        currentSource={dataSource}
+        onSourceChange={handleDataSourceChange}
+        theme={currentTheme}
+        mockDataStats={mockDataStats}
+      />
+      
       
       {/* Stats Panel */}
       <StatsPanel
@@ -379,22 +448,44 @@ const MapView = () => {
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
           msUserSelect: 'none',
-          opacity: loading ? 0.7 : 1
+          opacity: loading ? 0.7 : 1,
+          zIndex: 20 // Ensure map is above background
         }}
       >
+        {/* Semi-transparent overlay for official maps to improve contrast */}
+        {theme.isOfficial && (
+          <div 
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.2) 100%)',
+              zIndex: 2
+            }}
+          />
+        )}
+        
         <object
           ref={svgRef}
           data={mapSvg}
           type="image/svg+xml"
           className="w-full h-full"
-          onLoad={() => console.log('SVG loaded')}
+          style={{ 
+            zIndex: 25,
+            filter: theme.isOfficial ? 'contrast(1.2) brightness(1.1)' : 'none'
+          }}
+          onLoad={() => {
+            console.log('SVG loaded');
+            console.log('SVG contentDocument:', svgRef.current?.contentDocument);
+          }}
         />
         
-        {/* Street and Time Labels - inside map container so they move with zoom/pan */}
-        <StreetTimeLabels theme={currentTheme} zoom={zoom} />
+        {/* Road system styling for official themes only (SVG handles base styling) */}
+        {theme.isOfficial && (
+          <RoadSystem theme={currentTheme} svgRef={svgRef} />
+        )}
         
-        {/* Central B.E.D. Logo - inside map container so it moves with zoom/pan */}
+        {/* Central B.E.D. Logo - positioned at The Man */}
         <CentralLogo theme={currentTheme} />
+        
       </div>
       
       <div className="legend">
@@ -423,15 +514,25 @@ const MapView = () => {
       {/* Corner Characters - only shown in 2024 theme */}
       <CornerCharacters theme={currentTheme} />
       
-      {/* CSS Animations */}
+      {/* CSS Animations and SVG element hiding */}
       <style>{`
         @keyframes blockPulse {
           0% { transform: scale(1); }
           50% { transform: scale(1.05); }
           100% { transform: scale(1); }
         }
+        
+        /* Hide The Man and Temple from the SVG */
+        #The_Man {
+          display: none !important;
+        }
+        
+        #Temple {
+          display: none !important;
+        }
       `}</style>
     </div>
+    </>
   );
 };
 

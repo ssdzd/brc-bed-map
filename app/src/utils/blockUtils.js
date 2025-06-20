@@ -14,6 +14,21 @@ export const BED_COLORS_2024 = {
   bed_talk: '#FF1493'  // Hot pink
 };
 
+// Official Map BED colors (semi-transparent overlays)
+export const BED_COLORS_OFFICIAL_2025 = {
+  none: 'transparent',                    // Completely transparent
+  registered: 'rgba(254, 136, 3, 0.4)',   // Orange with 40% opacity
+  consent_policy: 'rgba(152, 7, 171, 0.4)', // Purple with 40% opacity  
+  bed_talk: 'rgba(255, 20, 147, 0.5)'     // Hot pink with 50% opacity
+};
+
+export const BED_COLORS_OFFICIAL_2024 = {
+  none: 'transparent',                     // Completely transparent
+  registered: 'rgba(254, 136, 3, 0.5)',    // Orange with 50% opacity
+  consent_policy: 'rgba(152, 7, 171, 0.5)', // Purple with 50% opacity
+  bed_talk: 'rgba(255, 20, 147, 0.6)'      // Hot pink with 60% opacity
+};
+
 // Default to 2025 theme for backward compatibility
 export const BED_COLORS = BED_COLORS_2025;
 
@@ -38,10 +53,30 @@ export const THEMES = {
       displayFont: 'Bebas Neue, sans-serif'
     }
   },
+  '2025-official': {
+    name: '2025 Official Map',
+    colors: BED_COLORS_OFFICIAL_2025,
+    background: 'transparent', // Uses OfficialMapBackground component
+    containerBg: 'transparent',
+    textColor: '#1e293b',
+    isDark: false,
+    isOfficial: true,
+    centerCircle: {
+      background: 'transparent',
+      border: 'none',
+      textColor: '#1e293b'
+    },
+    typography: {
+      primaryFont: 'Inter, system-ui, sans-serif',
+      headingFont: 'Inter, system-ui, sans-serif',
+      scriptFont: 'Dancing Script, cursive',
+      displayFont: 'Bebas Neue, sans-serif'
+    }
+  },
   '2024': {
     name: '2024 Vibrant',
     colors: BED_COLORS_2024,
-    background: 'radial-gradient(ellipse at top, #FF69B4 0%, #FF1493 25%, #E91E63 50%, #C2185B 75%, #AD1457 100%)',
+    background: 'radial-gradient(circle at center, rgba(255, 228, 225, 0.95) 0%, rgba(255, 105, 180, 0.85) 35%, rgba(139, 0, 139, 0.75) 65%, rgba(75, 0, 130, 0.65) 100%)',
     containerBg: '#FF69B4',
     textColor: '#FFFFFF',
     isDark: true,
@@ -56,11 +91,45 @@ export const THEMES = {
       scriptFont: 'Pacifico, cursive',
       displayFont: 'Bebas Neue, sans-serif'
     }
+  },
+  '2024-official': {
+    name: '2024 Official Map',
+    colors: BED_COLORS_OFFICIAL_2024,
+    background: 'transparent', // Uses OfficialMapBackground component
+    containerBg: 'transparent',
+    textColor: '#FFFFFF',
+    isDark: true,
+    isOfficial: true,
+    centerCircle: {
+      background: 'transparent',
+      border: 'none',
+      textColor: '#FFFFFF'
+    },
+    typography: {
+      primaryFont: 'Inter, system-ui, sans-serif',
+      headingFont: 'Bebas Neue, sans-serif',
+      scriptFont: 'Pacifico, cursive',
+      displayFont: 'Bebas Neue, sans-serif'
+    }
   }
 };
 
-// Parse block ID like "A_8" into components
+// Parse block ID like "polygon_A_2:00" or "A_8" into components
 export const parseBlockId = (blockId) => {
+  // Handle new format: "polygon_A_2:00"
+  if (blockId.startsWith('polygon_')) {
+    const parts = blockId.replace('polygon_', '').split('_');
+    const street = parts[0];
+    const timeString = parts[1];
+    return { 
+      street, 
+      timeString,
+      // Convert time string like "2:00" directly
+      approximateTime: timeString
+    };
+  }
+  
+  // Handle old format: "A_8" 
   const [street, segment] = blockId.split('_');
   return { 
     street, 
@@ -82,8 +151,8 @@ const segmentToTime = (segment) => {
 export const campInBlock = (campAddress, blockId) => {
   const { street, approximateTime } = parseBlockId(blockId);
   
-  // Parse camp address like "C & 3:45"
-  const match = campAddress.match(/([A-K])\s*&\s*(\d{1,2}):(\d{2})/);
+  // Parse camp address like "C & 3:45" or "Esplanade & 3:45"
+  const match = campAddress.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
   if (!match) return false;
   
   const [_, campStreet, campHour, campMinute] = match;
@@ -93,11 +162,13 @@ export const campInBlock = (campAddress, blockId) => {
   
   // Check if time is within block range (rough approximation)
   const campTime = parseInt(campHour) + parseInt(campMinute) / 60;
-  const blockTime = parseInt(approximateTime.split(':')[0]) + 
-                    parseInt(approximateTime.split(':')[1]) / 60;
   
-  // Within 15 minutes
-  return Math.abs(campTime - blockTime) < 0.25;
+  // Parse block time (handle both "2:00" and computed time formats)
+  const blockTimeParts = approximateTime.split(':');
+  const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
+  
+  // Within 30 minutes (wider range for new polygon format)
+  return Math.abs(campTime - blockTime) < 0.5;
 };
 
 // Get color for a block based on camps in it
