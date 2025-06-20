@@ -171,12 +171,37 @@ export const campInBlock = (campAddress, blockId) => {
   return Math.abs(campTime - blockTime) < 0.5;
 };
 
+// Plaza-specific gradient colors to simulate the actual gradient
+const PLAZA_GRADIENT_COLORS = {
+  // B plazas and Center Camp quarters - closer to center, lighter blue-gray
+  'B_plaza': '#b5bfd8',
+  'center_camp': '#b5bfd8',
+  // G plazas - further from center, purple-gray
+  'G_plaza': '#cec5db'
+};
+
+// Get plaza type from block ID
+const getPlazaType = (blockId) => {
+  if (blockId.includes('_B_Plaza') || blockId.includes('Center_Camp')) {
+    return 'B_plaza';
+  } else if (blockId.includes('_G_Plaza')) {
+    return 'G_plaza';
+  }
+  return null;
+};
+
 // Get color for a block based on camps in it
 export const getBlockColor = (blockId, camps, theme = '2025') => {
   const colors = THEMES[theme].colors;
   const campsInBlock = camps.filter(camp => 
     campInBlock(camp.placement_address, blockId)
   );
+  
+  // Check if this is a plaza element and handle gradient simulation
+  const plazaType = getPlazaType(blockId);
+  if (plazaType && campsInBlock.length === 0) {
+    return PLAZA_GRADIENT_COLORS[plazaType];
+  }
   
   if (campsInBlock.length === 0) return colors.none;
   
