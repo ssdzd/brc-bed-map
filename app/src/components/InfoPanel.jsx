@@ -2,7 +2,7 @@ import React from 'react';
 import { parseBlockId, campInBlock, THEMES, getThemeColors } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
-const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
+const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false }) => {
   const { street, approximateTime } = parseBlockId(blockId);
   const campsInBlock = camps.filter(camp => 
     campInBlock(camp.placement_address, blockId)
@@ -76,7 +76,34 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose }) => {
         )}
       </div>
       
-      {campsInBlock.length > 0 ? (
+      {loading ? (
+        <div style={{ 
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          <div
+            style={{
+              width: '24px',
+              height: '24px',
+              border: `2px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+              borderTop: `2px solid ${themeConfig.isDark ? '#FF69B4' : '#3B82F6'}`,
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}
+          />
+          <div style={{
+            color: themeConfig.textColor,
+            fontSize: '0.875rem',
+            fontFamily: themeConfig.typography.primaryFont,
+            opacity: 0.7
+          }}>
+            Loading camp data...
+          </div>
+        </div>
+      ) : campsInBlock.length > 0 ? (
         <div style={{ maxHeight: 'calc(100vh - 12rem)', overflowY: 'auto' }}>
           {campsInBlock.map((camp, index) => (
             <div

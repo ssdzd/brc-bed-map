@@ -14,6 +14,8 @@ import CornerCharacters from './CornerCharacters';
 import SearchPanel from './SearchPanel';
 import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorDisplay from './ErrorDisplay';
 import { useUrlState } from '../hooks/useUrlState';
 import mapSvg from '/brc_combined_validation.svg';
 
@@ -190,6 +192,21 @@ const MapView = () => {
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
       };
     });
+
+    // Apply shadow styling to joined borders for 2025 theme
+    if (currentTheme === '2025') {
+      const joinedBorders = svgDoc.querySelector('#Joined_Borders');
+      if (joinedBorders) {
+        joinedBorders.style.setProperty('filter', 'drop-shadow(0px 2px 4px rgba(0,0,0,0.15)) drop-shadow(0px 0px 8px rgba(0,0,0,0.05))', 'important');
+        console.log('Applied shadow to Joined_Borders for 2025 theme');
+      }
+    } else {
+      // Remove shadow for other themes
+      const joinedBorders = svgDoc.querySelector('#Joined_Borders');
+      if (joinedBorders) {
+        joinedBorders.style.setProperty('filter', 'none', 'important');
+      }
+    }
   }, [camps, loading, currentTheme]);
 
   // Zoom and pan functions
@@ -292,6 +309,25 @@ const MapView = () => {
       >
         {/* Background overlay */}
         <BackgroundOverlay theme={currentTheme} />
+        
+        {/* Loading State */}
+        {loading && (
+          <LoadingSpinner 
+            theme={currentTheme} 
+            message={dataSource === 'mock' ? 'Generating mock data...' : 'Loading camp data...'}
+          />
+        )}
+        
+        {/* Error State */}
+        {error && !loading && (
+          <ErrorDisplay
+            theme={currentTheme}
+            error={error}
+            onRetry={refresh}
+            title="Failed to load camp data"
+            showDetails={false}
+          />
+        )}
       
       {/* BED map header for 2024 theme */}
       <BEDmapHeader theme={currentTheme} />
@@ -316,29 +352,31 @@ const MapView = () => {
         color: theme.textColor,
         textShadow: theme.isDark 
             ? '2px 2px 4px rgba(0,0,0,0.5)' 
-            : '1px 1px 2px rgba(0,0,0,0.1)',
+            : '0px 2px 4px rgba(0,0,0,0.2), 0px 0px 8px rgba(0,0,0,0.1)',
         transition: 'color 0.3s ease',
         fontFamily: theme.typography.headingFont
       }}>
         {currentTheme === '2024' ? 'B.E.D. Map' : 'Burning Man B.E.D. Map'}
       </h1>
       
-      <p style={{ 
-        position: 'absolute', 
-        top: '4rem', 
-        left: '1rem', 
-        zIndex: 40,
-        color: theme.textColor,
-        fontSize: '0.875rem',
-        opacity: 0.8,
-        transition: 'color 0.3s ease',
-        fontFamily: theme.typography.primaryFont,
-        textShadow: 'none'
-      }}>
-        Loading: {loading ? 'Yes' : 'No'}, Camps: {camps.length}
-        {error && <span style={{ color: '#ef4444', marginLeft: '1rem' }}>({error})</span>}
-        {dataSource === 'mock' && <span style={{ color: '#10b981', marginLeft: '1rem' }}>(Mock Data)</span>}
-      </p>
+      {/* Status indicator - only show when not loading/error */}
+      {!loading && !error && (
+        <p style={{ 
+          position: 'absolute', 
+          top: '4rem', 
+          left: '1rem', 
+          zIndex: 40,
+          color: theme.textColor,
+          fontSize: '0.875rem',
+          opacity: 0.7,
+          transition: 'color 0.3s ease',
+          fontFamily: theme.typography.primaryFont,
+          textShadow: 'none'
+        }}>
+          {camps.length} camps loaded
+          {dataSource === 'mock' && <span style={{ color: '#10b981', marginLeft: '0.5rem' }}>(Mock Data)</span>}
+        </p>
+      )}
       
       <ThemeSwitcher 
         currentTheme={currentTheme}
@@ -438,6 +476,7 @@ const MapView = () => {
             blockId={selectedBlock} 
             camps={camps}
             theme={currentTheme}
+            loading={loading}
             onClose={() => setSelectedBlock(null)}
           />
         </div>

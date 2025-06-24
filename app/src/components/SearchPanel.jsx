@@ -20,8 +20,8 @@ const SearchPanel = ({
   const filterOptions = [
     { value: 'all', label: 'All Camps', icon: PlayaIcons.Camp },
     { value: 'none', label: 'Not Registered', icon: PlayaIcons.Camp },
-    { value: 'registered', label: 'Registered and started BEDucator program', icon: PlayaIcons.VideoPlay },
-    { value: 'consent_policy', label: 'Distributed Unique Consent Policy', icon: PlayaIcons.Buddy },
+    { value: 'registered', label: 'Started BEDucator program', icon: PlayaIcons.VideoPlay },
+    { value: 'consent_policy', label: 'Distributed Consent Policy', icon: PlayaIcons.Buddy },
     { value: 'bed_talk', label: 'Scheduled BED talk', icon: PlayaIcons.CheckMark }
   ];
   
@@ -111,8 +111,8 @@ const SearchPanel = ({
         position: 'absolute',
         bottom: '1rem',
         left: '50%',
-        transform: 'translateX(-50%)',
-        width: '420px',
+        transform: 'translateX(-40%)',
+        width: '500px',
         maxWidth: '90vw',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',
@@ -131,7 +131,7 @@ const SearchPanel = ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '1rem 1.5rem 0.5rem',
+        padding: '0.75rem 1.25rem 0.5rem',
         borderBottom: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
       }}>
         <h3 style={{
@@ -167,7 +167,7 @@ const SearchPanel = ({
       </div>
       
       {/* Search Input */}
-      <div style={{ padding: '1rem 1.5rem 0.5rem' }}>
+      <div style={{ padding: '0.75rem 1.25rem 0.5rem' }}>
         <input
           type="text"
           placeholder="Search camps, addresses, or organizers..."
@@ -195,12 +195,12 @@ const SearchPanel = ({
       </div>
       
       {/* Filter Buttons */}
-      <div style={{ padding: '0 1.5rem 1rem' }}>
+      <div style={{ padding: '0 1.25rem 0.75rem' }}>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
           gap: '0.5rem',
-          marginBottom: '1rem'
+          marginBottom: '0.75rem'
         }}>
           {filterOptions.map(option => {
             const IconComponent = option.icon;
@@ -281,17 +281,17 @@ const SearchPanel = ({
       {/* Results List */}
       {isExpanded && filteredCamps.length > 0 && (
         <div style={{
-          maxHeight: '300px',
+          maxHeight: '150px',
           overflowY: 'auto',
           borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          padding: '1rem 1.5rem'
+          padding: '0.75rem 1.25rem'
         }}>
           {filteredCamps.slice(0, 10).map((camp, index) => (
             <div
               key={camp.id}
               onClick={() => onCampSelect && onCampSelect(camp)}
               style={{
-                padding: '0.75rem',
+                padding: '0.5rem',
                 borderRadius: '0.5rem',
                 border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                 marginBottom: '0.5rem',

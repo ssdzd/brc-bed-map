@@ -15,13 +15,13 @@ const Legend = ({ theme = '2025' }) => {
     },
     { 
       status: 'registered', 
-      label: 'Registered and started BEDucator program', 
+      label: 'Started BEDucator program', 
       icon: '▶',
       //description: 'Started BEDucator training'
     },
     { 
       status: 'consent_policy', 
-      label: 'Distributed Unique Consent Policy', 
+      label: 'Distributed Consent Policy', 
       icon: '📜',
       //description: 'Consent policy implemented'
     },
