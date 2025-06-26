@@ -1,5 +1,4 @@
 import React from 'react';
-import { PlayaIcons } from './PlayaIcons';
 import { THEMES } from '../utils/blockUtils';
 
 const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
@@ -49,19 +48,44 @@ const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
   const c3Position = { x: 622.50, y: 392.04 }; // C & 3:00
   const c9Position = { x: 622.50, y: 152.04 }; // C & 9:00
   
+  // SVG icon components
+  const RangerIcon = ({ size = '1.5rem', color = 'white' }) => (
+    <img 
+      src="/Ranger.svg" 
+      alt="Ranger HQ"
+      style={{ 
+        width: size, 
+        height: size,
+        filter: color !== 'white' ? `brightness(0) saturate(100%) invert(1)` : 'none'
+      }} 
+    />
+  );
+
+  const MedicalIcon = ({ size = '1.5rem', color = 'white' }) => (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill={color}
+      style={{ display: 'block' }}
+    >
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17h-2v-4H5v-2h4V9h2v4h4v2h-4v4z"/>
+    </svg>
+  );
+
   // Define landmark positions with proper address validation
   const landmarks = [
     {
       id: 'medical-esplanade',
       name: 'Medical - Esplanade',
-      icon: PlayaIcons.RedCross,
+      icon: MedicalIcon,
       position: getPosition('Esplanade', 5.25), // 5:15
       address: 'Esplanade & 5:15'
     },
     {
       id: 'medical-9-plaza',
       name: 'Medical - 9:00 Plaza',
-      icon: PlayaIcons.RedCross,
+      icon: MedicalIcon,
       // Position at exact C & 9:00 intersection
       position: c9Position,
       address: 'C & 9:00'
@@ -69,7 +93,7 @@ const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
     {
       id: 'ranger-hq',
       name: 'Ranger HQ',
-      icon: PlayaIcons.RangerHQ,
+      icon: RangerIcon,
       position: getPosition('Esplanade', 5.75), // 5:45
       address: 'Esplanade & 5:45'
     }

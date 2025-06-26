@@ -16,7 +16,6 @@ import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorDisplay from './ErrorDisplay';
-import MapLandmarks from './MapLandmarks';
 import { useUrlState } from '../hooks/useUrlState';
 import mapSvg from '/brc_combined_validation.svg';
 
@@ -112,9 +111,11 @@ const MapView = () => {
       block.style.setProperty('cursor', 'pointer', 'important');
       block.style.setProperty('transition', 'all 0.3s ease', 'important');
       
-      // Remove stroke borders for clean look
-      block.style.setProperty('stroke', 'none', 'important');
-      block.style.setProperty('stroke-width', '0', 'important');
+      // Remove stroke borders for clean look (but preserve plaza-quarter strokes)
+      if (!block.classList.contains('plaza-quarter')) {
+        block.style.setProperty('stroke', 'none', 'important');
+        block.style.setProperty('stroke-width', '0', 'important');
+      }
       
       // Enhanced hover effect with tooltip
       block.onmouseenter = (e) => {
@@ -418,20 +419,20 @@ const MapView = () => {
     const rangerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     rangerCircle.setAttribute("cx", "0");
     rangerCircle.setAttribute("cy", "0");
-    rangerCircle.setAttribute("r", "12");
+    rangerCircle.setAttribute("r", "24");
     rangerCircle.setAttribute("fill", "#c3b091");
     rangerCircle.setAttribute("stroke", "#166534");
     rangerCircle.setAttribute("stroke-width", "2");
     
     // Ranger SVG image
     const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    rangerImage.setAttribute("href", "/Ranger.svg");
-    rangerImage.setAttribute("x", "-8");
-    rangerImage.setAttribute("y", "-8");
-    rangerImage.setAttribute("width", "16");
-    rangerImage.setAttribute("height", "16");
+    rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/Ranger.svg");
+    rangerImage.setAttribute("href", "/brc-bed-map/Ranger.svg"); // Fallback for modern browsers
+    rangerImage.setAttribute("x", "-21");
+    rangerImage.setAttribute("y", "-21");
+    rangerImage.setAttribute("width", "42");
+    rangerImage.setAttribute("height", "42");
     rangerImage.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    rangerImage.setAttribute("filter", "brightness(0) invert(1)");
     
     // Tooltip
     const rangerTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
@@ -796,11 +797,6 @@ const MapView = () => {
         {/* Central B.E.D. Logo - positioned at The Man */}
         <CentralLogo theme={currentTheme} />
         
-        {/* Map Landmarks - Ranger HQ, Medical, Airport */}
-        <MapLandmarks 
-          theme={currentTheme} 
-          onLandmarkClick={(landmarkId) => setSelectedBlock(landmarkId)}
-        />
         
       </div>
       
