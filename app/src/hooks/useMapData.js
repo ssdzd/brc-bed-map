@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { generateMockData, validateDistributions } from '../utils/mockData';
+import { fetchCamps, testConnection, parseAddress } from '../utils/airtableClient';
 
 // Original mock data for backward compatibility
 const originalMockCamps = [
@@ -21,22 +22,42 @@ export const useMapData = (dataSource = 'airtable') => {
       setLoading(true);
       setError(null);
       
-      // For now, fall back to original mock data since Airtable isn't configured
-      // TODO: Implement actual Airtable fetch
-      // const response = await fetch(AIRTABLE_URL, {
-      //   headers: { 'Authorization': `Bearer ${AIRTABLE_PAT}` }
-      // });
-      // const data = await response.json();
-      // setCamps(data.records);
+      // Test connection first
+      const connectionTest = await testConnection();
+      if (!connectionTest.success) {
+        console.warn('Airtable connection failed, falling back to original mock data:', connectionTest.message);
+        setCamps(originalMockCamps);
+        setMockDataStats(null);
+        setLoading(false);
+        return;
+      }
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setCamps(originalMockCamps);
+      // Fetch real data from Airtable
+      const airtableCamps = await fetchCamps();
+      
+      // Validate and parse addresses
+      const validCamps = airtableCamps.filter(camp => {
+        const parsed = parseAddress(camp.placement_address);
+        if (!parsed) {
+          console.warn(`Invalid address format: ${camp.placement_address} for camp: ${camp.camp_name}`);
+          return false;
+        }
+        return true;
+      });
+      
+      console.log(`Loaded ${validCamps.length} valid camps from Airtable (${airtableCamps.length} total)`);
+      setCamps(validCamps);
       setMockDataStats(null);
       setLoading(false);
+      
     } catch (err) {
       console.error('Error fetching Airtable data:', err);
-      setError('Failed to load Airtable data');
+      setError(`Failed to load Airtable data: ${err.message}`);
+      
+      // Fall back to original mock data on error
+      console.log('Falling back to original mock data');
+      setCamps(originalMockCamps);
+      setMockDataStats(null);
       setLoading(false);
     }
   }, []);
