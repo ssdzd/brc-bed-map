@@ -17,6 +17,11 @@
 .env.test.local
 .env.production.local
 
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log* 
