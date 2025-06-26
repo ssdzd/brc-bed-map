@@ -22,6 +22,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Project assets (large binary files)
+project_docs/BED_assets/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log* 

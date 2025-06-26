@@ -29,7 +29,7 @@ const airtableSchema = {
     user_name: "Single line text", 
     email: "Email",
     placement_address: "Single line text", // "C & 3:45" format
-    bed_status: "Single select", // Options: none, video_complete, buddy_assigned, fully_implemented
+    bed_status: "Single select", // Options: none, registered, consent_policy, bed_talk
     buddy_name: "Single line text",
     last_updated: "Last modified time",
     notes: "Long text",

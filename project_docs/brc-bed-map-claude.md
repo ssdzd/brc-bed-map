@@ -108,10 +108,10 @@ export default MapView;
 ```javascript
 // BED status colors
 export const BED_COLORS = {
-  none: '#9CA3AF',           // Gray
-  video_complete: '#FDE047',  // Yellow
-  buddy_assigned: '#FB923C',  // Orange
-  fully_implemented: '#4ADE80' // Green
+  none: '#FFFFFF',           // White
+  registered: '#FFA500',     // Orange
+  consent_policy: '#800080', // Purple
+  bed_talk: '#FF69B4'        // Pink
 };
 
 // Parse block ID like "A_8" into components
@@ -165,9 +165,9 @@ export const getBlockColor = (blockId, camps) => {
   
   // Use highest progress level
   const statuses = campsInBlock.map(c => c.bed_status);
-  if (statuses.includes('fully_implemented')) return BED_COLORS.fully_implemented;
-  if (statuses.includes('buddy_assigned')) return BED_COLORS.buddy_assigned;
-  if (statuses.includes('video_complete')) return BED_COLORS.video_complete;
+  if (statuses.includes('bed_talk')) return BED_COLORS.bed_talk;
+  if (statuses.includes('consent_policy')) return BED_COLORS.consent_policy;
+  if (statuses.includes('registered')) return BED_COLORS.registered;
   
   return BED_COLORS.none;
 };
@@ -227,10 +227,10 @@ const InfoPanel = ({ blockId, camps, onClose }) => {
 
 const getBEDColor = (status) => {
   const colors = {
-    none: '#9CA3AF',
-    video_complete: '#FDE047',
-    buddy_assigned: '#FB923C',
-    fully_implemented: '#4ADE80'
+    none: '#FFFFFF',
+    registered: '#FFA500',
+    consent_policy: '#800080',
+    bed_talk: '#FF69B4'
   };
   return colors[status] || colors.none;
 };
@@ -249,10 +249,10 @@ import { BED_COLORS } from '../utils/blockUtils';
 
 const Legend = () => {
   const items = [
-    { status: 'none', label: 'No Engagement' },
-    { status: 'video_complete', label: 'Video Complete' },
-    { status: 'buddy_assigned', label: 'Buddy Assigned' },
-    { status: 'fully_implemented', label: 'Fully Implemented' }
+    { status: 'none', label: 'Not Registered' },
+    { status: 'registered', label: 'Registered and started BEDucator program' },
+    { status: 'consent_policy', label: 'Distributed Unique Consent Policy' },
+    { status: 'bed_talk', label: 'Scheduled BED talk' }
   ];
 
   return (
@@ -282,11 +282,11 @@ import { useState, useEffect } from 'react';
 
 // Mock data for Week 1 testing
 const mockCamps = [
-  { id: 1, camp_name: "Dusty Data", placement_address: "A & 3:00", bed_status: "video_complete" },
-  { id: 2, camp_name: "Consent Camp", placement_address: "C & 4:30", bed_status: "buddy_assigned" },
-  { id: 3, camp_name: "Starr's Oasis", placement_address: "E & 7:30", bed_status: "fully_implemented" },
-  { id: 4, camp_name: "Tech Tent", placement_address: "B & 9:00", bed_status: "video_complete" },
-  { id: 5, camp_name: "BED Headquarters", placement_address: "D & 6:00", bed_status: "fully_implemented" },
+  { id: 1, camp_name: "Dusty Data", placement_address: "A & 3:00", bed_status: "registered" },
+  { id: 2, camp_name: "Consent Camp", placement_address: "C & 4:30", bed_status: "consent_policy" },
+  { id: 3, camp_name: "Starr's Oasis", placement_address: "E & 7:30", bed_status: "bed_talk" },
+  { id: 4, camp_name: "Tech Tent", placement_address: "B & 9:00", bed_status: "registered" },
+  { id: 5, camp_name: "BED Headquarters", placement_address: "D & 6:00", bed_status: "bed_talk" },
 ];
 
 export const useMapData = () => {
