@@ -93,27 +93,75 @@ const segmentToTime = (segment) => {
   return `${hour}:${minute.toString().padStart(2, '0')}`;
 };
 
+// Convert block ID back to 'C & 3:45' display format
+export const blockIdToDisplayAddress = (blockId) => {
+  const { street, timeString } = parseBlockId(blockId);
+  return `${street} & ${timeString}`;
+};
+
+// Enhanced address parsing with plaza quarter support
+const parseAddress = (address) => {
+  // Handle plaza quarters like "3:00 Plaza Quarter A" or "9:00 Plaza"
+  const plazaMatch = address.match(/(\d{1,2}):(\d{2})\s*Plaza(?:\s*Quarter\s*([A-D]))?/i);
+  if (plazaMatch) {
+    const [_, hour, minute, quarter] = plazaMatch;
+    return {
+      street: 'Plaza',
+      hour: parseInt(hour),
+      minute: parseInt(minute),
+      quarter: quarter || null,
+      isPlaza: true
+    };
+  }
+  
+  // Handle regular street addresses like "C & 3:45" or "Esplanade & 3:45"
+  const streetMatch = address.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
+  if (streetMatch) {
+    const [_, street, hour, minute] = streetMatch;
+    return {
+      street,
+      hour: parseInt(hour),
+      minute: parseInt(minute),
+      quarter: null,
+      isPlaza: false
+    };
+  }
+  
+  return null;
+};
+
 // Check if a camp address matches a block
 export const campInBlock = (campAddress, blockId) => {
   const { street, approximateTime } = parseBlockId(blockId);
+  const parsedAddress = parseAddress(campAddress);
   
-  // Parse camp address like "C & 3:45" or "Esplanade & 3:45"
-  const match = campAddress.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
-  if (!match) return false;
+  if (!parsedAddress) return false;
   
-  const [_, campStreet, campHour, campMinute] = match;
+  // Handle plaza blocks
+  if (parsedAddress.isPlaza) {
+    // Check if blockId contains plaza information
+    const isPlazaBlock = blockId.includes('Plaza') || blockId.includes('Center_Camp');
+    if (!isPlazaBlock) return false;
+    
+    // For plaza blocks, match by approximate time
+    const addressTime = parsedAddress.hour + parsedAddress.minute / 60;
+    const blockTimeParts = approximateTime.split(':');
+    const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
+    
+    return Math.abs(addressTime - blockTime) < 1.0; // Wider range for plazas
+  }
   
   // Check street match
-  if (campStreet !== street) return false;
+  if (parsedAddress.street !== street) return false;
   
-  // Check if time is within block range (rough approximation)
-  const campTime = parseInt(campHour) + parseInt(campMinute) / 60;
+  // Check if time is within block range
+  const campTime = parsedAddress.hour + parsedAddress.minute / 60;
   
   // Parse block time (handle both "2:00" and computed time formats)
   const blockTimeParts = approximateTime.split(':');
   const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
   
-  // Within 30 minutes (wider range for new polygon format)
+  // Within 30 minutes (0.5 hours) for regular blocks
   return Math.abs(campTime - blockTime) < 0.5;
 };
 

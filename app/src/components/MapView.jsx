@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useMapData } from '../hooks/useMapData';
-import { getBlockColor, THEMES, campInBlock } from '../utils/blockUtils';
+import { getBlockColor, THEMES, campInBlock, blockIdToDisplayAddress } from '../utils/blockUtils';
 import InfoPanel from './InfoPanel';
 import Legend from './Legend';
 import ZoomControls from './ZoomControls';
@@ -16,6 +16,7 @@ import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorDisplay from './ErrorDisplay';
+import MapLandmarks from './MapLandmarks';
 import { useUrlState } from '../hooks/useUrlState';
 import mapSvg from '/brc_combined_validation.svg';
 
@@ -116,16 +117,20 @@ const MapView = () => {
       
       // Enhanced hover effect with tooltip
       block.onmouseenter = (e) => {
-        const hoverOpacity = '1.0';
-        block.style.setProperty('fill-opacity', hoverOpacity, 'important');
-        
-        block.style.setProperty('filter', 'brightness(1.1)', 'important');
+        // Only apply hover effects if block is not already selected
+        if (selectedBlock !== block.id) {
+          const hoverOpacity = '1.0';
+          block.style.setProperty('fill-opacity', hoverOpacity, 'important');
+          
+          block.style.setProperty('filter', 'brightness(1.1)', 'important');
+        }
         setHoveredBlock(block.id);
         
-        // Show tooltip
+        // Show tooltip with display address
         const rect = svgRef.current.getBoundingClientRect();
+        const displayAddress = blockIdToDisplayAddress(block.id);
         const tooltipContent = {
-          title: `Block ${block.id}`,
+          title: displayAddress,
           description: campsInBlock.length > 0 
             ? `${campsInBlock.length} camp${campsInBlock.length > 1 ? 's' : ''} registered`
             : 'No camps registered',
@@ -161,17 +166,29 @@ const MapView = () => {
       block.onclick = (e) => {
         e.stopPropagation();
         
+        // Safety check and capture current values
+        if (!camps || !Array.isArray(camps)) {
+          console.warn('Camps data not available for click handler');
+          setSelectedBlock(block.id);
+          setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
+          return;
+        }
+        
+        const currentCamps = camps;
+        const currentThemeValue = currentTheme;
+        const currentGradientId = gradientId;
+        
         // Remove previous selection
         blocks.forEach(b => {
           if (b.id !== block.id) {
-            const blockColor = getBlockColor(b.id, camps, currentTheme);
+            const blockColor = getBlockColor(b.id, currentCamps, currentThemeValue);
             
             // Restore normal fill and opacity for unselected blocks
-            if (blockColor !== THEMES[currentTheme].colors.none) {
+            if (blockColor !== THEMES[currentThemeValue].colors.none) {
               b.style.setProperty('fill', blockColor, 'important');
               b.style.setProperty('fill-opacity', '0.7', 'important');
             } else {
-              b.style.setProperty('fill', `url(#${gradientId})`, 'important');
+              b.style.setProperty('fill', `url(#${currentGradientId})`, 'important');
               b.style.setProperty('fill-opacity', '1.0', 'important');
             }
             b.style.setProperty('filter', 'none', 'important');
@@ -463,6 +480,12 @@ const MapView = () => {
         
         {/* Central B.E.D. Logo - positioned at The Man */}
         <CentralLogo theme={currentTheme} />
+        
+        {/* Map Landmarks - Ranger HQ, Medical, Airport */}
+        <MapLandmarks 
+          theme={currentTheme} 
+          onLandmarkClick={(landmarkId) => setSelectedBlock(landmarkId)}
+        />
         
       </div>
       

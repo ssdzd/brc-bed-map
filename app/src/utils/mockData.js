@@ -275,8 +275,52 @@ export const generateMockData = () => {
     };
   });
   
+  // Add special landmark camps
+  const landmarkCamps = [
+    {
+      id: 'landmark_airport',
+      camp_name: 'Black Rock City Airport',
+      user_name: 'BRC Operations',
+      email: 'airport@blackrockcity.org',
+      placement_address: 'Airport & 4:30',
+      bed_status: 'none',
+      buddy_name: '',
+      created_at: '2024-01-01T00:00:00.000Z',
+      isLandmark: true,
+      landmarkType: 'airport'
+    },
+    {
+      id: 'landmark_medical_esplanade',
+      camp_name: 'Emergency Medical Services - Esplanade',
+      user_name: 'BRC Medical',
+      email: 'medical@blackrockcity.org',
+      placement_address: 'Esplanade & 5:15',
+      bed_status: 'none',
+      buddy_name: 'Safety Buddy',
+      created_at: '2024-01-01T00:00:00.000Z',
+      isLandmark: true,
+      landmarkType: 'medical'
+    },
+    {
+      id: 'landmark_ranger_hq',
+      camp_name: 'Black Rock Rangers HQ',
+      user_name: 'BRC Rangers',
+      email: 'rangers@blackrockcity.org',
+      placement_address: 'Esplanade & 5:45',
+      bed_status: 'none',
+      buddy_name: 'Ranger Buddy',
+      created_at: '2024-01-01T00:00:00.000Z',
+      isLandmark: true,
+      landmarkType: 'ranger'
+    }
+  ];
+  
+  allCamps = allCamps.concat(landmarkCamps);
+  
   console.log('Generated mock data with exact proportions:', {
     totalCamps: allCamps.length,
+    regularCamps: allCamps.filter(c => !c.isLandmark).length,
+    landmarks: allCamps.filter(c => c.isLandmark).length,
     byStatus: allCamps.reduce((acc, camp) => {
       acc[camp.bed_status] = (acc[camp.bed_status] || 0) + 1;
       return acc;

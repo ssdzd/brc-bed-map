@@ -90,7 +90,20 @@ export const PlayaIcons = {
   
   Esplanade: ({ size = '1rem', color = 'currentColor' }) => (
     <span style={{ fontSize: size, color }}>🛤️</span>
-  )
+  ),
+  
+  // Emergency services and infrastructure
+  RangerHQ: ({ size = '1rem', color = 'currentColor' }) => (
+    <span style={{ fontSize: size, color }}>🚨</span>
+  ),
+  
+  Medical: ({ size = '1rem', color = 'currentColor' }) => (
+    <span style={{ fontSize: size, color }}>❤️‍🩹</span>
+  ),
+  
+  RedCross: ({ size = '1rem', color = 'currentColor' }) => (
+    <span style={{ fontSize: size, color }}>❌</span>
+  ),
 };
 
 // Animated icon wrapper component

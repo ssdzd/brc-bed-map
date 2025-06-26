@@ -111,9 +111,9 @@ const SearchPanel = ({
         position: 'absolute',
         bottom: '1rem',
         left: '50%',
-        transform: 'translateX(-40%)',
-        width: '500px',
-        maxWidth: '90vw',
+        transform: 'translateX(-50%)',
+        width: '850px',
+        maxWidth: '95vw',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',
         boxShadow: themeConfig.isDark 
@@ -131,7 +131,7 @@ const SearchPanel = ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0.75rem 1.25rem 0.5rem',
+        padding: '0.5rem 1rem 0.25rem',
         borderBottom: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
       }}>
         <h3 style={{
@@ -167,7 +167,7 @@ const SearchPanel = ({
       </div>
       
       {/* Search Input */}
-      <div style={{ padding: '0.75rem 1.25rem 0.5rem' }}>
+      <div style={{ padding: '0.5rem 1rem 0.25rem' }}>
         <input
           type="text"
           placeholder="Search camps, addresses, or organizers..."
@@ -175,7 +175,7 @@ const SearchPanel = ({
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
             width: '100%',
-            padding: '0.75rem 1rem',
+            padding: '0.5rem 0.75rem',
             border: `2px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`,
             borderRadius: '0.5rem',
             backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)',
@@ -195,12 +195,12 @@ const SearchPanel = ({
       </div>
       
       {/* Filter Buttons */}
-      <div style={{ padding: '0 1.25rem 0.75rem' }}>
+      <div style={{ padding: '0 1rem 0.5rem' }}>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '0.5rem',
-          marginBottom: '0.75rem'
+          gap: '0.375rem',
+          marginBottom: '0.5rem'
         }}>
           {filterOptions.map(option => {
             const IconComponent = option.icon;
@@ -211,7 +211,7 @@ const SearchPanel = ({
                 key={option.value}
                 onClick={() => setSelectedFilter(option.value)}
                 style={{
-                  padding: '0.5rem 0.75rem',
+                  padding: '0.375rem 0.5rem',
                   border: `2px solid ${isSelected 
                     ? (theme === '2024' ? '#FF69B4' : '#3B82F6')
                     : (themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)')
@@ -222,7 +222,7 @@ const SearchPanel = ({
                     : 'transparent',
                   color: themeConfig.textColor,
                   fontFamily: themeConfig.typography.primaryFont,
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: isSelected ? '600' : '400',
                   cursor: 'pointer',
                   display: 'flex',

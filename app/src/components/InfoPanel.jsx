@@ -1,5 +1,5 @@
 import React from 'react';
-import { parseBlockId, campInBlock, THEMES, getThemeColors } from '../utils/blockUtils';
+import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
 const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false }) => {
@@ -7,6 +7,11 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false })
   const campsInBlock = camps.filter(camp => 
     campInBlock(camp.placement_address, blockId)
   );
+  
+  return renderInfoPanel(blockId, campsInBlock, theme, onClose, loading);
+};
+
+const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customTitle = null) => {
   
   const themeConfig = THEMES[theme];
   const colors = getThemeColors(theme);
@@ -40,7 +45,7 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false })
             color: themeConfig.isDark ? '#FFFFFF' : '#000000',
             fontFamily: themeConfig.typography.displayFont
           }}>
-            {blockId ? `Block ${blockId}` : 'Select a Block'}
+            {customTitle || (blockId ? blockIdToDisplayAddress(blockId) : 'Select a Block')}
           </h2>
           {blockId && (
             <p style={{
@@ -49,7 +54,7 @@ const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false })
               margin: 0,
               fontFamily: themeConfig.typography.bodyFont
             }}>
-              {camps.length} {camps.length === 1 ? 'Camp' : 'Camps'}
+              {campsInBlock.length} {campsInBlock.length === 1 ? 'Camp' : 'Camps'}
             </p>
           )}
         </div>
