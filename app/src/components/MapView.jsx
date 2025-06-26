@@ -36,6 +36,7 @@ const MapView = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
+  const [showCoordinates, setShowCoordinates] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
   console.log('MapView rendering, loading:', loading, 'camps:', camps);
@@ -129,12 +130,24 @@ const MapView = () => {
         // Show tooltip with display address
         const rect = svgRef.current.getBoundingClientRect();
         const displayAddress = blockIdToDisplayAddress(block.id);
+        
+        // Calculate SVG coordinates if enabled
+        let coordinates = null;
+        if (showCoordinates) {
+          // Get the bounding box of the block to find its center
+          const bbox = block.getBBox();
+          const centerX = bbox.x + bbox.width / 2;
+          const centerY = bbox.y + bbox.height / 2;
+          coordinates = `(${centerX.toFixed(1)}, ${centerY.toFixed(1)})`;
+        }
+        
         const tooltipContent = {
           title: displayAddress,
           description: campsInBlock.length > 0 
             ? `${campsInBlock.length} camp${campsInBlock.length > 1 ? 's' : ''} registered`
             : 'No camps registered',
-          camps: campsInBlock
+          camps: campsInBlock,
+          coordinates: coordinates
         };
         
         setTooltip({
@@ -224,6 +237,212 @@ const MapView = () => {
         joinedBorders.style.setProperty('filter', 'none', 'important');
       }
     }
+    
+    // Add medical icon directly to SVG at coordinates (943, 271)
+    const existingIcon = svgDoc.querySelector('#medical-icon-3c');
+    if (!existingIcon) {
+      // Create a group for the medical icon
+      const iconGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      iconGroup.setAttribute('id', 'medical-icon-3c');
+      iconGroup.setAttribute('transform', 'translate(943, 271)');
+      
+      // Create a circle background for the icon
+      const background = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      background.setAttribute('cx', '0');
+      background.setAttribute('cy', '0');
+      background.setAttribute('r', '12');
+      background.setAttribute('fill', 'rgba(220, 38, 127, 0.9)');
+      background.setAttribute('stroke', 'white');
+      background.setAttribute('stroke-width', '2');
+      background.setAttribute('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))');
+      
+      // Create the medical cross symbol
+      const cross = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      cross.setAttribute('fill', 'white');
+      
+      // Vertical line of the cross
+      const verticalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      verticalLine.setAttribute('x', '-1.5');
+      verticalLine.setAttribute('y', '-6');
+      verticalLine.setAttribute('width', '3');
+      verticalLine.setAttribute('height', '12');
+      verticalLine.setAttribute('rx', '1.5');
+      
+      // Horizontal line of the cross
+      const horizontalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      horizontalLine.setAttribute('x', '-6');
+      horizontalLine.setAttribute('y', '-1.5');
+      horizontalLine.setAttribute('width', '12');
+      horizontalLine.setAttribute('height', '3');
+      horizontalLine.setAttribute('rx', '1.5');
+      
+      // Add lines to cross group
+      cross.appendChild(verticalLine);
+      cross.appendChild(horizontalLine);
+      
+      // Add background and cross to icon group
+      iconGroup.appendChild(background);
+      iconGroup.appendChild(cross);
+      
+      // Add tooltip title
+      const title = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = 'Medical - 3:00 Plaza - C & 3:00';
+      iconGroup.appendChild(title);
+      
+      // Add the icon group to the SVG
+      svgDoc.documentElement.appendChild(iconGroup);
+      
+      console.log('Medical icon added to SVG at (943, 271)');
+    }
+
+    // Add medical icon directly to SVG at coordinates (301, 271) for 9:00 & C plaza
+    const existingIcon9c = svgDoc.querySelector('#medical-icon-9c');
+    if (!existingIcon9c) {
+      // Create a group for the medical icon
+      const iconGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      iconGroup.setAttribute('id', 'medical-icon-9c');
+      iconGroup.setAttribute('transform', 'translate(301, 271)');
+      
+      // Create a circle background for the icon
+      const background = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      background.setAttribute('cx', '0');
+      background.setAttribute('cy', '0');
+      background.setAttribute('r', '12');
+      background.setAttribute('fill', 'rgba(220, 38, 127, 0.9)');
+      background.setAttribute('stroke', 'white');
+      background.setAttribute('stroke-width', '2');
+      background.setAttribute('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))');
+      
+      // Create the medical cross symbol
+      const cross = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      cross.setAttribute('fill', 'white');
+      
+      // Vertical line of the cross
+      const verticalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      verticalLine.setAttribute('x', '-1.5');
+      verticalLine.setAttribute('y', '-6');
+      verticalLine.setAttribute('width', '3');
+      verticalLine.setAttribute('height', '12');
+      verticalLine.setAttribute('rx', '1.5');
+      
+      // Horizontal line of the cross
+      const horizontalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      horizontalLine.setAttribute('x', '-6');
+      horizontalLine.setAttribute('y', '-1.5');
+      horizontalLine.setAttribute('width', '12');
+      horizontalLine.setAttribute('height', '3');
+      horizontalLine.setAttribute('rx', '1.5');
+      
+      // Add lines to cross group
+      cross.appendChild(verticalLine);
+      cross.appendChild(horizontalLine);
+      
+      // Add background and cross to icon group
+      iconGroup.appendChild(background);
+      iconGroup.appendChild(cross);
+      
+      // Add tooltip title
+      const title = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = 'Medical - 9:00 Plaza - C & 9:00';
+      iconGroup.appendChild(title);
+      
+      // Add the icon group to the SVG
+      svgDoc.documentElement.appendChild(iconGroup);
+      
+      console.log('Medical icon added to SVG at (301, 271) for 9:00 & C plaza');
+    }
+
+    // Add medical icon directly to SVG at coordinates (712, 487) for 5:15 & Esplanade
+    const existingIcon515 = svgDoc.querySelector('#medical-icon-515');
+    if (!existingIcon515) {
+      // Create a group for the medical icon
+      const iconGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      iconGroup.setAttribute('id', 'medical-icon-515');
+      iconGroup.setAttribute('transform', 'translate(712, 487)');
+      
+      // Create a circle background for the icon
+      const background = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      background.setAttribute('cx', '0');
+      background.setAttribute('cy', '0');
+      background.setAttribute('r', '12');
+      background.setAttribute('fill', 'rgba(220, 38, 127, 0.9)');
+      background.setAttribute('stroke', 'white');
+      background.setAttribute('stroke-width', '2');
+      background.setAttribute('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))');
+      
+      // Create the medical cross symbol
+      const cross = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
+      cross.setAttribute('fill', 'white');
+      
+      // Vertical line of the cross
+      const verticalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      verticalLine.setAttribute('x', '-1.5');
+      verticalLine.setAttribute('y', '-6');
+      verticalLine.setAttribute('width', '3');
+      verticalLine.setAttribute('height', '12');
+      verticalLine.setAttribute('rx', '1.5');
+      
+      // Horizontal line of the cross
+      const horizontalLine = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      horizontalLine.setAttribute('x', '-6');
+      horizontalLine.setAttribute('y', '-1.5');
+      horizontalLine.setAttribute('width', '12');
+      horizontalLine.setAttribute('height', '3');
+      horizontalLine.setAttribute('rx', '1.5');
+      
+      // Add lines to cross group
+      cross.appendChild(verticalLine);
+      cross.appendChild(horizontalLine);
+      
+      // Add background and cross to icon group
+      iconGroup.appendChild(background);
+      iconGroup.appendChild(cross);
+      
+      // Add tooltip title
+      const title = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = 'Medical - 5:15 & Esplanade';
+      iconGroup.appendChild(title);
+      
+      // Add the icon group to the SVG
+      svgDoc.documentElement.appendChild(iconGroup);
+      
+      console.log('Medical icon added to SVG at (712, 487) for 5:15 & Esplanade');
+    }
+
+    // Add Ranger HQ icon at 5:45 & Esplanade
+    const rangerIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    rangerIcon.setAttribute("id", "ranger-hq-icon");
+    rangerIcon.setAttribute("transform", "translate(565, 495)");
+    
+    // Green circle background
+    const rangerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    rangerCircle.setAttribute("cx", "0");
+    rangerCircle.setAttribute("cy", "0");
+    rangerCircle.setAttribute("r", "12");
+    rangerCircle.setAttribute("fill", "#c3b091");
+    rangerCircle.setAttribute("stroke", "#166534");
+    rangerCircle.setAttribute("stroke-width", "2");
+    
+    // Ranger SVG image
+    const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    rangerImage.setAttribute("href", "/Ranger.svg");
+    rangerImage.setAttribute("x", "-8");
+    rangerImage.setAttribute("y", "-8");
+    rangerImage.setAttribute("width", "16");
+    rangerImage.setAttribute("height", "16");
+    rangerImage.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    rangerImage.setAttribute("filter", "brightness(0) invert(1)");
+    
+    // Tooltip
+    const rangerTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    rangerTitle.textContent = "Ranger HQ";
+    
+    rangerIcon.appendChild(rangerCircle);
+    rangerIcon.appendChild(rangerImage);
+    rangerIcon.appendChild(rangerTitle);
+    
+    svgDoc.documentElement.appendChild(rangerIcon);
+    console.log("Added Ranger HQ icon at coordinates: 565, 495");
   }, [camps, loading, currentTheme]);
 
   // Zoom and pan functions
@@ -399,6 +618,102 @@ const MapView = () => {
         currentTheme={currentTheme}
         onThemeChange={setCurrentTheme}
       />
+      
+      {/* Coordinate Toggle */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '1rem',
+          right: '20rem',
+          zIndex: 50,
+          backgroundColor: 'rgba(255, 0, 0, 0.1)',
+          padding: '2px',
+          borderRadius: '4px'
+        }}
+      >
+        <button
+          onClick={() => {
+            const newState = !showCoordinates;
+            setShowCoordinates(newState);
+            console.log('Coordinate toggle clicked, new state:', newState);
+          }}
+          style={{
+            backgroundColor: showCoordinates 
+              ? (theme.isDark ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 0.9)')
+              : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
+            color: showCoordinates 
+              ? '#ffffff' 
+              : theme.textColor,
+            border: `1px solid ${showCoordinates 
+              ? 'rgba(59, 130, 246, 0.5)' 
+              : (theme.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)')}`,
+            borderRadius: '0.5rem',
+            padding: '0.5rem 0.75rem',
+            fontSize: '0.75rem',
+            fontWeight: '500',
+            fontFamily: theme.typography.primaryFont,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(10px)',
+            boxShadow: theme.isDark 
+              ? '0 4px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.1)'
+              : '0 4px 12px rgba(0, 0, 0, 0.1), 0 0 8px rgba(255, 255, 255, 0.8)',
+            textShadow: showCoordinates ? 'none' : '1px 1px 2px rgba(0,0,0,0.1)',
+            minWidth: '120px'
+          }}
+          title="Toggle SVG coordinates in tooltips"
+        >
+          {showCoordinates ? '📍 Coords ON' : '📍 Coords OFF'}
+        </button>
+      </div>
+      
+      {/* Alternative Coordinate Toggle - positioned on the left side */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '6rem', // Below the camps loaded text
+          left: '1rem',
+          zIndex: 50,
+          backgroundColor: 'rgba(0, 255, 0, 0.1)', // Temporary debug background (green)
+          padding: '2px',
+          borderRadius: '4px'
+        }}
+      >
+        <button
+          onClick={() => {
+            const newState = !showCoordinates;
+            setShowCoordinates(newState);
+            console.log('Alternative coordinate toggle clicked, new state:', newState);
+          }}
+          style={{
+            backgroundColor: showCoordinates 
+              ? (theme.isDark ? 'rgba(59, 130, 246, 0.8)' : 'rgba(59, 130, 246, 0.9)')
+              : (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
+            color: showCoordinates 
+              ? '#ffffff' 
+              : theme.textColor,
+            border: `1px solid ${showCoordinates 
+              ? 'rgba(59, 130, 246, 0.5)' 
+              : (theme.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)')}`,
+            borderRadius: '0.5rem',
+            padding: '0.5rem 0.75rem',
+            fontSize: '0.75rem',
+            fontWeight: '500',
+            fontFamily: theme.typography.primaryFont,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(10px)',
+            boxShadow: theme.isDark 
+              ? '0 4px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(255, 255, 255, 0.1)'
+              : '0 4px 12px rgba(0, 0, 0, 0.1), 0 0 8px rgba(255, 255, 255, 0.8)',
+            textShadow: showCoordinates ? 'none' : '1px 1px 2px rgba(0,0,0,0.1)',
+            minWidth: '120px'
+          }}
+          title="Toggle SVG coordinates in tooltips (Alternative)"
+        >
+          {showCoordinates ? '📍 Coords ON' : '📍 Coords OFF'}
+        </button>
+      </div>
       
       {/* Data Source Selector */}
       <DataSourceSelector

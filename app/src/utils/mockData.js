@@ -302,6 +302,30 @@ export const generateMockData = () => {
       landmarkType: 'medical'
     },
     {
+      id: 'landmark_medical_3_plaza',
+      camp_name: 'Emergency Medical Services - 3:00 Plaza',
+      user_name: 'BRC Medical',
+      email: 'medical@blackrockcity.org',
+      placement_address: 'C & 3:00',
+      bed_status: 'none',
+      buddy_name: 'Safety Buddy',
+      created_at: '2024-01-01T00:00:00.000Z',
+      isLandmark: true,
+      landmarkType: 'medical'
+    },
+    {
+      id: 'landmark_medical_9_plaza',
+      camp_name: 'Emergency Medical Services - 9:00 Plaza',
+      user_name: 'BRC Medical',
+      email: 'medical@blackrockcity.org',
+      placement_address: 'C & 9:00',
+      bed_status: 'none',
+      buddy_name: 'Safety Buddy',
+      created_at: '2024-01-01T00:00:00.000Z',
+      isLandmark: true,
+      landmarkType: 'medical'
+    },
+    {
       id: 'landmark_ranger_hq',
       camp_name: 'Black Rock Rangers HQ',
       user_name: 'BRC Rangers',

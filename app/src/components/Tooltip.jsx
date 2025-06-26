@@ -92,6 +92,20 @@ const Tooltip = ({ theme = '2025', content, position, visible }) => {
           {content.camps.length} camp{content.camps.length > 1 ? 's' : ''} • Click for details
         </div>
       )}
+      {content.coordinates && (
+        <div style={{ 
+          marginTop: '0.5rem',
+          fontSize: '0.7rem',
+          opacity: 0.6,
+          fontFamily: 'monospace',
+          backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+          padding: '0.25rem 0.5rem',
+          borderRadius: '0.25rem',
+          border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`
+        }}>
+          SVG: {content.coordinates}
+        </div>
+      )}
       
       {/* Tooltip arrow */}
       <div

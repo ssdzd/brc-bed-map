@@ -5,33 +5,51 @@ import { THEMES } from '../utils/blockUtils';
 const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
   const themeConfig = THEMES[theme];
   
-  // Calculate positions based on SVG coordinate system
-  // The Man is at approximately (622.5, 272.04) in the SVG
-  // SVG viewBox is "0 0 1160.17 861.54"
+  // SVG coordinate system
+  const SVG_WIDTH = 1160.17;
+  const SVG_HEIGHT = 861.54;
+  const MAN_X = 622.5;
+  const MAN_Y = 272.04;
   
   // Convert BRC coordinates to SVG positions
   const getPosition = (street, time) => {
-    const manX = 622.5;
-    const manY = 272.04;
-    
     // Rough calculation for positioning (this would need fine-tuning)
     const timeAngle = ((time - 6) * 30 - 90) * (Math.PI / 180); // 6:00 = bottom, convert to radians
     
     let radius;
     if (street === 'Esplanade') {
       radius = 120; // Distance from center for Esplanade
+    } else if (street === 'D') {
+      radius = 140; // Distance from center for D street (from StreetTimeLabels.jsx)
     } else {
       // For plaza positions, use smaller radius
       radius = 80;
     }
     
-    const x = manX + radius * Math.cos(timeAngle);
-    const y = manY + radius * Math.sin(timeAngle);
+    const x = MAN_X + radius * Math.cos(timeAngle);
+    const y = MAN_Y + radius * Math.sin(timeAngle);
     
     return { x, y };
   };
   
-  // Define landmark positions
+  // Calculate exact coordinates for D & 3:00 and D & 9:00
+  const d3Position = getPosition('D', 3); // D & 3:00
+  const d9Position = getPosition('D', 9); // D & 9:00
+  
+  // Extract center point from polygon_B_3:00 path coordinates
+  // Path: M 916.5,272.0 A 294.0,294.0 0 0,1 906.6,348.2 L 932.9,355.2 A 321.0,321.0 0 0,0 943.5,272.0 Z
+  // Key points: (916.5,272.0), (906.6,348.2), (932.9,355.2), (943.5,272.0)
+  // Calculate center point of the bounding box
+  const polygonB3Center = {
+    x: (916.5 + 906.6 + 932.9 + 943.5) / 4, // Average of x coordinates
+    y: (272.0 + 348.2 + 355.2 + 272.0) / 4   // Average of y coordinates
+  };
+  
+  // C street intersection coordinates calculated by calculate_intersections.py
+  const c3Position = { x: 622.50, y: 392.04 }; // C & 3:00
+  const c9Position = { x: 622.50, y: 152.04 }; // C & 9:00
+  
+  // Define landmark positions with proper address validation
   const landmarks = [
     {
       id: 'medical-esplanade',
@@ -41,18 +59,12 @@ const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
       address: 'Esplanade & 5:15'
     },
     {
-      id: 'medical-3-plaza',
-      name: 'Medical - 3:00 Plaza',
-      icon: PlayaIcons.RedCross,
-      position: getPosition('Plaza', 3), // Behind 3:00 plaza
-      address: '3:00 Plaza'
-    },
-    {
       id: 'medical-9-plaza',
       name: 'Medical - 9:00 Plaza',
       icon: PlayaIcons.RedCross,
-      position: getPosition('Plaza', 9), // Behind 9:00 plaza
-      address: '9:00 Plaza'
+      // Position at exact C & 9:00 intersection
+      position: c9Position,
+      address: 'C & 9:00'
     },
     {
       id: 'ranger-hq',
@@ -72,8 +84,8 @@ const MapLandmarks = ({ theme = '2025', onLandmarkClick }) => {
             key={landmark.id}
             style={{
               position: 'absolute',
-              left: `${(landmark.position.x / 1160.17) * 100}%`,
-              top: `${(landmark.position.y / 861.54) * 100}%`,
+              left: `${(landmark.position.x / SVG_WIDTH) * 100}%`,
+              top: `${(landmark.position.y / SVG_HEIGHT) * 100}%`,
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
               cursor: 'pointer',
