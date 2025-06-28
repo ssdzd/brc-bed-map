@@ -15,30 +15,11 @@ export const BED_COLORS_2024 = {
 };
 
 
-// Default to 2025 theme for backward compatibility
-export const BED_COLORS = BED_COLORS_2025;
+// Default to 2024 theme
+export const BED_COLORS = BED_COLORS_2024;
 
 // Theme configurations
 export const THEMES = {
-  '2025': {
-    name: '2025 Professional',
-    colors: BED_COLORS_2025,
-    background: '#ffffff',
-    containerBg: '#f3f4f6',
-    textColor: '#374151',
-    isDark: false,
-    centerCircle: {
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
-      border: '2px solid #e2e8f0',
-      textColor: '#1e293b'
-    },
-    typography: {
-      primaryFont: 'Inter, system-ui, sans-serif',
-      headingFont: 'Inter, system-ui, sans-serif',
-      scriptFont: 'Dancing Script, cursive',
-      displayFont: 'Bebas Neue, sans-serif'
-    }
-  },
   '2024': {
     name: '2024 Vibrant',
     colors: BED_COLORS_2024,
@@ -259,19 +240,11 @@ export const campInBlock = (campAddress, blockId) => {
 
 // Plaza-specific gradient colors to simulate the actual gradient
 const PLAZA_GRADIENT_COLORS = {
-  '2025': {
-    // B plazas and Center Camp quarters - higher contrast for 2025 theme
-    'B_plaza': '#9bb2d8',
-    'center_camp': '#9bb2d8', 
-    // G plazas - stronger purple-gray for better contrast
-    'G_plaza': '#c4b5db'
-  },
-  '2024': {
-    // Original colors for 2024 theme
-    'B_plaza': '#b5bfd8',
-    'center_camp': '#b5bfd8',
-    'G_plaza': '#cec5db'
-  }
+  // B plazas and Center Camp quarters - closer to center, lighter blue-gray
+  'B_plaza': '#b5bfd8',
+  'center_camp': '#b5bfd8',
+  // G plazas - further from center, purple-gray
+  'G_plaza': '#cec5db'
 };
 
 // Get plaza type from block ID
@@ -285,7 +258,7 @@ const getPlazaType = (blockId) => {
 };
 
 // Get color for a block based on camps in it
-export const getBlockColor = (blockId, camps, theme = '2025') => {
+export const getBlockColor = (blockId, camps, theme = '2024') => {
   const colors = THEMES[theme].colors;
   const campsInBlock = camps.filter(camp => 
     campInBlock(camp.placement_address, blockId)
@@ -294,8 +267,7 @@ export const getBlockColor = (blockId, camps, theme = '2025') => {
   // Check if this is a plaza element and handle gradient simulation
   const plazaType = getPlazaType(blockId);
   if (plazaType && campsInBlock.length === 0) {
-    const themeColors = PLAZA_GRADIENT_COLORS[theme] || PLAZA_GRADIENT_COLORS['2024'];
-    return themeColors[plazaType] || PLAZA_GRADIENT_COLORS['2024'][plazaType];
+    return PLAZA_GRADIENT_COLORS[plazaType];
   }
   
   if (campsInBlock.length === 0) return colors.none;
@@ -310,6 +282,6 @@ export const getBlockColor = (blockId, camps, theme = '2025') => {
 };
 
 // Helper function to get theme colors
-export const getThemeColors = (theme = '2025') => {
+export const getThemeColors = (theme = '2024') => {
   return THEMES[theme].colors;
 };

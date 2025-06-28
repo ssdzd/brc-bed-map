@@ -2,11 +2,11 @@ import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 import logoImage from '../assets/logo@4x.png';
 
-const BEDmapHeader = ({ theme = '2025' }) => {
+const BEDmapHeader = ({ theme = '2024' }) => {
   const themeConfig = THEMES[theme];
   
-  // Show the BED map header in both 2024 and 2025 themes
-  if (theme !== '2024' && theme !== '2025') {
+  // Show the BED map header for 2024 theme
+  if (theme !== '2024') {
     return null;
   }
   
@@ -35,9 +35,7 @@ const BEDmapHeader = ({ theme = '2025' }) => {
             width: '400px',
             height: 'auto',
             objectFit: 'contain',
-            filter: theme === '2025' 
-              ? 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1))' 
-              : 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))',
+            filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))',
             marginLeft: '-15px'
           }}
         />
@@ -51,14 +49,12 @@ const BEDmapHeader = ({ theme = '2025' }) => {
             fontFamily: themeConfig.typography.scriptFont,
             fontSize: '5rem',
             fontWeight: '400',
-            color: theme === '2025' ? '#374151' : '#000000',
-            textShadow: theme === '2025' 
-              ? '0px 2px 4px rgba(0, 0, 0, 0.3), 0px 0px 8px rgba(0, 0, 0, 0.1)' 
-              : '2px 2px 4px rgba(255, 255, 255, 0.8)',
+            color: '#000000',
+            textShadow: '2px 2px 4px rgba(255, 255, 255, 0.8)',
             transform: 'rotate(-8deg)',
             zIndex: 2,
             letterSpacing: '0.1em',
-            WebkitTextFillColor: theme === '2025' ? '#374151' : '#000000'
+            WebkitTextFillColor: '#000000'
           }}
         >
           map

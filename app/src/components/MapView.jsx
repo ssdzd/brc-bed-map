@@ -224,19 +224,10 @@ const MapView = () => {
       };
     });
 
-    // Apply shadow styling to joined borders for 2025 theme
-    if (currentTheme === '2025') {
-      const joinedBorders = svgDoc.querySelector('#Joined_Borders');
-      if (joinedBorders) {
-        joinedBorders.style.setProperty('filter', 'drop-shadow(0px 2px 4px rgba(0,0,0,0.15)) drop-shadow(0px 0px 8px rgba(0,0,0,0.05))', 'important');
-        console.log('Applied shadow to Joined_Borders for 2025 theme');
-      }
-    } else {
-      // Remove shadow for other themes
-      const joinedBorders = svgDoc.querySelector('#Joined_Borders');
-      if (joinedBorders) {
-        joinedBorders.style.setProperty('filter', 'none', 'important');
-      }
+    // Remove any special SVG styling since we only use 2024 theme
+    const joinedBorders = svgDoc.querySelector('#Joined_Borders');
+    if (joinedBorders) {
+      joinedBorders.style.setProperty('filter', 'none', 'important');
     }
     
     // Add medical icon directly to SVG at coordinates (943, 271)
@@ -615,13 +606,17 @@ const MapView = () => {
         </p>
       )}
       
-      <ThemeSwitcher 
-        currentTheme={currentTheme}
-        onThemeChange={setCurrentTheme}
-      />
+      {/* Theme switcher hidden - using 2024 Vibrant as default */}
+      {false && (
+        <ThemeSwitcher 
+          currentTheme={currentTheme}
+          onThemeChange={setCurrentTheme}
+        />
+      )}
       
-      {/* Coordinate Toggle */}
-      <div
+      {/* Coordinate Toggle - hidden */}
+      {false && (
+        <div
         style={{
           position: 'absolute',
           top: '1rem',
@@ -667,9 +662,11 @@ const MapView = () => {
           {showCoordinates ? '📍 Coords ON' : '📍 Coords OFF'}
         </button>
       </div>
+      )}
       
-      {/* Alternative Coordinate Toggle - positioned on the left side */}
-      <div
+      {/* Alternative Coordinate Toggle - hidden */}
+      {false && (
+        <div
         style={{
           position: 'absolute',
           top: '6rem', // Below the camps loaded text
@@ -715,6 +712,7 @@ const MapView = () => {
           {showCoordinates ? '📍 Coords ON' : '📍 Coords OFF'}
         </button>
       </div>
+      )}
       
       {/* Data Source Selector */}
       <DataSourceSelector
