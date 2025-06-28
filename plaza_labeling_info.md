@@ -2,16 +2,16 @@
 
 ## Overview
 
-The plaza quarter labels (A, B, C, D) in the BRC map follow a **clockwise orientation** relative to the SVG image, with the labeling system varying based on whether the plaza is in standard or rotated orientation.
+The plaza quarter labels (A, B, C, D) in the BRC map follow a **counter-clockwise orientation** relative to the SVG image, with the labeling system varying based on whether the plaza is in standard or rotated orientation.
 
 ## Quarter Labeling Convention
 
-Each plaza is divided into 4 quarters labeled A, B, C, D in clockwise order:
+Each plaza is divided into 4 quarters labeled A, B, C, D in counter-clockwise order:
 
 ```
-    A (top-right)    B (top-left)
+    B (top-left)     A (top-right)    
          |               |
-    D (bottom-right) C (bottom-left)
+    C (bottom-left)  D (bottom-right)
 ```
 
 ## Plaza Locations and Their Quarter Systems

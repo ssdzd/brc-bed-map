@@ -101,16 +101,32 @@ export const blockIdToDisplayAddress = (blockId) => {
 
 // Enhanced address parsing with plaza quarter support
 const parseAddress = (address) => {
-  // Handle plaza quarters like "3:00 Plaza Quarter A" or "9:00 Plaza"
-  const plazaMatch = address.match(/(\d{1,2}):(\d{2})\s*Plaza(?:\s*Quarter\s*([A-D]))?/i);
+  // Handle plaza quarters like "3:00 B Plaza Quarter A" or "9:00 Plaza"
+  const plazaMatch = address.match(/(\d{1,2}):(\d{2})\s*([BG])?\s*Plaza(?:\s*Quarter\s*([A-D]))?/i);
   if (plazaMatch) {
-    const [_, hour, minute, quarter] = plazaMatch;
+    const [_, hour, minute, ring, quarter] = plazaMatch;
     return {
       street: 'Plaza',
       hour: parseInt(hour),
       minute: parseInt(minute),
+      ring: ring || 'B', // Default to B ring if not specified
       quarter: quarter || null,
       isPlaza: true
+    };
+  }
+  
+  // Handle Center Camp addresses
+  const centerCampMatch = address.match(/Center\s*Camp(?:\s*Quarter\s*([A-D]))?/i);
+  if (centerCampMatch) {
+    const [_, quarter] = centerCampMatch;
+    return {
+      street: 'Center Camp',
+      hour: null,
+      minute: null,
+      ring: null,
+      quarter: quarter || null,
+      isPlaza: true,
+      isCenterCamp: true
     };
   }
   
@@ -137,18 +153,62 @@ export const campInBlock = (campAddress, blockId) => {
   
   if (!parsedAddress) return false;
   
-  // Handle plaza blocks
+  // Handle plaza blocks with new quarter system
   if (parsedAddress.isPlaza) {
-    // Check if blockId contains plaza information
+    // Handle Center Camp
+    if (parsedAddress.isCenterCamp) {
+      if (blockId.startsWith('plaza_Center_Camp')) {
+        if (blockId.includes('Quarter_')) {
+          // Specific quarter match
+          const blockMatch = blockId.match(/plaza_Center_Camp_Quarter_([A-D])/);
+          if (!blockMatch) return false;
+          
+          const [_, blockQuarter] = blockMatch;
+          return parsedAddress.quarter ? parsedAddress.quarter === blockQuarter : true;
+        } else {
+          // General Center Camp match (any quarter)
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    // Check if this is a plaza quarter block
+    if (blockId.startsWith('plaza_')) {
+      // For specific quarter matches like "plaza_3:00_B_Quarter_A"
+      if (blockId.includes('Quarter_')) {
+        // Parse the block ID to extract time, ring, and quarter
+        const blockMatch = blockId.match(/plaza_(\d{1,2}:\d{2})_([BG])_Quarter_([A-D])/);
+        if (!blockMatch) return false;
+        
+        const [_, blockTime, blockRing, blockQuarter] = blockMatch;
+        const addressTime = `${parsedAddress.hour}:${parsedAddress.minute.toString().padStart(2, '0')}`;
+        
+        // Must match exact time, ring, and quarter if specified
+        if (addressTime === blockTime && parsedAddress.ring === blockRing) {
+          return parsedAddress.quarter ? parsedAddress.quarter === blockQuarter : true;
+        }
+        return false;
+      }
+      
+      // For general plaza matches like "plaza_3:00_B" (any quarter)
+      const blockMatch = blockId.match(/plaza_(\d{1,2}:\d{2})_([BG])/);
+      if (blockMatch) {
+        const [_, blockTime, blockRing] = blockMatch;
+        const addressTime = `${parsedAddress.hour}:${parsedAddress.minute.toString().padStart(2, '0')}`;
+        return addressTime === blockTime && parsedAddress.ring === blockRing;
+      }
+    }
+    
+    // Legacy plaza handling for older block IDs
     const isPlazaBlock = blockId.includes('Plaza') || blockId.includes('Center_Camp');
     if (!isPlazaBlock) return false;
     
-    // For plaza blocks, match by approximate time
     const addressTime = parsedAddress.hour + parsedAddress.minute / 60;
     const blockTimeParts = approximateTime.split(':');
     const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
     
-    return Math.abs(addressTime - blockTime) < 1.0; // Wider range for plazas
+    return Math.abs(addressTime - blockTime) < 1.0;
   }
   
   // Check street match
