@@ -93,8 +93,27 @@ const segmentToTime = (segment) => {
   return `${hour}:${minute.toString().padStart(2, '0')}`;
 };
 
-// Convert block ID back to '3:45 & C' display format  
+// Convert block ID back to display format (handles both street blocks and plaza quarters)
 export const blockIdToDisplayAddress = (blockId) => {
+  // Handle plaza quarter block IDs like "plaza_3:00_B_Quarter_A"
+  if (blockId.startsWith('plaza_')) {
+    // Handle Center Camp quarters
+    const centerCampMatch = blockId.match(/^plaza_Center_Camp(?:_Quarter_([A-D]))?$/);
+    if (centerCampMatch) {
+      const quarter = centerCampMatch[1];
+      return quarter ? `Center Camp Quarter ${quarter}` : 'Center Camp';
+    }
+    
+    // Handle regular plaza quarters
+    const plazaMatch = blockId.match(/^plaza_(\d{1,2}:\d{2})_([BG])(?:_Quarter_([A-D]))?$/);
+    if (plazaMatch) {
+      const [_, time, ring, quarter] = plazaMatch;
+      const baseLabel = `${time} ${ring} Plaza`;
+      return quarter ? `${baseLabel} Quarter ${quarter}` : baseLabel;
+    }
+  }
+  
+  // Handle regular street blocks
   const { street, timeString } = parseBlockId(blockId);
   return `${timeString} & ${street}`;
 };
