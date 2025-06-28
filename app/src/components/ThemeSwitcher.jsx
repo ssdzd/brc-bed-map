@@ -42,7 +42,9 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }) => {
             fontSize: '12px',
             fontWeight: '500',
             fontFamily: theme.typography.primaryFont,
-            border: 'none',
+            border: currentTheme === themeKey 
+              ? 'none'
+              : `1px solid ${theme.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}`,
             borderRadius: '0.25rem',
             cursor: 'pointer',
             backgroundColor: currentTheme === themeKey 
@@ -51,10 +53,7 @@ const ThemeSwitcher = ({ currentTheme, onThemeChange }) => {
             color: currentTheme === themeKey 
               ? (theme.isDark ? '#000000' : '#FFFFFF')
               : theme.textColor,
-            transition: 'all 0.2s ease',
-            border: currentTheme === themeKey 
-              ? 'none'
-              : `1px solid ${theme.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}`
+            transition: 'all 0.2s ease'
           }}
           onMouseOver={(e) => {
             if (currentTheme !== themeKey) {

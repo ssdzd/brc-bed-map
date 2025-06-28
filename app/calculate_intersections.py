@@ -56,6 +56,39 @@ def line_intersection(x1, y1, x2, y2, x3, y3, x4, y4):
     
     return None
 
+def calculate_c_street_intersections():
+    """Calculate C street intersections at 3:00 and 9:00 positions."""
+    
+    # The Man's position (center of the city)
+    man_x = 622.5
+    man_y = 272.04
+    
+    # C street radius (approximate distance from center)
+    # Based on the street positions in StreetTimeLabels.jsx
+    c_street_radius = 120  # C street is at radius 120
+    
+    # Calculate 3:00 position (90 degrees from 6:00)
+    # 3:00 is at 90 degrees, but we need to convert to radians
+    angle_3_00 = math.radians(90)  # 3:00 position
+    
+    # Calculate 9:00 position (270 degrees from 6:00)
+    angle_9_00 = math.radians(270)  # 9:00 position
+    
+    # Calculate intersection points
+    c_3_00_x = man_x + c_street_radius * math.cos(angle_3_00)
+    c_3_00_y = man_y + c_street_radius * math.sin(angle_3_00)
+    
+    c_9_00_x = man_x + c_street_radius * math.cos(angle_9_00)
+    c_9_00_y = man_y + c_street_radius * math.sin(angle_9_00)
+    
+    print(f"C & 3:00 intersection: ({c_3_00_x:.2f}, {c_3_00_y:.2f})")
+    print(f"C & 9:00 intersection: ({c_9_00_x:.2f}, {c_9_00_y:.2f})")
+    
+    return {
+        'c_3_00': (c_3_00_x, c_3_00_y),
+        'c_9_00': (c_9_00_x, c_9_00_y)
+    }
+
 def find_intersections_with_esplanade():
     """Find intersection points between radial roads and Esplanade."""
     
@@ -133,6 +166,10 @@ def find_intersections_with_esplanade():
     return intersections_3_9, intersections_6
 
 if __name__ == "__main__":
+    # Calculate C street intersections
+    c_intersections = calculate_c_street_intersections()
+    
+    # Original Esplanade intersections
     intersections_3_9, intersections_6 = find_intersections_with_esplanade()
     
     print("\nSVG Modifications needed:")
