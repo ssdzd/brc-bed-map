@@ -37,13 +37,33 @@ export const useMapData = (dataSource = 'airtable') => {
       
       // Validate and parse addresses
       const validCamps = airtableCamps.filter(camp => {
+        // Skip camps with empty or invalid addresses
+        if (!camp.placement_address || camp.placement_address.trim() === '') {
+          console.warn(`Empty address for camp: ${camp.camp_name}`);
+          return false;
+        }
+        
         const parsed = parseAddress(camp.placement_address);
         if (!parsed) {
-          console.warn(`Invalid address format: ${camp.placement_address} for camp: ${camp.camp_name}`);
+          console.warn(`Invalid address format: "${camp.placement_address}" for camp: ${camp.camp_name}`);
           return false;
         }
         return true;
       });
+      
+      // Check for potential duplicate camp names
+      const campNameCounts = {};
+      validCamps.forEach(camp => {
+        const name = camp.camp_name?.toLowerCase().trim();
+        if (name) {
+          campNameCounts[name] = (campNameCounts[name] || 0) + 1;
+        }
+      });
+      
+      const duplicates = Object.entries(campNameCounts).filter(([, count]) => count > 1);
+      if (duplicates.length > 0) {
+        console.warn('Found potential duplicate camp names:', duplicates.map(([name, count]) => `"${name}" (${count}x)`));
+      }
       
       console.log(`Loaded ${validCamps.length} valid camps from Airtable (${airtableCamps.length} total)`);
       setCamps(validCamps);

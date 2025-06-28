@@ -93,10 +93,10 @@ const segmentToTime = (segment) => {
   return `${hour}:${minute.toString().padStart(2, '0')}`;
 };
 
-// Convert block ID back to 'C & 3:45' display format
+// Convert block ID back to '3:45 & C' display format  
 export const blockIdToDisplayAddress = (blockId) => {
   const { street, timeString } = parseBlockId(blockId);
-  return `${street} & ${timeString}`;
+  return `${timeString} & ${street}`;
 };
 
 // Enhanced address parsing with plaza quarter support
@@ -130,10 +130,23 @@ const parseAddress = (address) => {
     };
   }
   
-  // Handle regular street addresses like "C & 3:45" or "Esplanade & 3:45"
-  const streetMatch = address.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
-  if (streetMatch) {
-    const [_, street, hour, minute] = streetMatch;
+  // Handle regular street addresses like "3:45 & C" or "3:45 & Esplanade" (new format)
+  const timeStreetMatch = address.match(/(\d{1,2}):(\d{2})\s*&\s*(Esplanade|[A-K])/);
+  if (timeStreetMatch) {
+    const [_, hour, minute, street] = timeStreetMatch;
+    return {
+      street,
+      hour: parseInt(hour),
+      minute: parseInt(minute),
+      quarter: null,
+      isPlaza: false
+    };
+  }
+  
+  // Also handle old format for backward compatibility "C & 3:45"
+  const streetTimeMatch = address.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
+  if (streetTimeMatch) {
+    const [_, street, hour, minute] = streetTimeMatch;
     return {
       street,
       hour: parseInt(hour),
@@ -208,7 +221,7 @@ export const campInBlock = (campAddress, blockId) => {
     const blockTimeParts = approximateTime.split(':');
     const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
     
-    return Math.abs(addressTime - blockTime) < 1.0;
+    return Math.abs(addressTime - blockTime) < 0.1;
   }
   
   // Check street match
@@ -221,8 +234,8 @@ export const campInBlock = (campAddress, blockId) => {
   const blockTimeParts = approximateTime.split(':');
   const blockTime = parseInt(blockTimeParts[0]) + parseInt(blockTimeParts[1]) / 60;
   
-  // Within 30 minutes (0.5 hours) for regular blocks
-  return Math.abs(campTime - blockTime) < 0.5;
+  // Since addresses are now normalized to exact block times, require exact match (or very close)
+  return Math.abs(campTime - blockTime) < 0.1;
 };
 
 // Plaza-specific gradient colors to simulate the actual gradient

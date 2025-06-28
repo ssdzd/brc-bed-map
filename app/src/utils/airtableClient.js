@@ -27,21 +27,145 @@ const createHeaders = () => ({
   'Content-Type': 'application/json'
 });
 
+// Map Airtable status values to BED status
+const mapStatusToBedStatus = (airtableStatus) => {
+  if (!airtableStatus) return 'none';
+  
+  const status = airtableStatus.toLowerCase();
+  switch (status) {
+    case 'orange':
+      return 'registered';
+    case 'purple':
+      return 'consent_policy';
+    case 'pink':
+    case 'hot pink':
+      return 'bed_talk';
+    case 'gray':
+    case 'grey':
+    default:
+      return 'none';
+  }
+};
+
+// Round time to nearest standard block time based on street
+const roundToNearestBlockTime = (timeStr, street) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  
+  // Different intervals for different streets
+  let standardMinutes;
+  if (['Esplanade', 'A', 'B', 'C', 'D', 'E'].includes(street.toUpperCase())) {
+    // Inner streets: 30-minute intervals
+    standardMinutes = [0, 30];
+  } else {
+    // Outer streets (F through K): 15-minute intervals  
+    standardMinutes = [0, 15, 30, 45];
+  }
+  
+  // Find the nearest standard minute
+  let nearestMinute = standardMinutes[0];
+  let minDiff = Math.abs(minutes - standardMinutes[0]);
+  
+  for (const stdMin of standardMinutes) {
+    const diff = Math.abs(minutes - stdMin);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearestMinute = stdMin;
+    }
+  }
+  
+  // Format the time with leading zeros
+  return `${hours}:${nearestMinute.toString().padStart(2, '0')}`;
+};
+
+// Normalize address format (keep as "time & street" format)
+const normalizeAddress = (address) => {
+  if (!address || typeof address !== 'string') return '';
+  
+  const trimmed = address.trim();
+  
+  // Skip obviously invalid addresses
+  if (trimmed.toLowerCase().includes('null') || 
+      trimmed.toLowerCase().includes('don\'t know') ||
+      trimmed.toLowerCase().includes('unknown') ||
+      trimmed === '') {
+    return '';
+  }
+  
+  // Check if it's in "time & street" format (preferred format)
+  const timeStreetMatch = trimmed.match(/^(\d{1,2}:\d{2})\s*(&|and)\s*([A-L]|Esplanade)$/i);
+  if (timeStreetMatch) {
+    const time = timeStreetMatch[1];
+    const street = timeStreetMatch[3];
+    const roundedTime = roundToNearestBlockTime(time, street);
+    return `${roundedTime} & ${street.toUpperCase()}`;
+  }
+  
+  // Check if it's in "street & time" format and convert to "time & street"
+  const streetTimeMatch = trimmed.match(/^([A-L]|Esplanade)\s*(&|and)\s*(\d{1,2}:\d{2})$/i);
+  if (streetTimeMatch) {
+    const street = streetTimeMatch[1];
+    const time = streetTimeMatch[3];
+    const roundedTime = roundToNearestBlockTime(time, street);
+    return `${roundedTime} & ${street.toUpperCase()}`;
+  }
+  
+  // Handle "street space time" format (e.g., "F 2:30")
+  const streetSpaceTimeMatch = trimmed.match(/^([A-L]|Esplanade)\s+(\d{1,2}:\d{2})$/i);
+  if (streetSpaceTimeMatch) {
+    const street = streetSpaceTimeMatch[1];
+    const time = streetSpaceTimeMatch[2];
+    const roundedTime = roundToNearestBlockTime(time, street);
+    return `${roundedTime} & ${street.toUpperCase()}`;
+  }
+  
+  // Handle malformed addresses like "3&J" (missing time, assume :00)
+  const malformedMatch = trimmed.match(/^(\d{1,2})\s*&\s*([A-L]|Esplanade)$/i);
+  if (malformedMatch) {
+    const hour = malformedMatch[1];
+    const street = malformedMatch[2];
+    const time = `${hour}:00`;
+    const roundedTime = roundToNearestBlockTime(time, street);
+    return `${roundedTime} & ${street.toUpperCase()}`;
+  }
+  
+  // Return empty string for unrecognized formats
+  return '';
+};
+
 // Transform Airtable record to match our data structure
 const transformRecord = (record) => {
   const fields = record.fields;
   
+  // Get the camp address, trying multiple field names
+  let rawAddress = fields['Matched Polygon'] || 
+                   fields['Camp Address copy'] || 
+                   fields['Camp Address'] || 
+                   fields['Placement Address'] || 
+                   fields.placement_address || 
+                   fields.address || '';
+  
+  // Handle case where Matched Polygon might have nested structure
+  if (typeof rawAddress === 'object' && rawAddress.value) {
+    rawAddress = rawAddress.value;
+  }
+  
+  const normalizedAddress = normalizeAddress(rawAddress);
+  
   return {
     id: record.id,
-    camp_name: fields['Camp Name'] || fields.camp_name || '',
-    placement_address: fields['Matched Address'] || fields.placement_address || fields['Placement Address'] || fields.address || '',
-    bed_status: fields['Status'] || fields.bed_status || fields['BED Status'] || 'none',
-    user_name: fields.user_name || fields['Contact Name'] || '',
-    email: fields.email || fields['Email'] || '',
+    camp_name: fields['Camp Name'] || fields.camp_name || fields['Preferred Name'] || '',
+    placement_address: normalizedAddress,
+    bed_status: mapStatusToBedStatus(fields['Status'] || fields.bed_status || fields['BED Status']),
+    user_name: fields['Preferred Name'] || fields['Full Name'] || fields.user_name || fields['Contact Name'] || '',
+    email: fields['Email'] || fields.email || '',
     buddy_name: fields.buddy_name || fields['Buddy Name'] || null,
+    phone: fields['Phone Number'] || fields.phone || null,
+    pronouns: fields['Pronouns'] || fields.pronouns || null,
+    camper_count: fields['Number of Campers'] || fields.camper_count || null,
+    wants_buddy: fields['Do you want a BED Buddy?'] === 'HELL YES!' || fields['Do you want a BED Buddy?'] === 'Yes',
     last_updated: fields.last_updated || fields['Last Updated'] || record.modifiedTime,
     notes: fields.notes || fields['Notes'] || null,
-    created_at: fields.created_at || fields['Created At'] || record.createdTime
+    created_at: fields.created_at || fields['Created At'] || fields['Timestamp'] || record.createdTime
   };
 };
 
@@ -88,22 +212,33 @@ export const getValidAddresses = () => {
   const addresses = [];
   
   // Street addresses
-  const streets = ['Esplanade', 'A', 'B', 'C', 'D', 'E', 'F'];
+  const streets = ['Esplanade', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
   const times = [];
   
-  // Generate times from 2:00 to 10:00
+  // Generate times from 2:00 to 10:00 with appropriate intervals
   for (let hour = 2; hour <= 10; hour++) {
     times.push(`${hour}:00`);
     if (hour <= 9) {
-      times.push(`${hour}:15`);
       times.push(`${hour}:30`);
+      // Outer streets (F-L) also have :15 and :45
+      times.push(`${hour}:15`);
       times.push(`${hour}:45`);
     }
   }
   
   streets.forEach(street => {
-    times.forEach(time => {
-      addresses.push(`${street} & ${time}`);
+    // Filter times based on street type
+    let validTimes;
+    if (['Esplanade', 'A', 'B', 'C', 'D', 'E'].includes(street)) {
+      // Inner streets: only :00 and :30
+      validTimes = times.filter(time => time.endsWith(':00') || time.endsWith(':30'));
+    } else {
+      // Outer streets: all intervals
+      validTimes = times;
+    }
+    
+    validTimes.forEach(time => {
+      addresses.push(`${time} & ${street}`);
     });
   });
   
@@ -134,9 +269,13 @@ export const getValidAddresses = () => {
 export const isValidAddress = (address) => {
   if (!address || typeof address !== 'string') return false;
   
-  // Check for street addresses (e.g., "C & 3:45")
-  const streetPattern = /^(Esplanade|[A-F])\s*&\s*(\d{1,2}:[0-5]\d)$/;
-  if (streetPattern.test(address.trim())) return true;
+  // Check for time & street addresses (e.g., "3:45 & C")
+  const timeStreetPattern = /^(\d{1,2}:[0-5]\d)\s*&\s*(Esplanade|[A-L])$/;
+  if (timeStreetPattern.test(address.trim())) return true;
+  
+  // Check for street & time addresses (e.g., "C & 3:45") - also valid
+  const streetTimePattern = /^(Esplanade|[A-L])\s*&\s*(\d{1,2}:[0-5]\d)$/;
+  if (streetTimePattern.test(address.trim())) return true;
   
   // Check for plaza addresses (e.g., "3:00 Plaza", "3:00 Plaza Quarter A")
   const plazaPattern = /^(\d{1,2}:\d{2})\s*Plaza(?:\s*Quarter\s*([A-D]))?$/i;
@@ -149,26 +288,73 @@ export const isValidAddress = (address) => {
 export const parseAddress = (address) => {
   if (!isValidAddress(address)) return null;
   
-  // Parse street addresses
-  const streetMatch = address.trim().match(/^(Esplanade|[A-F])\s*&\s*(\d{1,2}:[0-5]\d)$/);
-  if (streetMatch) {
+  // Parse time & street addresses (e.g., "3:45 & C")
+  const timeStreetMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*(Esplanade|[A-L])$/);
+  if (timeStreetMatch) {
     return {
-      street: streetMatch[1],
-      time: streetMatch[2],
-      blockId: `polygon_${streetMatch[1]}_${streetMatch[2]}`,
+      street: timeStreetMatch[2],
+      time: timeStreetMatch[1],
+      blockId: `polygon_${timeStreetMatch[2]}_${timeStreetMatch[1]}`,
       type: 'street'
     };
   }
   
-  // Parse plaza addresses
-  const plazaMatch = address.trim().match(/^(\d{1,2}:\d{2})\s*Plaza(?:\s*Quarter\s*([A-D]))?$/i);
+  // Parse street & time addresses (e.g., "C & 3:45") 
+  const streetTimeMatch = address.trim().match(/^(Esplanade|[A-L])\s*&\s*(\d{1,2}:[0-5]\d)$/);
+  if (streetTimeMatch) {
+    return {
+      street: streetTimeMatch[1],
+      time: streetTimeMatch[2],
+      blockId: `polygon_${streetTimeMatch[1]}_${streetTimeMatch[2]}`,
+      type: 'street'
+    };
+  }
+  
+  // Parse plaza addresses (with optional quarter and ring designation)
+  const plazaMatch = address.trim().match(/^(\d{1,2}:\d{2})\s*([BG])?\s*Plaza(?:\s*Quarter\s*([A-D]))?$/i);
   if (plazaMatch) {
+    const time = plazaMatch[1];
+    const ring = plazaMatch[2] || 'B'; // Default to B ring if not specified
+    const quarter = plazaMatch[3] || null;
+    
+    // Generate appropriate block ID based on whether quarter is specified
+    let blockId;
+    if (quarter) {
+      blockId = `plaza_${time}_${ring}_Quarter_${quarter}`;
+    } else {
+      // For general plaza addresses, we'll match any quarter in that plaza
+      blockId = `plaza_${time}_${ring}`;
+    }
+    
     return {
       street: 'Plaza',
-      time: plazaMatch[1],
-      quarter: plazaMatch[2] || null,
-      blockId: 'plaza-quarter',
+      time: time,
+      ring: ring,
+      quarter: quarter,
+      blockId: blockId,
       type: 'plaza'
+    };
+  }
+  
+  // Parse Center Camp addresses
+  const centerCampMatch = address.trim().match(/^Center\s*Camp(?:\s*Quarter\s*([A-D]))?$/i);
+  if (centerCampMatch) {
+    const quarter = centerCampMatch[1] || null;
+    
+    let blockId;
+    if (quarter) {
+      blockId = `plaza_Center_Camp_Quarter_${quarter}`;
+    } else {
+      blockId = `plaza_Center_Camp`;
+    }
+    
+    return {
+      street: 'Center Camp',
+      time: null,
+      ring: null,
+      quarter: quarter,
+      blockId: blockId,
+      type: 'center_camp'
     };
   }
   
