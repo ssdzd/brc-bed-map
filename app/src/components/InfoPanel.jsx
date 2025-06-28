@@ -21,7 +21,7 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
       style={{
         position: 'absolute',
         top: '1rem',
-        right: '17rem',
+        right: '1rem',
         width: '280px',
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',

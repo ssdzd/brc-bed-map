@@ -171,6 +171,11 @@ const MapView = () => {
           }
           
           block.style.setProperty('filter', 'none', 'important');
+          // Remove selection stroke if not selected
+          if (selectedBlock !== block.id) {
+            block.style.setProperty('stroke', 'none', 'important');
+            block.style.setProperty('stroke-width', '0', 'important');
+          }
         }
         setHoveredBlock(null);
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
@@ -206,12 +211,18 @@ const MapView = () => {
               b.style.setProperty('fill-opacity', '1.0', 'important');
             }
             b.style.setProperty('filter', 'none', 'important');
+            // Remove selection stroke
+            b.style.setProperty('stroke', 'none', 'important');
+            b.style.setProperty('stroke-width', '0', 'important');
           }
         });
         
-        // Highlight selected with enhanced styling
+        // Highlight selected with white glow around perimeter
         block.style.setProperty('fill-opacity', '1.0', 'important');
-        block.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 10px rgba(59, 130, 246, 0.5))', 'important');
+        block.style.setProperty('stroke', '#FFFFFF', 'important');
+        block.style.setProperty('stroke-width', '3', 'important');
+        block.style.setProperty('stroke-opacity', '1.0', 'important');
+        block.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))', 'important');
         
         // Add pulse animation
         block.style.setProperty('animation', 'blockPulse 0.6s ease-out', 'important');
@@ -221,6 +232,11 @@ const MapView = () => {
         
         setSelectedBlock(block.id);
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
+        
+        // Close all toolbars when clicking on a new camp
+        setSearchVisible(false);
+        setStatsVisible(false);
+        setShareVisible(false);
       };
     });
 
@@ -570,25 +586,28 @@ const MapView = () => {
         onToggle={() => setSearchVisible(!searchVisible)}
       />
       
-      <h1 style={{ 
-        position: 'absolute', 
-        top: '1rem', 
-        left: '1rem', 
-        fontSize: '1.5rem', 
-        fontWeight: 'bold', 
-        zIndex: 40,
-        color: theme.textColor,
-        textShadow: theme.isDark 
-            ? '2px 2px 4px rgba(0,0,0,0.5)' 
-            : '0px 2px 4px rgba(0,0,0,0.2), 0px 0px 8px rgba(0,0,0,0.1)',
-        transition: 'color 0.3s ease',
-        fontFamily: theme.typography.headingFont
-      }}>
-        {currentTheme === '2024' ? 'B.E.D. Map' : 'Burning Man B.E.D. Map'}
-      </h1>
+      {/* Title hidden for cleaner look */}
+      {false && (
+        <h1 style={{ 
+          position: 'absolute', 
+          top: '1rem', 
+          left: '1rem', 
+          fontSize: '1.5rem', 
+          fontWeight: 'bold', 
+          zIndex: 40,
+          color: theme.textColor,
+          textShadow: theme.isDark 
+              ? '2px 2px 4px rgba(0,0,0,0.5)' 
+              : '0px 2px 4px rgba(0,0,0,0.2), 0px 0px 8px rgba(0,0,0,0.1)',
+          transition: 'color 0.3s ease',
+          fontFamily: theme.typography.headingFont
+        }}>
+          {currentTheme === '2024' ? 'B.E.D. Map' : 'Burning Man B.E.D. Map'}
+        </h1>
+      )}
       
-      {/* Status indicator - only show when not loading/error */}
-      {!loading && !error && (
+      {/* Status indicator hidden - use debug mode */}
+      {false && !loading && !error && (
         <p style={{ 
           position: 'absolute', 
           top: '4rem', 
@@ -714,13 +733,15 @@ const MapView = () => {
       </div>
       )}
       
-      {/* Data Source Selector */}
-      <DataSourceSelector
-        currentSource={dataSource}
-        onSourceChange={handleDataSourceChange}
-        theme={currentTheme}
-        mockDataStats={mockDataStats}
-      />
+      {/* Data Source Selector hidden - use debug mode */}
+      {false && (
+        <DataSourceSelector
+          currentSource={dataSource}
+          onSourceChange={handleDataSourceChange}
+          theme={currentTheme}
+          mockDataStats={mockDataStats}
+        />
+      )}
       
       
       {/* Stats Panel */}
