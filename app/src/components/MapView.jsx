@@ -91,11 +91,14 @@ const MapView = () => {
         campInBlock(camp.placement_address, block.id)
       );
       
+      // Check if this block is currently selected
+      const isSelected = selectedBlock === block.id;
+      
       // Use BED status color as fill if present, otherwise use gradient
       if (color !== THEMES[currentTheme].colors.none) {
         // BED status override - use solid color fill
         block.style.setProperty('fill', color, 'important');
-        const fillOpacity = '0.7';
+        const fillOpacity = isSelected ? '1.0' : '0.7';
         block.style.setProperty('fill-opacity', fillOpacity, 'important');
         console.log(`Block ${block.id} - BED status color:`, color);
       } else {
@@ -111,10 +114,33 @@ const MapView = () => {
       block.style.setProperty('cursor', 'pointer', 'important');
       block.style.setProperty('transition', 'all 0.3s ease', 'important');
       
-      // Remove stroke borders for clean look (but preserve plaza-quarter strokes)
-      if (!block.classList.contains('plaza-quarter')) {
-        block.style.setProperty('stroke', 'none', 'important');
-        block.style.setProperty('stroke-width', '0', 'important');
+      // Apply selection styling if this block is selected
+      if (isSelected) {
+        // Apply white glow selection styling
+        block.style.setProperty('stroke', '#FFFFFF', 'important');
+        block.style.setProperty('stroke-width', '6', 'important');
+        block.style.setProperty('stroke-opacity', '1.0', 'important');
+        block.style.setProperty('stroke-dasharray', 'none', 'important');
+        block.style.setProperty('stroke-linejoin', 'round', 'important');
+        block.style.setProperty('stroke-linecap', 'round', 'important');
+        
+        // Multiple layered glow effects for maximum visibility
+        const glowFilter = [
+          'brightness(1.3)',
+          'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
+          'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
+          'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
+          'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
+        ].join(' ');
+        block.style.setProperty('filter', glowFilter, 'important');
+        console.log(`Applied selection styling to block ${block.id}`);
+      } else {
+        // Remove stroke borders for clean look (but preserve plaza-quarter strokes)
+        if (!block.classList.contains('plaza-quarter')) {
+          block.style.setProperty('stroke', 'none', 'important');
+          block.style.setProperty('stroke-width', '0', 'important');
+        }
+        block.style.setProperty('filter', 'none', 'important');
       }
       
       // Enhanced hover effect with tooltip
@@ -172,10 +198,22 @@ const MapView = () => {
           
           block.style.setProperty('filter', 'none', 'important');
           // Remove selection stroke if not selected
-          if (selectedBlock !== block.id) {
-            block.style.setProperty('stroke', 'none', 'important');
-            block.style.setProperty('stroke-width', '0', 'important');
-          }
+          block.style.setProperty('stroke', 'none', 'important');
+          block.style.setProperty('stroke-width', '0', 'important');
+        } else {
+          // If this block is selected, maintain the white glow selection styling
+          block.style.setProperty('fill-opacity', '1.0', 'important');
+          block.style.setProperty('stroke', '#FFFFFF', 'important');
+          block.style.setProperty('stroke-width', '6', 'important');
+          block.style.setProperty('stroke-opacity', '1.0', 'important');
+          const glowFilter = [
+            'brightness(1.3)',
+            'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
+            'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
+            'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
+            'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
+          ].join(' ');
+          block.style.setProperty('filter', glowFilter, 'important');
         }
         setHoveredBlock(null);
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
@@ -197,32 +235,7 @@ const MapView = () => {
         const currentThemeValue = currentTheme;
         const currentGradientId = gradientId;
         
-        // Remove previous selection
-        blocks.forEach(b => {
-          if (b.id !== block.id) {
-            const blockColor = getBlockColor(b.id, currentCamps, currentThemeValue);
-            
-            // Restore normal fill and opacity for unselected blocks
-            if (blockColor !== THEMES[currentThemeValue].colors.none) {
-              b.style.setProperty('fill', blockColor, 'important');
-              b.style.setProperty('fill-opacity', '0.7', 'important');
-            } else {
-              b.style.setProperty('fill', `url(#${currentGradientId})`, 'important');
-              b.style.setProperty('fill-opacity', '1.0', 'important');
-            }
-            b.style.setProperty('filter', 'none', 'important');
-            // Remove selection stroke
-            b.style.setProperty('stroke', 'none', 'important');
-            b.style.setProperty('stroke-width', '0', 'important');
-          }
-        });
-        
-        // Highlight selected with white glow around perimeter
-        block.style.setProperty('fill-opacity', '1.0', 'important');
-        block.style.setProperty('stroke', '#FFFFFF', 'important');
-        block.style.setProperty('stroke-width', '3', 'important');
-        block.style.setProperty('stroke-opacity', '1.0', 'important');
-        block.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))', 'important');
+        // Selection styling is now handled by the main useEffect when selectedBlock changes
         
         // Add pulse animation
         block.style.setProperty('animation', 'blockPulse 0.6s ease-out', 'important');
@@ -451,7 +464,7 @@ const MapView = () => {
     
     svgDoc.documentElement.appendChild(rangerIcon);
     console.log("Added Ranger HQ icon at coordinates: 565, 495");
-  }, [camps, loading, currentTheme]);
+  }, [camps, loading, currentTheme, selectedBlock]);
 
   // Zoom and pan functions
   const handleZoomIn = () => {
@@ -470,14 +483,55 @@ const MapView = () => {
   const handleCampSelect = (camp) => {
     setSearchVisible(false);
     
-    // Find the block this camp is in and select it
-    const blockId = `${camp.placement_address.split(' ')[0]}_${camp.placement_address.split(' ')[2]}`;
-    setSelectedBlock(blockId);
+    // Find the block this camp is in by checking all blocks
+    if (!svgRef.current?.contentDocument) return;
+    
+    const svgDoc = svgRef.current.contentDocument;
+    const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
+    
+    // Find the block that contains this camp
+    let foundBlockId = null;
+    blocks.forEach(block => {
+      if (campInBlock(camp.placement_address, block.id)) {
+        foundBlockId = block.id;
+      }
+    });
+    
+    if (foundBlockId) {
+      setSelectedBlock(foundBlockId);
+      console.log(`Selected block ${foundBlockId} for camp ${camp.camp_name} at ${camp.placement_address}`);
+    } else {
+      console.warn(`Could not find block for camp ${camp.camp_name} at ${camp.placement_address}`);
+    }
   };
   
   const handleFilterChange = (filterData) => {
-    // Could be used to highlight filtered camps on the map
     console.log('Filter changed:', filterData);
+    
+    // If a specific status filter is selected, highlight all matching blocks
+    if (filterData.statusFilter !== 'all' && filterData.filteredCamps.length > 0) {
+      // Find all unique block IDs that contain camps with the filtered status
+      const blocksToHighlight = new Set();
+      
+      if (svgRef.current?.contentDocument) {
+        const svgDoc = svgRef.current.contentDocument;
+        const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
+        
+        filterData.filteredCamps.forEach(camp => {
+          blocks.forEach(block => {
+            if (campInBlock(camp.placement_address, block.id)) {
+              blocksToHighlight.add(block.id);
+            }
+          });
+        });
+        
+        // If only one block matches, select it
+        if (blocksToHighlight.size === 1) {
+          const blockId = Array.from(blocksToHighlight)[0];
+          setSelectedBlock(blockId);
+        }
+      }
+    }
   };
 
   const handleDataSourceChange = (newSource) => {
@@ -749,7 +803,13 @@ const MapView = () => {
         camps={camps}
         theme={currentTheme}
         isVisible={statsVisible}
-        onToggle={() => setStatsVisible(!statsVisible)}
+        onToggle={() => {
+          setStatsVisible(!statsVisible);
+          // Close InfoPanel when stats opens due to overlap
+          if (!statsVisible) {
+            setSelectedBlock(null);
+          }
+        }}
       />
       
       {/* Share Panel */}

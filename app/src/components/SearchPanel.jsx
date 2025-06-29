@@ -206,6 +206,19 @@ const SearchPanel = ({
             const IconComponent = option.icon;
             const isSelected = selectedFilter === option.value;
             
+            // Get the BED status color for this option
+            const getStatusColor = (status) => {
+              switch (status) {
+                case 'none': return themeConfig.colors.none; // Gray
+                case 'registered': return themeConfig.colors.registered; // Orange  
+                case 'consent_policy': return themeConfig.colors.consent_policy; // Purple
+                case 'bed_talk': return themeConfig.colors.bed_talk; // Hot Pink
+                default: return theme === '2024' ? '#FF69B4' : '#3B82F6'; // Default theme color
+              }
+            };
+            
+            const statusColor = getStatusColor(option.value);
+            
             return (
               <button
                 key={option.value}
@@ -213,12 +226,12 @@ const SearchPanel = ({
                 style={{
                   padding: '0.375rem 0.5rem',
                   border: `2px solid ${isSelected 
-                    ? (theme === '2024' ? '#FF69B4' : '#3B82F6')
+                    ? statusColor
                     : (themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)')
                   }`,
                   borderRadius: '0.5rem',
                   backgroundColor: isSelected
-                    ? (theme === '2024' ? 'rgba(255,105,180,0.2)' : 'rgba(59,130,246,0.2)')
+                    ? `${statusColor}20` // 20% opacity of status color
                     : 'transparent',
                   color: themeConfig.textColor,
                   fontFamily: themeConfig.typography.primaryFont,
@@ -228,19 +241,32 @@ const SearchPanel = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.375rem',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected) {
                     e.target.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                    e.target.style.borderColor = `${statusColor}60`; // 60% opacity on hover
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) {
                     e.target.style.backgroundColor = 'transparent';
+                    e.target.style.borderColor = themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
                   }
                 }}
               >
+                {/* Color indicator dot for non-'all' options */}
+                {option.value !== 'all' && (
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: statusColor,
+                    marginRight: '0.25rem'
+                  }} />
+                )}
                 <IconComponent size="0.75rem" />
                 {option.label}
               </button>
