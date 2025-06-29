@@ -253,6 +253,21 @@ const MapView = () => {
       };
     });
 
+    // Handle Nimue icon selection styling
+    const nimueImage = svgDoc.querySelector('#nimue-icon image');
+    if (nimueImage && selectedBlock === 'nimue-artist-credit') {
+      const glowFilter = [
+        'brightness(1.3)',
+        'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
+        'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
+        'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
+        'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
+      ].join(' ');
+      nimueImage.style.setProperty('filter', glowFilter, 'important');
+    } else if (nimueImage) {
+      nimueImage.style.setProperty('filter', 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+    }
+
     // Remove any special SVG styling since we only use 2024 theme
     const joinedBorders = svgDoc.querySelector('#Joined_Borders');
     if (joinedBorders) {
@@ -446,8 +461,8 @@ const MapView = () => {
     
     // Ranger SVG image
     const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/Ranger.svg");
-    rangerImage.setAttribute("href", "/Ranger.svg"); // Fallback for modern browsers
+    rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/Ranger.svg");
+    rangerImage.setAttribute("href", "/brc-bed-map/Ranger.svg"); // Fallback for modern browsers
     rangerImage.setAttribute("x", "-21");
     rangerImage.setAttribute("y", "-21");
     rangerImage.setAttribute("width", "42");
@@ -464,6 +479,66 @@ const MapView = () => {
     
     svgDoc.documentElement.appendChild(rangerIcon);
     console.log("Added Ranger HQ icon at coordinates: 565, 495");
+    
+    // Remove any existing Nimue icon first
+    const existingNimue = svgDoc.querySelector('#nimue-icon');
+    if (existingNimue) {
+      existingNimue.remove();
+    }
+    
+    // Add Nimue501 icon at bottom right corner (off the map)
+    const nimueIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    nimueIcon.setAttribute("id", "nimue-icon");
+    nimueIcon.setAttribute("transform", "translate(1100, 750)"); // Moved up 50px
+    nimueIcon.style.setProperty('cursor', 'pointer', 'important');
+    
+    // Load the Nimue501 SVG
+    const nimueImageElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    nimueImageElement.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/NImue501.svg");
+    nimueImageElement.setAttribute("href", "/brc-bed-map/NImue501.svg");
+    nimueImageElement.setAttribute("x", "-80");
+    nimueImageElement.setAttribute("y", "-80");
+    nimueImageElement.setAttribute("width", "160");
+    nimueImageElement.setAttribute("height", "160");
+    nimueImageElement.setAttribute("class", "cls-2");
+    nimueImageElement.style.setProperty('filter', 'drop-shadow(0 0 6px white) drop-shadow(0 0 6px white) drop-shadow(0 0 6px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+    nimueImageElement.style.setProperty('transition', 'all 0.3s ease', 'important');
+    
+    // Add hover effects like other polygons
+    nimueIcon.onmouseenter = (e) => {
+      nimueImageElement.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 8px rgba(255, 105, 180, 0.8)) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+      nimueImageElement.style.setProperty('transform', 'scale(1.1)', 'important');
+      
+      // Show tooltip
+      setTooltip({
+        visible: true,
+        content: "Artist Credit: Nimue501",
+        position: { x: e.clientX, y: e.clientY }
+      });
+    };
+    
+    nimueIcon.onmouseleave = () => {
+      nimueImageElement.style.setProperty('filter', 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+      nimueImageElement.style.setProperty('transform', 'scale(1)', 'important');
+      setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
+    };
+    
+    // Add click handler for selection
+    nimueIcon.onclick = (e) => {
+      e.stopPropagation();
+      setSelectedBlock('nimue-artist-credit');
+      
+      // Close other panels when clicked
+      setSearchVisible(false);
+      setStatsVisible(false);
+      setShareVisible(false);
+      
+      console.log("Nimue501 artist credit selected");
+    };
+    
+    nimueIcon.appendChild(nimueImageElement);
+    svgDoc.documentElement.appendChild(nimueIcon);
+    console.log("Added Nimue501 artist credit at coordinates: 750, 650");
   }, [camps, loading, currentTheme, selectedBlock]);
 
   // Zoom and pan functions
