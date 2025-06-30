@@ -25,9 +25,21 @@ export const useMapData = (dataSource = 'airtable') => {
       // Test connection first
       const connectionTest = await testConnection();
       if (!connectionTest.success) {
-        console.warn('Airtable connection failed, falling back to original mock data:', connectionTest.message);
-        setCamps(originalMockCamps);
-        setMockDataStats(null);
+        console.warn('Airtable connection failed, falling back to generated mock data:', connectionTest.message);
+        // Use generated mock data instead of original mock data for better coverage
+        const mockCamps = generateMockData();
+        const validation = validateDistributions(mockCamps);
+        console.log('Mock data validation (fallback):', validation);
+        
+        setCamps(mockCamps);
+        setMockDataStats({
+          totalCamps: mockCamps.length,
+          byStatus: mockCamps.reduce((acc, camp) => {
+            acc[camp.bed_status] = (acc[camp.bed_status] || 0) + 1;
+            return acc;
+          }, {}),
+          validation
+        });
         setLoading(false);
         return;
       }
@@ -74,10 +86,21 @@ export const useMapData = (dataSource = 'airtable') => {
       console.error('Error fetching Airtable data:', err);
       setError(`Failed to load Airtable data: ${err.message}`);
       
-      // Fall back to original mock data on error
-      console.log('Falling back to original mock data');
-      setCamps(originalMockCamps);
-      setMockDataStats(null);
+      // Fall back to generated mock data on error
+      console.log('Falling back to generated mock data');
+      const mockCamps = generateMockData();
+      const validation = validateDistributions(mockCamps);
+      console.log('Mock data validation (error fallback):', validation);
+      
+      setCamps(mockCamps);
+      setMockDataStats({
+        totalCamps: mockCamps.length,
+        byStatus: mockCamps.reduce((acc, camp) => {
+          acc[camp.bed_status] = (acc[camp.bed_status] || 0) + 1;
+          return acc;
+        }, {}),
+        validation
+      });
       setLoading(false);
     }
   }, []);
