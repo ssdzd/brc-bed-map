@@ -138,30 +138,15 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
                   {getStatusIcon(camp.bed_status)}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{
-                    fontSize: '1rem',
+                  <h2 style={{
+                    fontSize: '1.25rem',
                     fontWeight: '600',
-                    margin: '0 0 0.5rem 0',
+                    margin: '0',
                     color: themeConfig.isDark ? '#FFFFFF' : '#000000',
                     fontFamily: themeConfig.typography.displayFont
                   }}>
                     {camp.camp_name}
-                  </h3>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                    margin: '0 0 0.5rem 0',
-                    fontFamily: themeConfig.typography.bodyFont
-                  }}>
-                    {camp.placement_address}
-                  </p>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: themeConfig.isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                    fontFamily: themeConfig.typography.bodyFont
-                  }}>
-                    {formatStatus(camp.bed_status)}
-                  </div>
+                  </h2>
                 </div>
               </div>
             </div>

@@ -7,6 +7,7 @@ const SearchPanel = ({
   theme = '2025', 
   onCampSelect, 
   onFilterChange,
+  onFilterButtonClick,
   isVisible = false,
   onToggle 
 }) => {
@@ -222,7 +223,10 @@ const SearchPanel = ({
             return (
               <button
                 key={option.value}
-                onClick={() => setSelectedFilter(option.value)}
+                onClick={() => {
+                  setSelectedFilter(option.value);
+                  if (onFilterButtonClick) onFilterButtonClick();
+                }}
                 style={{
                   padding: '0.375rem 0.5rem',
                   border: `2px solid ${isSelected 

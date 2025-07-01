@@ -76,6 +76,11 @@ const segmentToTime = (segment) => {
 
 // Convert block ID back to display format (handles both street blocks and plaza quarters)
 export const blockIdToDisplayAddress = (blockId) => {
+  // Handle special locations
+  if (blockId === 'nimue-artist-credit') {
+    return 'BRC Airport';
+  }
+  
   // Handle plaza quarter block IDs like "plaza_3:00_B_Quarter_A"
   if (blockId.startsWith('plaza_')) {
     // Handle Center Camp quarters

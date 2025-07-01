@@ -36,6 +36,7 @@ const MapView = () => {
   const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);
+  const [currentFilter, setCurrentFilter] = useState({ statusFilter: 'all', filteredCamps: [] });
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
   console.log('MapView rendering, loading:', loading, 'camps:', camps);
@@ -94,11 +95,16 @@ const MapView = () => {
       // Check if this block is currently selected
       const isSelected = selectedBlock === block.id;
       
+      // Check if this block should be highlighted due to filtering
+      const shouldHighlight = currentFilter.statusFilter !== 'all' && 
+        currentFilter.filteredCamps.some(camp => campInBlock(camp.placement_address, block.id));
+      
       // Use BED status color as fill if present, otherwise use gradient
       if (color !== THEMES[currentTheme].colors.none) {
         // BED status override - use solid color fill
         block.style.setProperty('fill', color, 'important');
-        const fillOpacity = isSelected ? '1.0' : '0.7';
+        let fillOpacity = isSelected ? '1.0' : '0.7';
+        
         block.style.setProperty('fill-opacity', fillOpacity, 'important');
         console.log(`Block ${block.id} - BED status color:`, color);
       } else {
@@ -107,14 +113,40 @@ const MapView = () => {
         block.style.setProperty('fill', gradientFill, 'important');
         block.style.setProperty('fill-opacity', '1.0', 'important');
         console.log(`Block ${block.id} - Using gradient:`, gradientFill);
-        
-        // Gradient should now be visible
       }
       
       block.style.setProperty('cursor', 'pointer', 'important');
       block.style.setProperty('transition', 'all 0.3s ease', 'important');
       
-      // Apply selection styling if this block is selected
+      // Apply filter highlighting for matching blocks - use same glow as selection
+      if (shouldHighlight && !isSelected) {
+        // Apply white glow highlighting like selection but slightly dimmer
+        block.style.setProperty('stroke', '#FFFFFF', 'important');
+        block.style.setProperty('stroke-width', '4', 'important');
+        block.style.setProperty('stroke-opacity', '0.8', 'important');
+        block.style.setProperty('stroke-dasharray', 'none', 'important');
+        block.style.setProperty('stroke-linejoin', 'round', 'important');
+        block.style.setProperty('stroke-linecap', 'round', 'important');
+        
+        // Filtered glow effect - slightly dimmer than selection
+        const filterGlowFilter = [
+          'brightness(1.2)',
+          'drop-shadow(0 0 15px rgba(255, 255, 255, 0.8))',
+          'drop-shadow(0 0 8px rgba(255, 255, 255, 0.7))',
+          'drop-shadow(0 0 4px rgba(255, 255, 255, 0.6))',
+          'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2))'
+        ].join(' ');
+        block.style.setProperty('filter', filterGlowFilter, 'important');
+      } else if (!isSelected) {
+        // Remove filter glow for non-matching, non-selected blocks
+        if (!block.classList.contains('plaza-quarter')) {
+          block.style.setProperty('stroke', 'none', 'important');
+          block.style.setProperty('stroke-width', '0', 'important');
+        }
+        block.style.setProperty('filter', 'none', 'important');
+      }
+      
+      // Apply selection styling if this block is selected (highest priority)
       if (isSelected) {
         // Apply white glow selection styling
         block.style.setProperty('stroke', '#FFFFFF', 'important');
@@ -134,8 +166,8 @@ const MapView = () => {
         ].join(' ');
         block.style.setProperty('filter', glowFilter, 'important');
         console.log(`Applied selection styling to block ${block.id}`);
-      } else {
-        // Remove stroke borders for clean look (but preserve plaza-quarter strokes)
+      } else if (!shouldHighlight) {
+        // Only remove stroke/filter if block is not highlighted by filter
         if (!block.classList.contains('plaza-quarter')) {
           block.style.setProperty('stroke', 'none', 'important');
           block.style.setProperty('stroke-width', '0', 'important');
@@ -197,9 +229,11 @@ const MapView = () => {
           }
           
           block.style.setProperty('filter', 'none', 'important');
-          // Remove selection stroke if not selected
-          block.style.setProperty('stroke', 'none', 'important');
-          block.style.setProperty('stroke-width', '0', 'important');
+          // Remove selection stroke if not selected (but preserve plaza-quarter strokes)
+          if (!block.classList.contains('plaza-quarter')) {
+            block.style.setProperty('stroke', 'none', 'important');
+            block.style.setProperty('stroke-width', '0', 'important');
+          }
         } else {
           // If this block is selected, maintain the white glow selection styling
           block.style.setProperty('fill-opacity', '1.0', 'important');
@@ -256,16 +290,17 @@ const MapView = () => {
     // Handle Nimue icon selection styling
     const nimueImage = svgDoc.querySelector('#nimue-icon image');
     if (nimueImage && selectedBlock === 'nimue-artist-credit') {
-      const glowFilter = [
-        'brightness(1.3)',
+      const selectionFilter = [
+        'brightness(3)',
+        'contrast(0.2)',
         'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
         'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
         'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
         'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
       ].join(' ');
-      nimueImage.style.setProperty('filter', glowFilter, 'important');
+      nimueImage.style.setProperty('filter', selectionFilter, 'important');
     } else if (nimueImage) {
-      nimueImage.style.setProperty('filter', 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+      nimueImage.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
     }
 
     // Remove any special SVG styling since we only use 2024 theme
@@ -446,100 +481,101 @@ const MapView = () => {
     }
 
     // Add Ranger HQ icon at 5:45 & Esplanade
-    const rangerIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    rangerIcon.setAttribute("id", "ranger-hq-icon");
-    rangerIcon.setAttribute("transform", "translate(565, 495)");
-    
-    // Green circle background
-    const rangerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    rangerCircle.setAttribute("cx", "0");
-    rangerCircle.setAttribute("cy", "0");
-    rangerCircle.setAttribute("r", "24");
-    rangerCircle.setAttribute("fill", "#c3b091");
-    rangerCircle.setAttribute("stroke", "#166534");
-    rangerCircle.setAttribute("stroke-width", "2");
-    
-    // Ranger SVG image
-    const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/Ranger.svg");
-    rangerImage.setAttribute("href", "/brc-bed-map/Ranger.svg"); // Fallback for modern browsers
-    rangerImage.setAttribute("x", "-21");
-    rangerImage.setAttribute("y", "-21");
-    rangerImage.setAttribute("width", "42");
-    rangerImage.setAttribute("height", "42");
-    rangerImage.setAttribute("preserveAspectRatio", "xMidYMid meet");
-    
-    // Tooltip
-    const rangerTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    rangerTitle.textContent = "Ranger HQ";
-    
-    rangerIcon.appendChild(rangerCircle);
-    rangerIcon.appendChild(rangerImage);
-    rangerIcon.appendChild(rangerTitle);
-    
-    svgDoc.documentElement.appendChild(rangerIcon);
-    console.log("Added Ranger HQ icon at coordinates: 565, 495");
-    
-    // Remove any existing Nimue icon first
-    const existingNimue = svgDoc.querySelector('#nimue-icon');
-    if (existingNimue) {
-      existingNimue.remove();
+    const existingRanger = svgDoc.querySelector('#ranger-hq-icon');
+    if (!existingRanger) {
+      const rangerIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      rangerIcon.setAttribute("id", "ranger-hq-icon");
+      rangerIcon.setAttribute("transform", "translate(565, 495)");
+      
+      // Green circle background
+      const rangerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      rangerCircle.setAttribute("cx", "0");
+      rangerCircle.setAttribute("cy", "0");
+      rangerCircle.setAttribute("r", "24");
+      rangerCircle.setAttribute("fill", "#c3b091");
+      rangerCircle.setAttribute("stroke", "#166534");
+      rangerCircle.setAttribute("stroke-width", "2");
+      
+      // Ranger SVG image
+      const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/Ranger.svg");
+      rangerImage.setAttribute("href", "/Ranger.svg"); // Fallback for modern browsers
+      rangerImage.setAttribute("x", "-21");
+      rangerImage.setAttribute("y", "-21");
+      rangerImage.setAttribute("width", "42");
+      rangerImage.setAttribute("height", "42");
+      rangerImage.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      
+      // Tooltip
+      const rangerTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      rangerTitle.textContent = "Ranger HQ";
+      
+      rangerIcon.appendChild(rangerCircle);
+      rangerIcon.appendChild(rangerImage);
+      rangerIcon.appendChild(rangerTitle);
+      
+      svgDoc.documentElement.appendChild(rangerIcon);
+      console.log("Added Ranger HQ icon at coordinates: 565, 495");
     }
     
     // Add Nimue501 icon at bottom right corner (off the map)
-    const nimueIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    nimueIcon.setAttribute("id", "nimue-icon");
-    nimueIcon.setAttribute("transform", "translate(1100, 750)"); // Moved up 50px
-    nimueIcon.style.setProperty('cursor', 'pointer', 'important');
-    
-    // Load the Nimue501 SVG
-    const nimueImageElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    nimueImageElement.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/NImue501.svg");
-    nimueImageElement.setAttribute("href", "/brc-bed-map/NImue501.svg");
-    nimueImageElement.setAttribute("x", "-80");
-    nimueImageElement.setAttribute("y", "-80");
-    nimueImageElement.setAttribute("width", "160");
-    nimueImageElement.setAttribute("height", "160");
-    nimueImageElement.setAttribute("class", "cls-2");
-    nimueImageElement.style.setProperty('filter', 'drop-shadow(0 0 6px white) drop-shadow(0 0 6px white) drop-shadow(0 0 6px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-    nimueImageElement.style.setProperty('transition', 'all 0.3s ease', 'important');
-    
-    // Add hover effects like other polygons
-    nimueIcon.onmouseenter = (e) => {
-      nimueImageElement.style.setProperty('filter', 'brightness(1.2) drop-shadow(0 0 8px rgba(255, 105, 180, 0.8)) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-      nimueImageElement.style.setProperty('transform', 'scale(1.1)', 'important');
+    const existingNimue = svgDoc.querySelector('#nimue-icon');
+    if (!existingNimue) {
+      const nimueIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      nimueIcon.setAttribute("id", "nimue-icon");
+      nimueIcon.setAttribute("transform", "translate(1100, 750)"); // Moved up 50px
+      nimueIcon.style.setProperty('cursor', 'pointer', 'important');
       
-      // Show tooltip
-      setTooltip({
-        visible: true,
-        content: "Artist Credit: Nimue501",
-        position: { x: e.clientX, y: e.clientY }
-      });
-    };
-    
-    nimueIcon.onmouseleave = () => {
-      nimueImageElement.style.setProperty('filter', 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-      nimueImageElement.style.setProperty('transform', 'scale(1)', 'important');
-      setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
-    };
-    
-    // Add click handler for selection
-    nimueIcon.onclick = (e) => {
-      e.stopPropagation();
-      setSelectedBlock('nimue-artist-credit');
+      // Load the Nimue501 SVG
+      const nimueImageElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      nimueImageElement.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/NImue501.svg");
+      nimueImageElement.setAttribute("href", "/brc-bed-map/NImue501.svg");
+      nimueImageElement.setAttribute("x", "-80");
+      nimueImageElement.setAttribute("y", "-80");
+      nimueImageElement.setAttribute("width", "160");
+      nimueImageElement.setAttribute("height", "160");
+      nimueImageElement.setAttribute("class", "cls-2");
+      // Use filters to make the airplane bright/white and add glow
+      nimueImageElement.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+      nimueImageElement.style.setProperty('transition', 'all 0.3s ease', 'important');
       
-      // Close other panels when clicked
-      setSearchVisible(false);
-      setStatsVisible(false);
-      setShareVisible(false);
+      // Add hover effects like other polygons
+      nimueIcon.onmouseenter = (e) => {
+        nimueImageElement.style.setProperty('filter', 'brightness(2.5) contrast(0.3) drop-shadow(0 0 12px rgba(255, 105, 180, 1.0)) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+        nimueImageElement.style.setProperty('transform', 'scale(1.1)', 'important');
+        
+        // Show tooltip
+        setTooltip({
+          visible: true,
+          content: { title: "BRC Airport", description: "Airport information" },
+          position: { x: e.clientX, y: e.clientY }
+        });
+      };
       
-      console.log("Nimue501 artist credit selected");
-    };
-    
-    nimueIcon.appendChild(nimueImageElement);
-    svgDoc.documentElement.appendChild(nimueIcon);
-    console.log("Added Nimue501 artist credit at coordinates: 750, 650");
-  }, [camps, loading, currentTheme, selectedBlock]);
+      nimueIcon.onmouseleave = () => {
+        nimueImageElement.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+        nimueImageElement.style.setProperty('transform', 'scale(1)', 'important');
+        setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
+      };
+      
+      // Add click handler for selection
+      nimueIcon.onclick = (e) => {
+        e.stopPropagation();
+        setSelectedBlock('nimue-artist-credit');
+        
+        // Close other panels when clicked
+        setSearchVisible(false);
+        setStatsVisible(false);
+        setShareVisible(false);
+        
+        console.log("Nimue501 artist credit selected");
+      };
+      
+      nimueIcon.appendChild(nimueImageElement);
+      svgDoc.documentElement.appendChild(nimueIcon);
+      console.log("Added Nimue501 artist credit at coordinates: 1100, 750");
+    }
+  }, [camps, loading, currentTheme, selectedBlock, currentFilter]);
 
   // Zoom and pan functions
   const handleZoomIn = () => {
@@ -583,30 +619,8 @@ const MapView = () => {
   const handleFilterChange = (filterData) => {
     console.log('Filter changed:', filterData);
     
-    // If a specific status filter is selected, highlight all matching blocks
-    if (filterData.statusFilter !== 'all' && filterData.filteredCamps.length > 0) {
-      // Find all unique block IDs that contain camps with the filtered status
-      const blocksToHighlight = new Set();
-      
-      if (svgRef.current?.contentDocument) {
-        const svgDoc = svgRef.current.contentDocument;
-        const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
-        
-        filterData.filteredCamps.forEach(camp => {
-          blocks.forEach(block => {
-            if (campInBlock(camp.placement_address, block.id)) {
-              blocksToHighlight.add(block.id);
-            }
-          });
-        });
-        
-        // If only one block matches, select it
-        if (blocksToHighlight.size === 1) {
-          const blockId = Array.from(blocksToHighlight)[0];
-          setSelectedBlock(blockId);
-        }
-      }
-    }
+    // Store the current filter for highlighting blocks
+    setCurrentFilter(filterData);
   };
 
   const handleDataSourceChange = (newSource) => {
@@ -711,6 +725,7 @@ const MapView = () => {
         theme={currentTheme}
         onCampSelect={handleCampSelect}
         onFilterChange={handleFilterChange}
+        onFilterButtonClick={() => setSelectedBlock(null)}
         isVisible={searchVisible}
         onToggle={() => setSearchVisible(!searchVisible)}
       />
@@ -987,6 +1002,12 @@ const MapView = () => {
           0% { transform: scale(1); }
           50% { transform: scale(1.05); }
           100% { transform: scale(1); }
+        }
+        
+        @keyframes filterPulse {
+          0% { opacity: 0.7; }
+          50% { opacity: 1.0; }
+          100% { opacity: 0.7; }
         }
         
         /* Hide The Man and Temple from the SVG */

@@ -10,8 +10,7 @@ const Legend = ({ theme = '2025' }) => {
     { 
       status: 'none', 
       label: 'Unregistered', 
-      icon: '○',
-      description: 'Not yet registered'
+      icon: '○'
     },
     { 
       status: 'registered', 
@@ -134,6 +133,27 @@ const Legend = ({ theme = '2025' }) => {
             </div>
           </div>
         ))}
+      </div>
+      
+      {/* Last Updated */}
+      <div style={{
+        marginTop: '1rem',
+        padding: '0.5rem',
+        borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.5rem'
+      }}>
+        <div style={{ fontSize: '1rem' }}>🏜️</div>
+        <div style={{
+          fontSize: '0.7rem',
+          fontFamily: themeConfig.typography.primaryFont,
+          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+          opacity: 0.6
+        }}>
+          Last Updated: 06/30/2025
+        </div>
       </div>
     </div>
   );
