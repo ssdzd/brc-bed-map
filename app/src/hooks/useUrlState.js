@@ -4,7 +4,7 @@ export const useUrlState = () => {
   const [urlState, setUrlState] = useState({
     theme: '2024',
     zoom: 0.67,
-    pan: { x: -32, y: 84 },
+    pan: { x: 0, y: 84 },
     selectedBlock: null,
     search: ''
   });
@@ -15,7 +15,7 @@ export const useUrlState = () => {
     const newState = {
       theme: '2024',
       zoom: 0.67,
-      pan: { x: -32, y: 84 },
+      pan: { x: 0, y: 84 },
       selectedBlock: null,
       search: ''
     };
@@ -81,7 +81,7 @@ export const useUrlState = () => {
     }
     
     // Update pan
-    if (newState.pan && (newState.pan.x !== -32 || newState.pan.y !== 84)) {
+    if (newState.pan && (newState.pan.x !== 0 || newState.pan.y !== 84)) {
       params.set('panX', newState.pan.x.toFixed(0));
       params.set('panY', newState.pan.y.toFixed(0));
     } else {
@@ -123,7 +123,7 @@ export const useUrlState = () => {
       params.set('zoom', state.zoom.toFixed(2));
     }
     
-    if (state.pan && (state.pan.x !== -32 || state.pan.y !== 84)) {
+    if (state.pan && (state.pan.x !== 0 || state.pan.y !== 84)) {
       params.set('panX', state.pan.x.toFixed(0));
       params.set('panY', state.pan.y.toFixed(0));
     }

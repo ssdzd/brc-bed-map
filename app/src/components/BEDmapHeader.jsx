@@ -21,7 +21,7 @@ const BEDmapHeader = ({ theme = '2024' }) => {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.5rem',
-        zIndex: 10,
+        zIndex: 30,
         pointerEvents: 'none'
       }}
     >

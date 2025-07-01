@@ -53,15 +53,30 @@ const Legend = ({ theme = '2025' }) => {
       cursor: 'pointer'
     }}
     onClick={() => setIsExpanded(!isExpanded)}>
-      <h4 style={{
-        fontWeight: 'bold',
-        fontSize: '0.875rem',
-        fontFamily: themeConfig.typography.headingFont,
+      <div className="legend-header" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: isExpanded ? '0.5rem' : '0.25rem',
-        color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor
       }}>
-        BEDucator Program Progress
-      </h4>
+        <h4 style={{
+          fontWeight: 'bold',
+          fontSize: '0.875rem',
+          fontFamily: themeConfig.typography.headingFont,
+          margin: 0,
+          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor
+        }}>
+          BEDucator Program Progress
+        </h4>
+        <div className="legend-header-date" style={{
+          fontSize: '0.7rem',
+          fontFamily: themeConfig.typography.primaryFont,
+          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+          opacity: 0.6
+        }}>
+          Last Updated: 06/30/2025
+        </div>
+      </div>
       
       {!isExpanded && (
         <div style={{
@@ -149,8 +164,8 @@ const Legend = ({ theme = '2025' }) => {
             ))}
           </div>
           
-          {/* Last Updated */}
-          <div style={{
+          {/* Last Updated - Desktop only */}
+          <div className="legend-footer-date" style={{
             marginTop: '1rem',
             padding: '0.5rem',
             borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,

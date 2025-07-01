@@ -49,6 +49,7 @@ const SharePanel = ({
   if (!isVisible) {
     return (
       <div
+        className="share-panel-container"
         style={{
           position: 'absolute',
           left: '1rem',

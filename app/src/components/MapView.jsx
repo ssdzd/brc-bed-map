@@ -26,7 +26,7 @@ const MapView = () => {
   const { camps, loading, error, mockDataStats, refresh } = useMapData(dataSource);
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [zoom, setZoom] = useState(0.67);
-  const [pan, setPan] = useState({ x: -32, y: 84 });
+  const [pan, setPan] = useState({ x: 0, y: 84 });
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [currentTheme, setCurrentTheme] = useState('2024');
@@ -78,6 +78,14 @@ const MapView = () => {
     const svgDoc = svgRef.current.contentDocument;
     console.log('SVG doc:', svgDoc);
     if (!svgDoc) return;
+
+    // Extend SVG viewBox to accommodate invisible balancing element
+    const svgElement = svgDoc.documentElement;
+    if (svgElement && svgElement.getAttribute('viewBox') === '0 0 1160.17 861.54') {
+      svgElement.setAttribute('viewBox', '0 0 1240 861.54');
+      console.log('Extended SVG viewBox to accommodate balancing element');
+    }
+
 
     // Update gradient references based on current theme
     const gradientId = currentTheme.includes('2024') ? 'cityGradient-2024' : 'cityGradient-2025';
@@ -605,6 +613,28 @@ const MapView = () => {
       console.log("Added BED Logo to SVG at coordinates: 612.5, 272.04");
     }
 
+    // Add invisible balancing element to fix SVG centering (mirror of left outpost)
+    const existingBalancer = svgDoc.querySelector('#invisible-balancer');
+    if (!existingBalancer) {
+      const balancerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      balancerGroup.setAttribute("id", "invisible-balancer");
+      balancerGroup.setAttribute("transform", "translate(1226.5, 92.04)"); // Mirror position of left outpost
+      
+      // Create invisible circle with same dimensions as left outpost
+      const balancerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      balancerCircle.setAttribute("cx", "0");
+      balancerCircle.setAttribute("cy", "0");
+      balancerCircle.setAttribute("r", "12"); // Same size as outpost
+      balancerCircle.setAttribute("fill", "transparent");
+      balancerCircle.setAttribute("opacity", "0");
+      balancerCircle.setAttribute("pointer-events", "none");
+      
+      balancerGroup.appendChild(balancerCircle);
+      svgDoc.documentElement.appendChild(balancerGroup);
+      console.log("Added invisible balancing element at coordinates: 1226.5, 92.04");
+    }
+
+
     // Add BEDtalks.org text centered at The Man's x-coordinate, 400px lower
     const existingBedText = svgDoc.querySelector('#bedtalks-text-svg');
     if (!existingBedText) {
@@ -997,21 +1027,31 @@ const MapView = () => {
       
       <div
         className="map-container"
-        style={{
-          width: '100%',
-          height: '100%',
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          transformOrigin: 'center center',
-          transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
-          cursor: 'default',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          opacity: loading ? 0.7 : 1,
-          zIndex: 20 // Ensure map is above background
-        }}
-      >
+          style={{
+            width: '100%',
+            height: '100%',
+            minWidth: '100%',
+            minHeight: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            position: 'relative',
+            display: 'block',
+            overflow: 'visible',
+            boxSizing: 'border-box',
+            transform: window.innerWidth <= 768 
+              ? `translate(${pan.x}px, -30px) scale(1)`
+              : `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: 'center center',
+            transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
+            cursor: 'default',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            opacity: loading ? 0.7 : 1,
+            zIndex: 20 // Ensure map is above background
+          }}
+        >
         
         <object
           ref={svgRef}
@@ -1020,7 +1060,16 @@ const MapView = () => {
           className="w-full h-full"
           style={{ 
             zIndex: 25,
-            filter: 'none'
+            filter: 'none',
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            maxWidth: 'none',
+            maxHeight: 'none',
+            minWidth: 'auto',
+            minHeight: 'auto',
+            objectFit: 'contain',
+            objectPosition: 'center center'
           }}
           onLoad={() => {
             console.log('SVG loaded');
@@ -1095,6 +1144,13 @@ const MapView = () => {
             display: none !important;
           }
           
+          /* Resize and reposition map container on mobile */
+          .map-container:last-of-type {
+            width: 100vw !important;
+            height: 100vh !important;
+            margin-top: 0 !important;
+          }
+          
           /* Center legend on mobile and raise it slightly */
           .legend-container {
             position: fixed !important;
@@ -1135,21 +1191,53 @@ const MapView = () => {
             display: none !important;
           }
           
-          /* Shrink BED header by 20% on mobile and adjust positioning */
+          /* Shrink BED header by 40% total on mobile and adjust positioning */
           .bed-header-image {
-            width: 640px !important; /* 800px * 0.8 = 640px */
+            width: 480px !important; /* 640px * 0.75 = 480px (25% additional reduction) */
           }
           
           .bed-header-container {
-            top: -10rem !important; /* Use better distance from top like desktop */
-          }
-          
-          /* Lower the map container to maintain spacing with header */
-          .map-container {
-            transform: translateY(0px) !important; /* Remove the upward translation */
+            top: -8rem !important; /* Bring header down to restore proper spacing */
           }
           
           /* BED logo is now SVG-based and scales automatically with the map */
+          
+          /* Move share panel down on mobile and ensure it's on top of map */
+          .share-panel-container {
+            top: calc(50% + 3rem) !important;
+            z-index: 25 !important;
+          }
+          
+          /* Legend date positioning - mobile uses header, desktop uses footer */
+          .legend-header-date {
+            display: block !important;
+          }
+          
+          .legend-footer-date {
+            display: none !important;
+          }
+        }
+        
+        /* Robust map container styling to prevent size changes */
+        .map-container {
+          contain: layout style size !important;
+          isolation: isolate !important;
+        }
+        
+        .map-container object {
+          contain: layout style size !important;
+          isolation: isolate !important;
+        }
+        
+        /* Desktop legend date positioning - hide header date, show footer date */
+        @media (min-width: 769px) {
+          .legend-header-date {
+            display: none !important;
+          }
+          
+          .legend-footer-date {
+            display: flex !important;
+          }
         }
       `}</style>
     </div>
