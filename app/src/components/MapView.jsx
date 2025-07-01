@@ -498,8 +498,8 @@ const MapView = () => {
       
       // Ranger SVG image
       const rangerImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
-      rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/Ranger.svg");
-      rangerImage.setAttribute("href", "/Ranger.svg"); // Fallback for modern browsers
+      rangerImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/Ranger.svg");
+      rangerImage.setAttribute("href", "/brc-bed-map/Ranger.svg"); // Fallback for modern browsers
       rangerImage.setAttribute("x", "-21");
       rangerImage.setAttribute("y", "-21");
       rangerImage.setAttribute("width", "42");
