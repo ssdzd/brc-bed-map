@@ -1,17 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
 const Legend = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const items = [
-    { 
-      status: 'none', 
-      label: 'Unregistered', 
-      icon: '○'
-    },
     { 
       status: 'registered', 
       label: 'Started BEDucator program', 
@@ -53,19 +49,37 @@ const Legend = ({ theme = '2025' }) => {
           ? '1px solid rgba(255,255,255,0.2)' 
           : '1px solid rgba(0,0,0,0.1)',
       backdropFilter: 'blur(10px)',
-      transition: 'all 0.3s ease'
-    }}>
+      transition: 'all 0.3s ease',
+      cursor: 'pointer'
+    }}
+    onClick={() => setIsExpanded(!isExpanded)}>
       <h4 style={{
         fontWeight: 'bold',
         fontSize: '0.875rem',
         fontFamily: themeConfig.typography.headingFont,
-        marginBottom: '0.5rem',
+        marginBottom: isExpanded ? '0.5rem' : '0.25rem',
         color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor
       }}>
         BEDucator Program Progress
       </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {items.map(item => (
+      
+      {!isExpanded && (
+        <div style={{
+          fontSize: '0.7rem',
+          fontFamily: themeConfig.typography.primaryFont,
+          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+          opacity: 0.7,
+          textAlign: 'center',
+          fontStyle: 'italic'
+        }}>
+          Click to expand
+        </div>
+      )}
+      
+      {isExpanded && (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {items.map(item => (
           <div 
             key={item.status} 
             style={{ 
@@ -132,29 +146,31 @@ const Legend = ({ theme = '2025' }) => {
               </div>
             </div>
           </div>
-        ))}
-      </div>
-      
-      {/* Last Updated */}
-      <div style={{
-        marginTop: '1rem',
-        padding: '0.5rem',
-        borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem'
-      }}>
-        <div style={{ fontSize: '1rem' }}>🏜️</div>
-        <div style={{
-          fontSize: '0.7rem',
-          fontFamily: themeConfig.typography.primaryFont,
-          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
-          opacity: 0.6
-        }}>
-          Last Updated: 06/30/2025
-        </div>
-      </div>
+            ))}
+          </div>
+          
+          {/* Last Updated */}
+          <div style={{
+            marginTop: '1rem',
+            padding: '0.5rem',
+            borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
+          }}>
+            <div className="legend-desert-icon" style={{ fontSize: '1rem' }}>🏜️</div>
+            <div style={{
+              fontSize: '0.7rem',
+              fontFamily: themeConfig.typography.primaryFont,
+              color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+              opacity: 0.6
+            }}>
+              Last Updated: 06/30/2025
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

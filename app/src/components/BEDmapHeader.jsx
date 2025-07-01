@@ -11,6 +11,7 @@ const BEDmapHeader = ({ theme = '2024' }) => {
   
   return (
     <div
+      className="bed-header-container"
       style={{
         position: 'absolute',
         top: '-15rem',
@@ -28,6 +29,7 @@ const BEDmapHeader = ({ theme = '2024' }) => {
       <img 
         src="/brc-bed-map/BED_Map.V1_Facebook_Post_Square_3.png"
         alt="BED Map"
+        className="bed-header-image"
         style={{
           width: '800px',
           height: 'auto',

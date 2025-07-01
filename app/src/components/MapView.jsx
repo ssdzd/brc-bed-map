@@ -575,6 +575,67 @@ const MapView = () => {
       svgDoc.documentElement.appendChild(nimueIcon);
       console.log("Added Nimue501 artist credit at coordinates: 1100, 750");
     }
+
+    // Add BED Logo directly to SVG at The Man's coordinates + 15px right
+    const existingBedLogo = svgDoc.querySelector('#bed-logo-svg');
+    if (!existingBedLogo) {
+      const bedLogoGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      bedLogoGroup.setAttribute("id", "bed-logo-svg");
+      bedLogoGroup.setAttribute("transform", "translate(612.5, 272.04)"); // The Man's coords - 10px left
+      
+      // Create SVG image element for the BED logo
+      const bedLogoImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      bedLogoImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/logo-4x.png");
+      bedLogoImage.setAttribute("href", "/brc-bed-map/logo-4x.png");
+      bedLogoImage.setAttribute("x", "-180"); // Center the 360px image
+      bedLogoImage.setAttribute("y", "-180"); // Center the 360px image  
+      bedLogoImage.setAttribute("width", "360");
+      bedLogoImage.setAttribute("height", "360");
+      bedLogoImage.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      bedLogoImage.style.setProperty('filter', 'drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5))', 'important');
+      
+      // Add tooltip
+      const bedLogoTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      bedLogoTitle.textContent = "Bureau of Erotic Discourse";
+      
+      bedLogoGroup.appendChild(bedLogoImage);
+      bedLogoGroup.appendChild(bedLogoTitle);
+      
+      svgDoc.documentElement.appendChild(bedLogoGroup);
+      console.log("Added BED Logo to SVG at coordinates: 612.5, 272.04");
+    }
+
+    // Add BEDtalks.org text centered at The Man's x-coordinate, 400px lower
+    const existingBedText = svgDoc.querySelector('#bedtalks-text-svg');
+    if (!existingBedText) {
+      const bedTextGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      bedTextGroup.setAttribute("id", "bedtalks-text-svg");
+      bedTextGroup.setAttribute("transform", "translate(622.5, 847.04)"); // The Man's x-coord, y-coord + 575px
+      
+      // Create SVG text element for BEDtalks.org
+      const bedText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      bedText.setAttribute("x", "0");
+      bedText.setAttribute("y", "0");
+      bedText.setAttribute("text-anchor", "middle"); // Center the text horizontally
+      bedText.setAttribute("dominant-baseline", "middle"); // Center the text vertically
+      bedText.setAttribute("font-family", "Arial, sans-serif");
+      bedText.setAttribute("font-size", "24");
+      bedText.setAttribute("font-weight", "600");
+      bedText.setAttribute("fill", "#FFFFFF"); // White text
+      bedText.setAttribute("letter-spacing", "0.1em");
+      bedText.style.setProperty('filter', 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))', 'important');
+      bedText.textContent = "BEDtalks.org";
+      
+      // Add tooltip
+      const bedTextTitle = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      bedTextTitle.textContent = "Visit BEDtalks.org for more information";
+      
+      bedTextGroup.appendChild(bedText);
+      bedTextGroup.appendChild(bedTextTitle);
+      
+      svgDoc.documentElement.appendChild(bedTextGroup);
+      console.log("Added BEDtalks.org text to SVG at coordinates: 622.5, 847.04");
+    }
   }, [camps, loading, currentTheme, selectedBlock, currentFilter]);
 
   // Zoom and pan functions
@@ -678,6 +739,7 @@ const MapView = () => {
       
       <div 
         ref={containerRef}
+        className="map-container"
         style={{ 
           position: 'relative', 
           width: '100%', 
@@ -719,16 +781,18 @@ const MapView = () => {
       {/* BED map header for 2024 theme */}
       <BEDmapHeader theme={currentTheme} />
       
-      {/* Search Panel */}
-      <SearchPanel
-        camps={camps}
-        theme={currentTheme}
-        onCampSelect={handleCampSelect}
-        onFilterChange={handleFilterChange}
-        onFilterButtonClick={() => setSelectedBlock(null)}
-        isVisible={searchVisible}
-        onToggle={() => setSearchVisible(!searchVisible)}
-      />
+      {/* Search Panel - Hidden on mobile */}
+      <div className="desktop-only">
+        <SearchPanel
+          camps={camps}
+          theme={currentTheme}
+          onCampSelect={handleCampSelect}
+          onFilterChange={handleFilterChange}
+          onFilterButtonClick={() => setSelectedBlock(null)}
+          isVisible={searchVisible}
+          onToggle={() => setSearchVisible(!searchVisible)}
+        />
+      </div>
       
       {/* Title hidden for cleaner look */}
       {false && (
@@ -888,19 +952,21 @@ const MapView = () => {
       )}
       
       
-      {/* Stats Panel */}
-      <StatsPanel
-        camps={camps}
-        theme={currentTheme}
-        isVisible={statsVisible}
-        onToggle={() => {
-          setStatsVisible(!statsVisible);
-          // Close InfoPanel when stats opens due to overlap
-          if (!statsVisible) {
-            setSelectedBlock(null);
-          }
-        }}
-      />
+      {/* Stats Panel - Hidden on mobile */}
+      <div className="desktop-only">
+        <StatsPanel
+          camps={camps}
+          theme={currentTheme}
+          isVisible={statsVisible}
+          onToggle={() => {
+            setStatsVisible(!statsVisible);
+            // Close InfoPanel when stats opens due to overlap
+            if (!statsVisible) {
+              setSelectedBlock(null);
+            }
+          }}
+        />
+      </div>
       
       {/* Share Panel */}
       <SharePanel
@@ -963,13 +1029,13 @@ const MapView = () => {
         />
         
         
-        {/* Central B.E.D. Logo - positioned at The Man */}
-        <CentralLogo theme={currentTheme} />
+        {/* Central B.E.D. Logo - now added directly to SVG, so this component is hidden */}
+        {false && <CentralLogo theme={currentTheme} />}
         
         
       </div>
       
-      <div className="legend">
+      <div className="legend-container">
         <Legend theme={currentTheme} />
       </div>
       
@@ -994,7 +1060,10 @@ const MapView = () => {
       />
       
       {/* Corner Characters - only shown in 2024 theme */}
-      <CornerCharacters theme={currentTheme} />
+      {/* Corner Characters - Hidden on mobile */}
+      <div className="desktop-only">
+        <CornerCharacters theme={currentTheme} />
+      </div>
       
       {/* CSS Animations and SVG element hiding */}
       <style>{`
@@ -1017,6 +1086,70 @@ const MapView = () => {
         
         #Temple {
           display: none !important;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          /* Hide desktop-only elements on mobile */
+          .desktop-only {
+            display: none !important;
+          }
+          
+          /* Center legend on mobile and raise it slightly */
+          .legend-container {
+            position: fixed !important;
+            bottom: 1.5rem !important; /* Raised from 1rem to 1.5rem */
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            z-index: 20 !important;
+            width: auto !important;
+          }
+          
+          /* Override legend internal positioning and make it wider on mobile */
+          .legend-container > div {
+            position: relative !important;
+            bottom: auto !important;
+            left: auto !important;
+            width: 90vw !important; /* Use most of screen width */
+            max-width: 600px !important; /* Reasonable max width */
+          }
+          
+          /* Make legend items flow horizontally to reduce height when expanded */
+          .legend-container > div > div[style*="flex-direction: column"] {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            gap: 0.75rem !important;
+            justify-content: center !important;
+          }
+          
+          /* Style individual legend items for horizontal layout */
+          .legend-container > div > div[style*="flex-direction: column"] > div {
+            flex: 0 1 auto !important;
+            min-width: 120px !important;
+            text-align: center !important;
+          }
+          
+          /* Hide the desert icon in the last updated section on mobile */
+          .legend-desert-icon {
+            display: none !important;
+          }
+          
+          /* Shrink BED header by 20% on mobile and adjust positioning */
+          .bed-header-image {
+            width: 640px !important; /* 800px * 0.8 = 640px */
+          }
+          
+          .bed-header-container {
+            top: -10rem !important; /* Use better distance from top like desktop */
+          }
+          
+          /* Lower the map container to maintain spacing with header */
+          .map-container {
+            transform: translateY(0px) !important; /* Remove the upward translation */
+          }
+          
+          /* BED logo is now SVG-based and scales automatically with the map */
         }
       `}</style>
     </div>

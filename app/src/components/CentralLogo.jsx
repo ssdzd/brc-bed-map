@@ -1,6 +1,6 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
-import logoImage from '../assets/logo@4x.png';
+import logoImage from '../assets/logo-4x.png';
 import fullnameImage from '../assets/fullname@4x.png';
 
 const CentralLogo = ({ theme = '2025' }) => {
