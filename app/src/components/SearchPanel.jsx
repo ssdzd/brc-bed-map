@@ -64,7 +64,7 @@ const SearchPanel = ({
           bottom: '1rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 20
+          zIndex: 35
         }}
       >
         <button
@@ -122,7 +122,7 @@ const SearchPanel = ({
           : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
         border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
         backdropFilter: 'blur(20px)',
-        zIndex: 20,
+        zIndex: 35,
         transition: 'all 0.3s ease',
         animation: 'slideDown 0.3s ease-out'
       }}

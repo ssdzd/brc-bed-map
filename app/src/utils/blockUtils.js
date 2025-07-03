@@ -74,6 +74,69 @@ const segmentToTime = (segment) => {
   return `${hour}:${minute.toString().padStart(2, '0')}`;
 };
 
+// Plaza quarter renaming mapping based on geographic orientation
+const PLAZA_QUARTER_MAPPING = {
+  // Center Camp: 6:00 & A Plaza (Quarter A touches 5:30 & A)
+  'plaza_Center_Camp_Quarter_A': '5:59 & A+',
+  'plaza_Center_Camp_Quarter_B': '5:59 & A-',
+  'plaza_Center_Camp_Quarter_C': '6:01 & A-',
+  'plaza_Center_Camp_Quarter_D': '6:01 & A+',
+  
+  // 6:00 & G Plaza (Quarter A touches 5:30 & G)
+  'plaza_6:00_G_Quarter_A': '5:59 & G+',
+  'plaza_6:00_G_Quarter_B': '5:59 & G-',
+  'plaza_6:00_G_Quarter_C': '6:01 & G-',
+  'plaza_6:00_G_Quarter_D': '6:01 & G+',
+  
+  // 3:00 & B Plaza (Quarter A touches 2:30 & B)
+  'plaza_3:00_B_Quarter_A': '3:01 & B+',
+  'plaza_3:00_B_Quarter_B': '2:59 & B+',
+  'plaza_3:00_B_Quarter_C': '2:59 & B-',
+  'plaza_3:00_B_Quarter_D': '3:01 & B-',
+  
+  // 3:00 & G Plaza
+  'plaza_3:00_G_Quarter_A': '3:01 & G+',
+  'plaza_3:00_G_Quarter_B': '2:59 & G+',
+  'plaza_3:00_G_Quarter_C': '2:59 & G-',
+  'plaza_3:00_G_Quarter_D': '3:01 & G-',
+  
+  // 9:00 & B Plaza (Quarter A touches 8:30 & A)
+  'plaza_9:00_B_Quarter_A': '8:59 & B-',
+  'plaza_9:00_B_Quarter_B': '9:01 & B-',
+  'plaza_9:00_B_Quarter_C': '9:01 & B+',
+  'plaza_9:00_B_Quarter_D': '8:59 & B+',
+  
+  // 9:00 & G Plaza (Quarter A touches 8:30 & F)
+  'plaza_9:00_G_Quarter_A': '8:59 & G-',
+  'plaza_9:00_G_Quarter_B': '9:01 & G-',
+  'plaza_9:00_G_Quarter_C': '9:01 & G+',
+  'plaza_9:00_G_Quarter_D': '8:59 & G+',
+  
+  // 7:30 & B Plaza (Quarter A touches 7:00 & B)
+  'plaza_7:30_B_Quarter_A': '7:29 & B+',
+  'plaza_7:30_B_Quarter_B': '7:29 & B-',
+  'plaza_7:30_B_Quarter_C': '7:31 & B-',
+  'plaza_7:30_B_Quarter_D': '7:31 & B+',
+  
+  // 7:30 & G Plaza (Quarter A touches 7:00 & G)
+  'plaza_7:30_G_Quarter_A': '7:29 & G+',
+  'plaza_7:30_G_Quarter_B': '7:29 & G-',
+  'plaza_7:30_G_Quarter_C': '7:31 & G-',
+  'plaza_7:30_G_Quarter_D': '7:31 & G+',
+  
+  // 4:30 & B Plaza (Quarter B touches 4:00 & B)
+  'plaza_4:30_B_Quarter_A': '4:31 & B+',
+  'plaza_4:30_B_Quarter_B': '4:29 & B+',
+  'plaza_4:30_B_Quarter_C': '4:29 & B-',
+  'plaza_4:30_B_Quarter_D': '4:31 & B-',
+  
+  // 4:30 & G Plaza (Quarter B touches 4:00 & G)
+  'plaza_4:30_G_Quarter_A': '4:31 & G+',
+  'plaza_4:30_G_Quarter_B': '4:29 & G+',
+  'plaza_4:30_G_Quarter_C': '4:29 & G-',
+  'plaza_4:30_G_Quarter_D': '4:31 & G-'
+};
+
 // Convert block ID back to display format (handles both street blocks and plaza quarters)
 export const blockIdToDisplayAddress = (blockId) => {
   // Handle special locations
@@ -81,16 +144,21 @@ export const blockIdToDisplayAddress = (blockId) => {
     return 'BRC Airport';
   }
   
-  // Handle plaza quarter block IDs like "plaza_3:00_B_Quarter_A"
+  // Handle plaza quarter block IDs with new geographic naming
   if (blockId.startsWith('plaza_')) {
-    // Handle Center Camp quarters
+    // Check if this is a plaza quarter with new naming
+    if (PLAZA_QUARTER_MAPPING[blockId]) {
+      return PLAZA_QUARTER_MAPPING[blockId];
+    }
+    
+    // Handle Center Camp quarters (fallback)
     const centerCampMatch = blockId.match(/^plaza_Center_Camp(?:_Quarter_([A-D]))?$/);
     if (centerCampMatch) {
       const quarter = centerCampMatch[1];
       return quarter ? `Center Camp Quarter ${quarter}` : 'Center Camp';
     }
     
-    // Handle regular plaza quarters
+    // Handle regular plaza quarters (fallback)
     const plazaMatch = blockId.match(/^plaza_(\d{1,2}:\d{2})_([BG])(?:_Quarter_([A-D]))?$/);
     if (plazaMatch) {
       const [_, time, ring, quarter] = plazaMatch;
@@ -106,6 +174,20 @@ export const blockIdToDisplayAddress = (blockId) => {
 
 // Enhanced address parsing with plaza quarter support
 const parseAddress = (address) => {
+  // Handle new geographic plaza quarter format like "5:59 & A+", "7:29 & G-"
+  const geographicPlazaMatch = address.match(/(\d{1,2}):(\d{2})\s*&\s*([A-G])([+-])/);
+  if (geographicPlazaMatch) {
+    const [_, hour, minute, street, direction] = geographicPlazaMatch;
+    return {
+      street: street + direction, // Combined street and direction (e.g., "A+", "G-")
+      hour: parseInt(hour),
+      minute: parseInt(minute),
+      quarter: null,
+      isPlaza: true,
+      isGeographicPlaza: true
+    };
+  }
+  
   // Handle plaza quarters like "3:00 B Plaza Quarter A" or "9:00 Plaza"
   const plazaMatch = address.match(/(\d{1,2}):(\d{2})\s*([BG])?\s*Plaza(?:\s*Quarter\s*([A-D]))?/i);
   if (plazaMatch) {
@@ -164,6 +246,17 @@ const parseAddress = (address) => {
   return null;
 };
 
+// Reverse mapping: convert geographic names back to block IDs for matching
+const getBlockIdFromGeographicName = (geographicName) => {
+  // Find the block ID that maps to this geographic name
+  for (const [blockId, displayName] of Object.entries(PLAZA_QUARTER_MAPPING)) {
+    if (displayName === geographicName) {
+      return blockId;
+    }
+  }
+  return null;
+};
+
 // Check if a camp address matches a block
 export const campInBlock = (campAddress, blockId) => {
   const { street, approximateTime } = parseBlockId(blockId);
@@ -173,6 +266,12 @@ export const campInBlock = (campAddress, blockId) => {
   
   // Handle plaza blocks with new quarter system
   if (parsedAddress.isPlaza) {
+    // Handle new geographic plaza quarter format
+    if (parsedAddress.isGeographicPlaza) {
+      const geographicAddress = `${parsedAddress.hour}:${parsedAddress.minute.toString().padStart(2, '0')} & ${parsedAddress.street}`;
+      const matchingBlockId = getBlockIdFromGeographicName(geographicAddress);
+      return matchingBlockId === blockId;
+    }
     // Handle Center Camp
     if (parsedAddress.isCenterCamp) {
       if (blockId.startsWith('plaza_Center_Camp')) {

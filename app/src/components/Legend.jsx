@@ -184,6 +184,57 @@ const Legend = ({ theme = '2025' }) => {
               Last Updated: 06/30/2025
             </div>
           </div>
+          
+          {/* Update BEDmap Button - Mobile only */}
+          <div className="mobile-only" style={{
+            marginTop: '1rem',
+            padding: '0.5rem 0 0 0',
+            borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+          }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent legend toggle
+                window.open('https://bedtalks.org/bedmapupdate', '_blank', 'noopener,noreferrer');
+              }}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontFamily: themeConfig.typography.primaryFont,
+                fontWeight: '600',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                boxShadow: theme === '2024' 
+                  ? '0 4px 15px rgba(255,105,180,0.3)'
+                  : '0 4px 15px rgba(59,130,246,0.3)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = theme === '2024' 
+                  ? '0 6px 20px rgba(255,105,180,0.4)'
+                  : '0 6px 20px rgba(59,130,246,0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0px)';
+                e.target.style.boxShadow = theme === '2024' 
+                  ? '0 4px 15px rgba(255,105,180,0.3)'
+                  : '0 4px 15px rgba(59,130,246,0.3)';
+              }}
+            >
+              <div style={{ textAlign: 'center', lineHeight: '1.2' }}>
+                Don't See Your Camp?<br />
+                Update the BEDmap
+              </div>
+            </button>
+          </div>
         </>
       )}
     </div>

@@ -3,6 +3,11 @@ import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddr
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
 const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false }) => {
+  // Handle special landmark selections
+  if (blockId === 'airport-polygon') {
+    return renderLandmarkPanel('airport', theme, onClose);
+  }
+  
   const { street, approximateTime } = parseBlockId(blockId);
   const campsInBlock = camps.filter(camp => 
     campInBlock(camp.placement_address, blockId)
@@ -30,7 +35,7 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
           : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
         border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
         backdropFilter: 'blur(20px)',
-        zIndex: 15,
+        zIndex: 35,
         transition: 'all 0.3s ease',
         animation: 'slideInRight 0.3s ease-out',
         padding: '1.5rem'
@@ -226,6 +231,139 @@ const formatStatus = (status) => {
     bed_talk: 'Scheduled BED talk'
   };
   return statusLabels[status] || statusLabels.none;
+};
+
+const renderLandmarkPanel = (landmarkType, theme, onClose) => {
+  const themeConfig = THEMES[theme];
+  
+  const landmarkInfo = {
+    airport: {
+      title: "BRC Airport",
+      description: "Black Rock City Airport serves the Burning Man community with private aircraft access.",
+      details: [
+        "Private aircraft only",
+        "Located outside the event perimeter", 
+        "Registration required for aircraft",
+        "Ground transportation available to event"
+      ],
+      icon: "✈️"
+    }
+  };
+  
+  const info = landmarkInfo[landmarkType];
+  
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: '1rem',
+        right: '1rem',
+        width: '280px',
+        backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
+        borderRadius: '1rem',
+        boxShadow: themeConfig.isDark 
+          ? '0 25px 50px rgba(255, 105, 180, 0.15), 0 10px 20px rgba(0, 0, 0, 0.4)'
+          : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
+        border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
+        backdropFilter: 'blur(20px)',
+        zIndex: 35,
+        transition: 'all 0.3s ease',
+        animation: 'slideInRight 0.3s ease-out',
+        padding: '1.5rem'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+        <div>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            color: themeConfig.isDark ? '#FFFFFF' : '#000000',
+            fontFamily: themeConfig.typography.displayFont,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>{info.icon}</span>
+            {info.title}
+          </h2>
+          <p style={{
+            fontSize: '0.875rem',
+            color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            margin: 0,
+            fontFamily: themeConfig.typography.bodyFont
+          }}>
+            Special Landmark
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            fontSize: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'color 0.2s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.color = themeConfig.isDark ? '#FFFFFF' : '#000000'}
+          onMouseOut={(e) => e.currentTarget.style.color = themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+        >
+          ×
+        </button>
+      </div>
+      
+      <div style={{
+        padding: '1rem',
+        backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+        borderRadius: '0.75rem',
+        marginBottom: '1rem'
+      }}>
+        <p style={{
+          fontSize: '0.875rem',
+          fontFamily: themeConfig.typography.primaryFont,
+          color: themeConfig.textColor,
+          margin: '0 0 1rem 0',
+          lineHeight: '1.4'
+        }}>
+          {info.description}
+        </p>
+        
+        <ul style={{
+          fontSize: '0.8rem',
+          fontFamily: themeConfig.typography.primaryFont,
+          color: themeConfig.isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+          margin: 0,
+          paddingLeft: '1.2rem',
+          lineHeight: '1.6'
+        }}>
+          {info.details.map((detail, index) => (
+            <li key={index} style={{ marginBottom: '0.25rem' }}>
+              {detail}
+            </li>
+          ))}
+        </ul>
+      </div>
+      
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default InfoPanel;

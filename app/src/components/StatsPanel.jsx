@@ -146,7 +146,7 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
           : '0 25px 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05)',
         border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid rgba(0,0,0,0.08)',
         backdropFilter: 'blur(20px)',
-        zIndex: 15,
+        zIndex: 35,
         transition: 'all 0.3s ease',
         animation: 'slideInRight 0.3s ease-out'
       }}

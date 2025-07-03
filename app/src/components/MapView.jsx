@@ -14,6 +14,7 @@ import CornerCharacters from './CornerCharacters';
 import SearchPanel from './SearchPanel';
 import StatsPanel from './StatsPanel';
 import SharePanel from './SharePanel';
+import UpdatePanel from './UpdatePanel';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorDisplay from './ErrorDisplay';
 import { useUrlState } from '../hooks/useUrlState';
@@ -35,6 +36,7 @@ const MapView = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
+  const [updateVisible, setUpdateVisible] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);
   const [currentFilter, setCurrentFilter] = useState({ statusFilter: 'all', filteredCamps: [] });
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
@@ -156,24 +158,30 @@ const MapView = () => {
       
       // Apply selection styling if this block is selected (highest priority)
       if (isSelected) {
-        // Apply white glow selection styling
-        block.style.setProperty('stroke', '#FFFFFF', 'important');
+        // Check if block has unregistered camps (BED status 'none') to determine stroke color
+        const isUnregisteredBlock = campsInBlock.length > 0 && campsInBlock.every(camp => camp.bed_status === 'none');
+        
+        // Use gray for unregistered blocks, white for all others
+        const strokeColor = isUnregisteredBlock ? '#9CA3AF' : '#FFFFFF';
+        const glowColor = isUnregisteredBlock ? '156, 163, 175' : '255, 255, 255'; // RGB values for rgba
+        
+        block.style.setProperty('stroke', strokeColor, 'important');
         block.style.setProperty('stroke-width', '6', 'important');
         block.style.setProperty('stroke-opacity', '1.0', 'important');
         block.style.setProperty('stroke-dasharray', 'none', 'important');
         block.style.setProperty('stroke-linejoin', 'round', 'important');
         block.style.setProperty('stroke-linecap', 'round', 'important');
         
-        // Multiple layered glow effects for maximum visibility
+        // Multiple layered glow effects using appropriate color
         const glowFilter = [
           'brightness(1.3)',
-          'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
-          'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
-          'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
+          `drop-shadow(0 0 20px rgba(${glowColor}, 1.0))`,
+          `drop-shadow(0 0 10px rgba(${glowColor}, 0.9))`,
+          `drop-shadow(0 0 5px rgba(${glowColor}, 0.8))`,
           'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
         ].join(' ');
         block.style.setProperty('filter', glowFilter, 'important');
-        console.log(`Applied selection styling to block ${block.id}`);
+        console.log(`Applied selection styling to block ${block.id} with ${isUnregisteredBlock ? 'gray' : 'white'} stroke`);
       } else if (!shouldHighlight) {
         // Only remove stroke/filter if block is not highlighted by filter
         if (!block.classList.contains('plaza-quarter')) {
@@ -292,23 +300,26 @@ const MapView = () => {
         setSearchVisible(false);
         setStatsVisible(false);
         setShareVisible(false);
+        setUpdateVisible(false);
       };
     });
 
-    // Handle Nimue icon selection styling
-    const nimueImage = svgDoc.querySelector('#nimue-icon image');
-    if (nimueImage && selectedBlock === 'nimue-artist-credit') {
-      const selectionFilter = [
-        'brightness(3)',
-        'contrast(0.2)',
-        'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0))',
-        'drop-shadow(0 0 10px rgba(255, 255, 255, 0.9))',
-        'drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))',
-        'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
-      ].join(' ');
-      nimueImage.style.setProperty('filter', selectionFilter, 'important');
-    } else if (nimueImage) {
-      nimueImage.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
+    // Handle Airport polygon selection styling
+    const airportPolygon = svgDoc.querySelector('#airport-polygon');
+    
+    if (airportPolygon && selectedBlock === 'airport-polygon') {
+      // Apply selection styling like other selected blocks
+      airportPolygon.style.setProperty('stroke', 'rgba(255, 105, 180, 1.0)', 'important');
+      airportPolygon.style.setProperty('stroke-width', '4', 'important');
+      airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
+      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 105, 180, 0.8)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))', 'important');
+    } else if (airportPolygon) {
+      // Reset to default styling (gradient fill with 70% opacity, white stroke like other city blocks)
+      airportPolygon.style.setProperty('stroke', 'white', 'important');
+      airportPolygon.style.setProperty('stroke-width', '2', 'important');
+      airportPolygon.style.setProperty('fill', `url(#${gradientId})`, 'important');
+      airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
+      airportPolygon.style.setProperty('filter', 'none', 'important');
     }
 
     // Remove any special SVG styling since we only use 2024 theme
@@ -526,62 +537,68 @@ const MapView = () => {
       console.log("Added Ranger HQ icon at coordinates: 565, 495");
     }
     
-    // Add Nimue501 icon at bottom right corner (off the map)
-    const existingNimue = svgDoc.querySelector('#nimue-icon');
-    if (!existingNimue) {
-      const nimueIcon = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      nimueIcon.setAttribute("id", "nimue-icon");
-      nimueIcon.setAttribute("transform", "translate(1100, 750)"); // Moved up 50px
-      nimueIcon.style.setProperty('cursor', 'pointer', 'important');
+    // Add Airport polygon at bottom right corner (off the map) - simplified Nimue airplane shape
+    const existingAirport = svgDoc.querySelector('#airport-polygon');
+    if (!existingAirport) {
+      const airportPolygon = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      airportPolygon.setAttribute("id", "airport-polygon");
+      airportPolygon.setAttribute("transform", "translate(1100, 750) scale(0.8)"); // Scale down 80%
       
-      // Load the Nimue501 SVG
-      const nimueImageElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
-      nimueImageElement.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "/brc-bed-map/NImue501.svg");
-      nimueImageElement.setAttribute("href", "/brc-bed-map/NImue501.svg");
-      nimueImageElement.setAttribute("x", "-80");
-      nimueImageElement.setAttribute("y", "-80");
-      nimueImageElement.setAttribute("width", "160");
-      nimueImageElement.setAttribute("height", "160");
-      nimueImageElement.setAttribute("class", "cls-2");
-      // Use filters to make the airplane bright/white and add glow
-      nimueImageElement.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-      nimueImageElement.style.setProperty('transition', 'all 0.3s ease', 'important');
+      // Actual Nimue airplane shape from traced SVG - scaled and centered
+      // Original viewBox: 0 0 270 281, centering around (135, 140.5) and scaling down
+      const airplanePath = 'M 63.040 -139.830 C 51.411 -134.765, 50.791 -133.772, 36.504 -97.290 C 30.130 -81.012, 26.260 -72.405, 25.164 -72.066 C 24.249 -71.783, -9.561 -63.657, -49.968 -54.008 C -90.376 -44.358, -123.717 -36.134, -124.060 -35.732 C -125.096 -34.514, -135 -10.748, -135 -9.478 C -135 -8.629, -133.102 -8.460, -128.250 -8.878 C -124.537 -9.198, -95.175 -9.714, -63 -10.025 C -30.825 -10.336, -2.858 -10.827, -0.850 -11.116 L 2.800 -11.642 -14.093 31.089 C -23.384 54.591, -31.102 73.908, -31.243 74.016 C -31.384 74.125, -41.157 76.785, -52.961 79.928 C -78.478 86.723, -75.010 84.850, -78.995 93.989 C -83.090 103.380, -85.475 102.213, -56.666 104.915 L -32.111 107.217 -18.805 118.549 C -11.487 124.782, -2.908 132.117, 0.259 134.848 C 3.426 137.580, 6.212 139.621, 6.449 139.384 C 7.397 138.436, 13 125.223, 13 123.935 C 13 123.177, 8.275 114.065, 2.500 103.686 C -3.275 93.308, -8 84.162, -8 83.362 C -8 82.154, 28.308 1.859, 29.305 0.862 C 29.482 0.685, 50.720 23.037, 76.501 50.533 C 102.282 78.028, 123.669 100.182, 124.029 99.762 C 124.995 98.635, 135 74.828, 135 73.656 C 135 73.105, 117.401 42.893, 95.891 6.519 L 56.781 -59.615 69.641 -87.735 C 83.826 -118.755, 84.245 -120.412, 80.622 -131.193 C 77.186 -141.417, 72.251 -143.842, 63.040 -139.830';
       
-      // Add hover effects like other polygons
-      nimueIcon.onmouseenter = (e) => {
-        nimueImageElement.style.setProperty('filter', 'brightness(2.5) contrast(0.3) drop-shadow(0 0 12px rgba(255, 105, 180, 1.0)) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-        nimueImageElement.style.setProperty('transform', 'scale(1.1)', 'important');
+      airportPolygon.setAttribute("d", airplanePath);
+      airportPolygon.setAttribute("fill", `url(#${gradientId})`);  // Use same gradient as city blocks
+      airportPolygon.setAttribute("fill-opacity", "0.7");  // 70% opacity
+      airportPolygon.setAttribute("stroke", "#FFFFFF");
+      airportPolygon.setAttribute("stroke-miterlimit", "10");
+      airportPolygon.setAttribute("filter", "url(#plazaShadow)");
+      airportPolygon.style.setProperty('cursor', 'pointer', 'important');
+      airportPolygon.style.setProperty('transition', 'all 0.3s ease', 'important');
+      
+      // Add hover effects like other blocks
+      airportPolygon.onmouseenter = (e) => {
+        airportPolygon.style.setProperty('stroke', 'rgba(255, 105, 180, 1.0)', 'important');
+        airportPolygon.style.setProperty('stroke-width', '3', 'important');
+        airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.8))', 'important');
         
         // Show tooltip
         setTooltip({
           visible: true,
-          content: { title: "BRC Airport", description: "Airport information" },
+          content: { title: "BRC Airport", description: "Black Rock City Airport" },
           position: { x: e.clientX, y: e.clientY }
         });
       };
       
-      nimueIcon.onmouseleave = () => {
-        nimueImageElement.style.setProperty('filter', 'brightness(2) contrast(0.5) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(0 0 8px white) drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))', 'important');
-        nimueImageElement.style.setProperty('transform', 'scale(1)', 'important');
+      airportPolygon.onmouseleave = () => {
+        airportPolygon.style.setProperty('stroke', 'white', 'important');
+        airportPolygon.style.setProperty('stroke-width', '2', 'important');
+        airportPolygon.style.setProperty('filter', 'none', 'important');
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
       };
       
       // Add click handler for selection
-      nimueIcon.onclick = (e) => {
+      airportPolygon.onclick = (e) => {
         e.stopPropagation();
-        setSelectedBlock('nimue-artist-credit');
+        setSelectedBlock('airport-polygon');
         
         // Close other panels when clicked
         setSearchVisible(false);
         setStatsVisible(false);
         setShareVisible(false);
+        setUpdateVisible(false);
         
-        console.log("Nimue501 artist credit selected");
+        console.log("Airport polygon selected");
       };
       
-      nimueIcon.appendChild(nimueImageElement);
-      svgDoc.documentElement.appendChild(nimueIcon);
-      console.log("Added Nimue501 artist credit at coordinates: 1100, 750");
+      // Add tooltip title
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = "BRC Airport - Black Rock City Airport";
+      airportPolygon.appendChild(title);
+      
+      svgDoc.documentElement.appendChild(airportPolygon);
+      console.log("Added Airport polygon at coordinates: 1100, 750");
     }
 
     // Add BED Logo directly to SVG at The Man's coordinates + 15px right
@@ -998,20 +1015,31 @@ const MapView = () => {
         />
       </div>
       
-      {/* Share Panel */}
-      <SharePanel
-        theme={currentTheme}
-        isVisible={shareVisible}
-        onToggle={() => setShareVisible(!shareVisible)}
-        onCopyUrl={copyToClipboard}
-        currentState={{
-          theme: currentTheme,
-          zoom,
-          pan,
-          selectedBlock,
-          search: '' // Could be connected to search state
-        }}
-      />
+      {/* Share Panel - Hidden on mobile */}
+      <div className="desktop-only">
+        <SharePanel
+          theme={currentTheme}
+          isVisible={shareVisible}
+          onToggle={() => setShareVisible(!shareVisible)}
+          onCopyUrl={copyToClipboard}
+          currentState={{
+            theme: currentTheme,
+            zoom,
+            pan,
+            selectedBlock,
+            search: '' // Could be connected to search state
+          }}
+        />
+      </div>
+      
+      {/* Update Panel - Hidden on mobile */}
+      <div className="desktop-only">
+        <UpdatePanel
+          theme={currentTheme}
+          isVisible={updateVisible}
+          onToggle={() => setUpdateVisible(!updateVisible)}
+        />
+      </div>
       
       {/* Zoom controls hidden */}
       {false && (
@@ -1144,6 +1172,11 @@ const MapView = () => {
             display: none !important;
           }
           
+          /* Show mobile-only elements on mobile */
+          .mobile-only {
+            display: block !important;
+          }
+          
           /* Resize and reposition map container on mobile */
           .map-container:last-of-type {
             width: 100vw !important;
@@ -1202,11 +1235,9 @@ const MapView = () => {
           
           /* BED logo is now SVG-based and scales automatically with the map */
           
-          /* Move share panel down on mobile and ensure it's on top of map */
-          .share-panel-container {
-            top: calc(50% + 3rem) !important;
-            z-index: 25 !important;
-          }
+          /* Share panel is hidden on mobile via desktop-only wrapper */
+          
+          /* Update panel is hidden on mobile via desktop-only wrapper */
           
           /* Legend date positioning - mobile uses header, desktop uses footer */
           .legend-header-date {
@@ -1231,6 +1262,11 @@ const MapView = () => {
         
         /* Desktop legend date positioning - hide header date, show footer date */
         @media (min-width: 769px) {
+          /* Hide mobile-only elements on desktop */
+          .mobile-only {
+            display: none !important;
+          }
+          
           .legend-header-date {
             display: none !important;
           }
