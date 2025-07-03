@@ -11,7 +11,7 @@ Each plaza is divided into 4 quarters labeled A, B, C, D in counter-clockwise or
 ```
     B (top-left)     A (top-right)    
          |               |
-    C (bottom-left)  D (bottom-right)
+    C (bottom-left)  D (bottom-right)J
 ```
 
 ## Plaza Locations and Their Quarter Systems
