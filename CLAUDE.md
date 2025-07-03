@@ -107,6 +107,40 @@ Table: "BED_Camp_Progress" (ready for integration)
 
 Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps at Burning Man.
 
+## Development Todos
+
+### High Priority
+- **Integrate Airtable API for live data sync** ✅ *Completed*
+- **Implement address parsing from 'C & 3:45' format to block_id (including plaza quarters)** ✅ *Completed*
+
+### Medium Priority
+- **Fix hover tooltip positions for blocks** - May need to resize map instead of scaling to get accurate coordinates
+- **Update copy for BRC Airport info panel popup** - More accurate and useful information needed
+- **Handle BED status labels from Airtable for plaza quarters and airport** - Currently only handles regular camp blocks
+- **Style Airport block as a unique landmark** ✅ *Completed*
+- **Rename plaza quarters with geographically intuitive names** ✅ *Completed*
+- **Fix the selection highlight for unregistered blocks** ✅ *Completed*
+- **Add 'Update the BEDmap' button** ✅ *Completed*
+- **Add Ranger HQ, Medical icons, and Airport block** ✅ *Completed*
+- **Optimize performance for large camp datasets**
+- **Add proper error boundaries and fallback UI components**
+- **Add comprehensive testing suite (unit, integration, e2e)**
+- **Enhance mobile responsiveness with improved scaling and positioning** ✅ *Completed*
+- **Make map sizing more robust and resistant to CSS changes** ✅ *Completed*
+- **Add invisible balancing element to fix SVG centering issue** ✅ *Completed*
+- **Polish the 2025 theme visuals (shadows, contrast, separation)** ✅ *Completed*
+- **Polish Search & Filter panel layout and spacing** ✅ *Completed*
+- **Clean up Legend Text by shortening labels** ✅ *Completed*
+- **Add loading and error states during data fetch** ✅ *Completed*
+- **Fix selected block highlight overlapping on hover** ✅ *Completed*
+
+### Low Priority
+- **Add accessibility labels to all interactive map regions**
+- **Create 'Export to Figma/Canva' button with map overlay**
+- **Add debug mode toggle to show hidden developer tools**
+- **Implement analytics and performance monitoring**
+- **Fix missing block highlight when camp is searched** ✅ *Completed*
+
 ## Git Workflow Instructions for Claude Code
 When making changes to files:
 1. Always commit changes after user approval with descriptive commit messages
