@@ -58,7 +58,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
         >
           <div style={{ textAlign: 'center', lineHeight: '1.2' }}>
             Don't See Your Camp?<br />
-            Update the BEDmap
+            Update the BEDmap!
           </div>
         </button>
       </div>
@@ -102,7 +102,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
           alignItems: 'center',
           gap: '0.5rem'
         }}>
-          📝 Update the BEDmap
+          📝 Update the BEDmap!
         </h3>
         <button
           onClick={() => onToggle && onToggle()}

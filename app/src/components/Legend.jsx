@@ -231,7 +231,7 @@ const Legend = ({ theme = '2025' }) => {
             >
               <div style={{ textAlign: 'center', lineHeight: '1.2' }}>
                 Don't See Your Camp?<br />
-                Update the BEDmap
+                Update the BEDmap!
               </div>
             </button>
           </div>
