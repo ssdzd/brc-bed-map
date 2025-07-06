@@ -81,11 +81,11 @@ const MapView = () => {
     console.log('SVG doc:', svgDoc);
     if (!svgDoc) return;
 
-    // Extend SVG viewBox to accommodate invisible balancing element
+    // Extend SVG viewBox to accommodate invisible balancing element and airport
     const svgElement = svgDoc.documentElement;
     if (svgElement && svgElement.getAttribute('viewBox') === '0 0 1160.17 861.54') {
-      svgElement.setAttribute('viewBox', '0 0 1240 861.54');
-      console.log('Extended SVG viewBox to accommodate balancing element');
+      svgElement.setAttribute('viewBox', '0 0 1240 1011.54');
+      console.log('Extended SVG viewBox to accommodate balancing element and airport');
     }
 
 
@@ -324,7 +324,7 @@ const MapView = () => {
       airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
       airportPolygon.style.setProperty('stroke-width', '6', 'important');
       airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
-      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))', 'important');
+      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.4))', 'important');
     } else if (airportPolygon) {
       // Reset to default styling (gradient fill with 70% opacity, white stroke like other city blocks)
       airportPolygon.style.setProperty('stroke', 'white', 'important');
@@ -554,7 +554,7 @@ const MapView = () => {
     if (!existingAirport) {
       const airportPolygon = document.createElementNS("http://www.w3.org/2000/svg", "path");
       airportPolygon.setAttribute("id", "airport-polygon");
-      airportPolygon.setAttribute("transform", "translate(1100, 750) scale(0.8)"); // Scale down 80%
+      airportPolygon.setAttribute("transform", "translate(1100, 775) scale(0.8)"); // Scale down 80%, moved down 50px
       
       // Actual Nimue airplane shape from traced SVG - scaled and centered
       // Original viewBox: 0 0 270 281, centering around (135, 140.5) and scaling down
@@ -624,7 +624,7 @@ const MapView = () => {
       airportPolygon.appendChild(title);
       
       svgDoc.documentElement.appendChild(airportPolygon);
-      console.log("Added Airport polygon at coordinates: 1100, 750");
+      console.log("Added Airport polygon at coordinates: 1100, 775");
     }
 
     // Add BED Logo directly to SVG at The Man's coordinates + 15px right
@@ -709,6 +709,27 @@ const MapView = () => {
       svgDoc.documentElement.appendChild(bedTextGroup);
       console.log("Added BEDtalks.org text to SVG at coordinates: 622.5, 847.04");
     }
+
+    // Add invisible bottom balancer 100px below airport to ensure glow effects aren't clipped
+    const existingBottomBalancer = svgDoc.querySelector('#bottom-balancer');
+    if (!existingBottomBalancer) {
+      const bottomBalancerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      bottomBalancerGroup.setAttribute("id", "bottom-balancer");
+      bottomBalancerGroup.setAttribute("transform", "translate(1100, 875)"); // 100px below airport at y=775
+      
+      // Create invisible circle to extend SVG bounds for glow effects
+      const bottomBalancerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      bottomBalancerCircle.setAttribute("cx", "0");
+      bottomBalancerCircle.setAttribute("cy", "0");
+      bottomBalancerCircle.setAttribute("r", "1"); // Minimal size
+      bottomBalancerCircle.setAttribute("fill", "transparent");
+      bottomBalancerCircle.setAttribute("opacity", "0");
+      bottomBalancerCircle.setAttribute("pointer-events", "none");
+      
+      bottomBalancerGroup.appendChild(bottomBalancerCircle);
+      svgDoc.documentElement.appendChild(bottomBalancerGroup);
+      console.log("Added bottom balancer element at coordinates: 1100, 875 to prevent glow clipping");
+    }
   }, [camps, loading, currentTheme, selectedBlock, currentFilter]);
 
   // Zoom and pan functions
@@ -788,9 +809,7 @@ const MapView = () => {
 
   const handleWheel = (e) => {
     e.preventDefault();
-    const delta = e.deltaY;
-    const zoomFactor = delta > 0 ? 0.9 : 1.1;
-    setZoom(prevZoom => Math.max(0.3, Math.min(3, prevZoom * zoomFactor)));
+    // Zoom functionality disabled - preventing default scroll behavior only
   };
 
   // Add event listeners for pan and zoom
@@ -829,7 +848,7 @@ const MapView = () => {
           width: '100%', 
           height: '100vh', 
           background: theme.background,
-          overflow: 'hidden',
+          overflow: 'visible',
           cursor: 'default',
           userSelect: 'none',
           WebkitUserSelect: 'none',
@@ -1289,12 +1308,12 @@ const MapView = () => {
         
         /* Robust map container styling to prevent size changes */
         .map-container {
-          contain: layout style size !important;
+          contain: layout style !important;
           isolation: isolate !important;
         }
         
         .map-container object {
-          contain: layout style size !important;
+          contain: layout style !important;
           isolation: isolate !important;
         }
         
