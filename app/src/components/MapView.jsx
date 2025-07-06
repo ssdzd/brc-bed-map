@@ -34,7 +34,7 @@ const MapView = () => {
   const [tooltip, setTooltip] = useState({ visible: false, content: null, position: { x: 0, y: 0 } });
   const [hoveredBlock, setHoveredBlock] = useState(null);
   const [searchVisible, setSearchVisible] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(true);
+  const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);

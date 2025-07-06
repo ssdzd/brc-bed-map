@@ -128,6 +128,7 @@ Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps
 
 ### Medium Priority
 - **Fix hover tooltip positions for blocks** ✅ *Completed*
+- **Fix CSS glow effect clipping at bottom of container** ✅ *Completed*
 - **Update copy for BRC Airport info panel popup** ✅ *Completed*
 - **Handle BED status labels from Airtable for plaza quarters and airport** ✅ *Completed*
 - **Audit interactive components count and clean up artifacts** - Check actual number of components, remove old non-existent component references (keep hidden ones)

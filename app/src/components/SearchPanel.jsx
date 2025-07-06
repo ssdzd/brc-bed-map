@@ -71,7 +71,7 @@ const SearchPanel = ({
           onClick={() => onToggle && onToggle()}
           style={{
             padding: '0.75rem 1.5rem',
-            backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+            backgroundColor: '#FE8803',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '2rem',
@@ -79,9 +79,7 @@ const SearchPanel = ({
             fontWeight: '600',
             fontSize: '0.875rem',
             cursor: 'pointer',
-            boxShadow: theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)',
+            boxShadow: '0 8px 25px rgba(254,136,3,0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
@@ -89,15 +87,11 @@ const SearchPanel = ({
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 12px 35px rgba(255,105,180,0.4)'
-              : '0 12px 35px rgba(59,130,246,0.4)';
+            e.target.style.boxShadow = '0 12px 35px rgba(254,136,3,0.4)';
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = 'translateY(0px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)';
+            e.target.style.boxShadow = '0 8px 25px rgba(254,136,3,0.3)';
           }}
         >
           🔍 Search Camps
@@ -187,7 +181,7 @@ const SearchPanel = ({
             transition: 'border-color 0.2s ease'
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = theme === '2024' ? '#FF69B4' : '#3B82F6';
+            e.target.style.borderColor = '#FE8803';
           }}
           onBlur={(e) => {
             e.target.style.borderColor = themeConfig.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
@@ -296,7 +290,7 @@ const SearchPanel = ({
             style={{
               background: 'none',
               border: 'none',
-              color: theme === '2024' ? '#FF69B4' : '#3B82F6',
+              color: '#FE8803',
               cursor: 'pointer',
               fontSize: '0.8rem',
               fontFamily: themeConfig.typography.primaryFont,

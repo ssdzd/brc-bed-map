@@ -26,7 +26,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
           onClick={handleUpdateClick}
           style={{
             padding: '0.75rem 1rem',
-            backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+            backgroundColor: '#FE8803',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '0.75rem',
@@ -34,9 +34,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
             fontWeight: '600',
             fontSize: '0.875rem',
             cursor: 'pointer',
-            boxShadow: theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)',
+            boxShadow: '0 8px 25px rgba(254,136,3,0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
@@ -45,15 +43,11 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 12px 35px rgba(255,105,180,0.4)'
-              : '0 12px 35px rgba(59,130,246,0.4)';
+            e.target.style.boxShadow = '0 12px 35px rgba(254,136,3,0.4)';
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = 'translateY(0px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)';
+            e.target.style.boxShadow = '0 8px 25px rgba(254,136,3,0.3)';
           }}
         >
           <div style={{ textAlign: 'center', lineHeight: '1.2' }}>
@@ -143,7 +137,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
             padding: '1rem',
             borderRadius: '0.75rem',
             backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-            border: `1px solid ${theme === '2024' ? 'rgba(255,105,180,0.2)' : 'rgba(59,130,246,0.2)'}`,
+            border: `1px solid rgba(254,136,3,0.2)`,
             marginBottom: '1rem'
           }}>
             <h4 style={{
@@ -177,7 +171,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
           style={{
             width: '100%',
             padding: '0.875rem 1.25rem',
-            backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+            backgroundColor: '#FE8803',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '0.75rem',
@@ -185,9 +179,7 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
             fontWeight: '600',
             fontSize: '0.875rem',
             cursor: 'pointer',
-            boxShadow: theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)',
+            boxShadow: '0 8px 25px rgba(254,136,3,0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
@@ -196,15 +188,11 @@ const UpdatePanel = ({ theme = '2025', isVisible = false, onToggle }) => {
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 12px 35px rgba(255,105,180,0.4)'
-              : '0 12px 35px rgba(59,130,246,0.4)';
+            e.target.style.boxShadow = '0 12px 35px rgba(254,136,3,0.4)';
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = 'translateY(0px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)';
+            e.target.style.boxShadow = '0 8px 25px rgba(254,136,3,0.3)';
           }}
         >
           🚀 Submit Update

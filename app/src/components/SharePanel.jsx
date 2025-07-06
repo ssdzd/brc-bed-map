@@ -65,7 +65,7 @@ const SharePanel = ({
           onClick={() => onToggle && onToggle()}
           style={{
             padding: '0.75rem',
-            backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+            backgroundColor: '#FE8803',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '0.75rem',
@@ -73,9 +73,7 @@ const SharePanel = ({
             fontWeight: '600',
             fontSize: '0.875rem',
             cursor: 'pointer',
-            boxShadow: theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)',
+            boxShadow: '0 8px 25px rgba(254,136,3,0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
@@ -84,15 +82,11 @@ const SharePanel = ({
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 12px 35px rgba(255,105,180,0.4)'
-              : '0 12px 35px rgba(59,130,246,0.4)';
+            e.target.style.boxShadow = '0 12px 35px rgba(254,136,3,0.4)';
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = 'translateY(0px)';
-            e.target.style.boxShadow = theme === '2024' 
-              ? '0 8px 25px rgba(255,105,180,0.3)'
-              : '0 8px 25px rgba(59,130,246,0.3)';
+            e.target.style.boxShadow = '0 8px 25px rgba(254,136,3,0.3)';
           }}
         >
           🔗 Share
@@ -184,7 +178,7 @@ const SharePanel = ({
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
-                backgroundColor: theme === '2024' ? '#FF69B4' : '#3B82F6',
+                backgroundColor: '#FE8803',
                 color: '#FFFFFF',
                 border: 'none',
                 borderRadius: '0.5rem',
@@ -199,10 +193,10 @@ const SharePanel = ({
                 gap: '0.5rem'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = theme === '2024' ? '#E91E63' : '#2563EB';
+                e.target.style.backgroundColor = '#E67300';
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = theme === '2024' ? '#FF69B4' : '#3B82F6';
+                e.target.style.backgroundColor = '#FE8803';
               }}
             >
               📱 Share
@@ -221,7 +215,7 @@ const SharePanel = ({
               color: copyStatus === 'Copied!' ? '#FFFFFF' : themeConfig.textColor,
               border: `2px solid ${copyStatus === 'Copied!' 
                 ? '#22C55E' 
-                : (theme === '2024' ? '#FF69B4' : '#3B82F6')}`,
+                : '#FE8803'}`,
               borderRadius: '0.5rem',
               fontFamily: themeConfig.typography.primaryFont,
               fontWeight: '600',
