@@ -1,44 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 
 const Tooltip = ({ theme = '2025', content, position, visible }) => {
   const themeConfig = THEMES[theme];
-  const [adjustedPosition, setAdjustedPosition] = useState(position);
-
-  useEffect(() => {
-    if (!position || !visible) return;
-
-    // Adjust position to keep tooltip in viewport
-    const tooltipWidth = 200;
-    const tooltipHeight = 80;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    let adjustedX = position.x;
-    let adjustedY = position.y;
-
-    // Keep tooltip within right edge
-    if (adjustedX + tooltipWidth > viewportWidth) {
-      adjustedX = viewportWidth - tooltipWidth - 10;
-    }
-
-    // Keep tooltip within bottom edge
-    if (adjustedY + tooltipHeight > viewportHeight) {
-      adjustedY = position.y - tooltipHeight - 10;
-    }
-
-    // Keep tooltip within left edge
-    if (adjustedX < 10) {
-      adjustedX = 10;
-    }
-
-    // Keep tooltip within top edge
-    if (adjustedY < 10) {
-      adjustedY = 10;
-    }
-
-    setAdjustedPosition({ x: adjustedX, y: adjustedY });
-  }, [position, visible]);
 
   if (!visible || !content) return null;
 
@@ -46,8 +10,8 @@ const Tooltip = ({ theme = '2025', content, position, visible }) => {
     <div
       style={{
         position: 'fixed',
-        left: `${adjustedPosition.x}px`,
-        top: `${adjustedPosition.y}px`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
         color: themeConfig.textColor,
         padding: '0.75rem 1rem',
@@ -107,20 +71,6 @@ const Tooltip = ({ theme = '2025', content, position, visible }) => {
         </div>
       )}
       
-      {/* Tooltip arrow */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '-6px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 0,
-          height: 0,
-          borderLeft: '6px solid transparent',
-          borderRight: '6px solid transparent',
-          borderTop: `6px solid ${themeConfig.isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)'}`
-        }}
-      />
       
       {/* CSS Animation */}
       <style>{`

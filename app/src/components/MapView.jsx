@@ -225,12 +225,24 @@ const MapView = () => {
           coordinates: coordinates
         };
         
+        // Calculate tooltip position using block's center in SVG coordinates
+        const bbox = block.getBBox();
+        const blockCenterX = bbox.x + bbox.width / 2;
+        const blockCenterY = bbox.y + bbox.height / 2;
+        
+        // Transform SVG coordinates to screen coordinates
+        const svgRect = svgRef.current.getBoundingClientRect();
+        
+        // Account for current zoom and pan transforms
+        const transformedX = (blockCenterX * zoom) + svgRect.left + pan.x;
+        const transformedY = (blockCenterY * zoom) + svgRect.top + pan.y;
+        
         setTooltip({
           visible: true,
           content: tooltipContent,
           position: {
-            x: e.clientX - rect.left + rect.left,
-            y: e.clientY - rect.top + rect.top - 10
+            x: transformedX,
+            y: transformedY - 10
           }
         });
       };
@@ -565,10 +577,23 @@ const MapView = () => {
         
         // Show tooltip (will inherit camp name like other polygons)
         const displayAddress = blockIdToDisplayAddress('nimue-artist-credit');
+        
+        // Get airport polygon bounding box for positioning
+        const bbox = airportPolygon.getBBox();
+        const blockCenterX = bbox.x + bbox.width / 2;
+        const blockCenterY = bbox.y + bbox.height / 2;
+        
+        // Transform SVG coordinates to screen coordinates
+        const svgRect = svgRef.current.getBoundingClientRect();
+        
+        // Account for current zoom and pan transforms
+        const transformedX = (blockCenterX * zoom) + svgRect.left + pan.x;
+        const transformedY = (blockCenterY * zoom) + svgRect.top + pan.y;
+        
         setTooltip({
           visible: true,
           content: { title: displayAddress, description: "Black Rock City Airport" },
-          position: { x: e.clientX, y: e.clientY }
+          position: { x: transformedX, y: transformedY - 10 }
         });
       };
       
@@ -696,8 +721,8 @@ const MapView = () => {
   };
 
   const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+    setZoom(0.67);
+    setPan({ x: 0, y: 84 });
   };
 
   const handleCampSelect = (camp) => {
@@ -738,23 +763,34 @@ const MapView = () => {
   };
 
   const handleMouseDown = (e) => {
-    // Pan disabled
-    return;
+    e.preventDefault();
+    setIsPanning(true);
+    setLastPanPoint({ x: e.clientX, y: e.clientY });
   };
 
   const handleMouseMove = (e) => {
-    // Pan disabled
-    return;
+    if (!isPanning) return;
+    
+    const deltaX = e.clientX - lastPanPoint.x;
+    const deltaY = e.clientY - lastPanPoint.y;
+    
+    setPan(prevPan => ({
+      x: prevPan.x + deltaX,
+      y: prevPan.y + deltaY
+    }));
+    
+    setLastPanPoint({ x: e.clientX, y: e.clientY });
   };
 
   const handleMouseUp = () => {
-    // Pan disabled
-    return;
+    setIsPanning(false);
   };
 
   const handleWheel = (e) => {
-    // Zoom disabled
-    return;
+    e.preventDefault();
+    const delta = e.deltaY;
+    const zoomFactor = delta > 0 ? 0.9 : 1.1;
+    setZoom(prevZoom => Math.max(0.3, Math.min(3, prevZoom * zoomFactor)));
   };
 
   // Add event listeners for pan and zoom
@@ -1042,14 +1078,15 @@ const MapView = () => {
         />
       </div>
       
-      {/* Zoom controls hidden */}
+      {/* Zoom controls - Hidden */}
       {false && (
-        <div className="zoom-controls">
+        <div className="desktop-only">
           <ZoomControls
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
             onResetZoom={handleResetZoom}
             currentZoom={zoom}
+            theme={currentTheme}
           />
         </div>
       )}
@@ -1072,7 +1109,7 @@ const MapView = () => {
               : `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: 'center center',
             transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
-            cursor: 'default',
+            cursor: isPanning ? 'grabbing' : 'grab',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             MozUserSelect: 'none',

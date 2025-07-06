@@ -1,35 +1,63 @@
 import React from 'react';
+import { THEMES } from '../utils/blockUtils';
 
-const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom }) => {
+const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '2024' }) => {
+  const currentTheme = THEMES[theme];
+  
+  const containerStyle = {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    zIndex: 50,
+    backgroundColor: currentTheme.isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+    padding: '0.75rem',
+    borderRadius: '0.75rem',
+    boxShadow: currentTheme.isDark 
+      ? '0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(255, 255, 255, 0.1)'
+      : '0 8px 24px rgba(0, 0, 0, 0.15)',
+    backdropFilter: 'blur(12px)',
+    border: currentTheme.isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.1)'
+  };
+
+  const buttonStyle = {
+    width: '44px',
+    height: '44px',
+    border: currentTheme.isDark 
+      ? '1px solid rgba(255, 255, 255, 0.3)' 
+      : '1px solid rgba(0, 0, 0, 0.2)',
+    borderRadius: '8px',
+    backgroundColor: currentTheme.isDark 
+      ? 'rgba(255, 255, 255, 0.1)' 
+      : 'rgba(255, 255, 255, 0.8)',
+    color: currentTheme.textColor,
+    cursor: 'pointer',
+    fontSize: '18px',
+    fontWeight: 'bold',
+    fontFamily: currentTheme.typography.primaryFont,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+    textShadow: currentTheme.isDark ? '1px 1px 2px rgba(0, 0, 0, 0.5)' : 'none'
+  };
+
+  const hoverStyle = {
+    backgroundColor: currentTheme.isDark 
+      ? 'rgba(255, 255, 255, 0.2)' 
+      : 'rgba(255, 255, 255, 1)',
+    transform: 'scale(1.05)'
+  };
+
   return (
-    <div style={{
-      position: 'absolute',
-      top: '1rem',
-      right: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem',
-      zIndex: 15,
-      backgroundColor: 'white',
-      padding: '0.5rem',
-      borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-    }}>
+    <div style={containerStyle}>
       <button
         onClick={onZoomIn}
-        style={{
-          width: '40px',
-          height: '40px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
+        style={buttonStyle}
+        onMouseEnter={(e) => Object.assign(e.target.style, hoverStyle)}
+        onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
         title="Zoom In"
       >
         +
@@ -37,19 +65,9 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom }) => {
       
       <button
         onClick={onZoomOut}
-        style={{
-          width: '40px',
-          height: '40px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
+        style={buttonStyle}
+        onMouseEnter={(e) => Object.assign(e.target.style, hoverStyle)}
+        onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
         title="Zoom Out"
       >
         −
@@ -58,18 +76,11 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom }) => {
       <button
         onClick={onResetZoom}
         style={{
-          width: '40px',
-          height: '40px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
+          ...buttonStyle,
+          fontSize: '14px'
         }}
+        onMouseEnter={(e) => Object.assign(e.target.style, {...buttonStyle, fontSize: '14px', ...hoverStyle})}
+        onMouseLeave={(e) => Object.assign(e.target.style, {...buttonStyle, fontSize: '14px'})}
         title="Reset Zoom"
       >
         ⌂
@@ -78,8 +89,11 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom }) => {
       <div style={{
         fontSize: '12px',
         textAlign: 'center',
-        color: '#666',
-        padding: '0.25rem'
+        color: currentTheme.isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
+        padding: '0.25rem',
+        fontFamily: currentTheme.typography.primaryFont,
+        fontWeight: '500',
+        textShadow: currentTheme.isDark ? '1px 1px 2px rgba(0, 0, 0, 0.5)' : 'none'
       }}>
         {Math.round(currentZoom * 100)}%
       </div>

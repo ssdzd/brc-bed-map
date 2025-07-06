@@ -18,7 +18,7 @@ Interactive Burning Man map system for tracking B.E.D. (Bureau of Erotic Discour
 ## Current Implementation Structure
 ```
 app/src/
-├── components/              # 17 interactive components
+├── components/              # 19 interactive components
 │   ├── MapView.jsx         # Main map container with zoom/pan
 │   ├── BEDmapHeader.jsx    # Theme-aware header component
 │   ├── Legend.jsx          # BED status legend with tooltips
@@ -27,7 +27,7 @@ app/src/
 │   ├── StatsPanel.jsx      # Progress statistics and metrics
 │   ├── SharePanel.jsx      # URL sharing functionality
 │   ├── PlayaIcons/         # Custom SVG icon components
-│   └── [10 more UI components]
+│   └── [12 more UI components]
 ├── hooks/
 │   ├── useMapData.js       # Live Airtable API data fetching with mock fallback
 │   └── useUrlState.js      # URL state management and sharing
@@ -101,7 +101,7 @@ Dual theme support with complete styling:
 **Fully Implemented**:
 - Complete UI/UX with all interactive features
 - Live Airtable API integration with mock data fallback
-- Comprehensive component library (17 interactive components)
+- Comprehensive component library (19 interactive components)
 - Dual theme system with persistence
 - Geographic address parsing including plaza quarters
 - GitHub Pages deployment pipeline
@@ -127,7 +127,7 @@ Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps
 - **Implement address parsing from 'C & 3:45' format to block_id (including plaza quarters)** ✅ *Completed*
 
 ### Medium Priority
-- **Fix hover tooltip positions for blocks** - May need to resize map instead of scaling to get accurate coordinates
+- **Fix hover tooltip positions for blocks** ✅ *Completed* - Simplified tooltip positioning to use mouse coordinates directly
 - **Update copy for BRC Airport info panel popup** ✅ *Completed*
 - **Handle BED status labels from Airtable for plaza quarters and airport** ✅ *Completed*
 - **Audit interactive components count and clean up artifacts** - Check actual number of components, remove old non-existent component references (keep hidden ones)
