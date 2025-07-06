@@ -91,6 +91,16 @@ const normalizeAddress = (address) => {
     return '';
   }
   
+  // Check if it's a geographic plaza quarter name (e.g., "9:01 & B+", "7:29 & G-")
+  const geographicQuarterMatch = trimmed.match(/^(\d{1,2}:\d{2})\s*(&|and)\s*([A-G])([+-])$/i);
+  if (geographicQuarterMatch) {
+    const time = geographicQuarterMatch[1];
+    const street = geographicQuarterMatch[3];
+    const direction = geographicQuarterMatch[4];
+    // Don't round time for geographic quarters - they're already specific
+    return `${time} & ${street.toUpperCase()}${direction}`;
+  }
+  
   // Check if it's in "time & street" format (preferred format)
   const timeStreetMatch = trimmed.match(/^(\d{1,2}:\d{2})\s*(&|and)\s*([A-L]|Esplanade)$/i);
   if (timeStreetMatch) {
@@ -262,6 +272,22 @@ export const getValidAddresses = () => {
     addresses.push(`Center Camp Quarter ${quarter}`);
   });
   
+  // Geographic plaza quarter names
+  const geographicQuarters = [
+    '5:59 & A+', '5:59 & A-', '6:01 & A-', '6:01 & A+',
+    '5:59 & G+', '5:59 & G-', '6:01 & G-', '6:01 & G+',
+    '3:01 & B+', '2:59 & B+', '2:59 & B-', '3:01 & B-',
+    '3:01 & G+', '2:59 & G+', '2:59 & G-', '3:01 & G-',
+    '8:59 & B-', '9:01 & B-', '9:01 & B+', '8:59 & B+',
+    '8:59 & G-', '9:01 & G-', '9:01 & G+', '8:59 & G+',
+    '7:29 & B+', '7:29 & B-', '7:31 & B-', '7:31 & B+',
+    '7:29 & G+', '7:29 & G-', '7:31 & G-', '7:31 & G+',
+    '4:31 & B+', '4:29 & B+', '4:29 & B-', '4:31 & B-',
+    '4:31 & G+', '4:29 & G+', '4:29 & G-', '4:31 & G-'
+  ];
+  
+  addresses.push(...geographicQuarters);
+  
   return addresses.sort();
 };
 
@@ -277,6 +303,10 @@ export const isValidAddress = (address) => {
   const streetTimePattern = /^(Esplanade|[A-L])\s*&\s*(\d{1,2}:[0-5]\d)$/;
   if (streetTimePattern.test(address.trim())) return true;
   
+  // Check for geographic plaza quarter names (e.g., "9:01 & B+", "7:29 & G-")
+  const geographicQuarterPattern = /^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/;
+  if (geographicQuarterPattern.test(address.trim())) return true;
+  
   // Check for plaza addresses (e.g., "3:00 Plaza", "3:00 Plaza Quarter A")
   const plazaPattern = /^(\d{1,2}:\d{2})\s*Plaza(?:\s*Quarter\s*([A-D]))?$/i;
   if (plazaPattern.test(address.trim())) return true;
@@ -287,6 +317,23 @@ export const isValidAddress = (address) => {
 // Parse placement address to extract street and time
 export const parseAddress = (address) => {
   if (!isValidAddress(address)) return null;
+  
+  // Parse geographic plaza quarter names (e.g., "9:01 & B+", "7:29 & G-")
+  const geographicQuarterMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/);
+  if (geographicQuarterMatch) {
+    const [_, time, street, direction] = geographicQuarterMatch;
+    const geographicName = `${time} & ${street}${direction}`;
+    
+    // Find the corresponding block ID from the PLAZA_QUARTER_MAPPING
+    // We need to import this function from blockUtils.js
+    return {
+      street: 'Geographic Plaza Quarter',
+      time: time,
+      geographicName: geographicName,
+      blockId: null, // Will be resolved by getBlockIdFromGeographicName
+      type: 'geographic_plaza'
+    };
+  }
   
   // Parse time & street addresses (e.g., "3:45 & C")
   const timeStreetMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*(Esplanade|[A-L])$/);

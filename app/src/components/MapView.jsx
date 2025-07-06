@@ -307,12 +307,12 @@ const MapView = () => {
     // Handle Airport polygon selection styling
     const airportPolygon = svgDoc.querySelector('#airport-polygon');
     
-    if (airportPolygon && selectedBlock === 'airport-polygon') {
-      // Apply selection styling like other selected blocks
-      airportPolygon.style.setProperty('stroke', 'rgba(255, 105, 180, 1.0)', 'important');
-      airportPolygon.style.setProperty('stroke-width', '4', 'important');
+    if (airportPolygon && selectedBlock === 'nimue-artist-credit') {
+      // Apply selection styling but keep the white stroke
+      airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
+      airportPolygon.style.setProperty('stroke-width', '6', 'important');
       airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
-      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 105, 180, 0.8)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))', 'important');
+      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 1.0)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.8))', 'important');
     } else if (airportPolygon) {
       // Reset to default styling (gradient fill with 70% opacity, white stroke like other city blocks)
       airportPolygon.style.setProperty('stroke', 'white', 'important');
@@ -563,10 +563,11 @@ const MapView = () => {
         airportPolygon.style.setProperty('stroke-width', '3', 'important');
         airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.8))', 'important');
         
-        // Show tooltip
+        // Show tooltip (will inherit camp name like other polygons)
+        const displayAddress = blockIdToDisplayAddress('nimue-artist-credit');
         setTooltip({
           visible: true,
-          content: { title: "BRC Airport", description: "Black Rock City Airport" },
+          content: { title: displayAddress, description: "Black Rock City Airport" },
           position: { x: e.clientX, y: e.clientY }
         });
       };
@@ -581,7 +582,7 @@ const MapView = () => {
       // Add click handler for selection
       airportPolygon.onclick = (e) => {
         e.stopPropagation();
-        setSelectedBlock('airport-polygon');
+        setSelectedBlock('nimue-artist-credit');
         
         // Close other panels when clicked
         setSearchVisible(false);
@@ -592,9 +593,9 @@ const MapView = () => {
         console.log("Airport polygon selected");
       };
       
-      // Add tooltip title
+      // Add tooltip title (will inherit camp name like other polygons)
       const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-      title.textContent = "BRC Airport - Black Rock City Airport";
+      title.textContent = blockIdToDisplayAddress('nimue-artist-credit');
       airportPolygon.appendChild(title);
       
       svgDoc.documentElement.appendChild(airportPolygon);

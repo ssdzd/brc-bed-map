@@ -174,6 +174,18 @@ export const blockIdToDisplayAddress = (blockId) => {
 
 // Enhanced address parsing with plaza quarter support
 const parseAddress = (address) => {
+  // Handle BRC Airport as a special case
+  if (address.match(/BRC\s*Airport/i)) {
+    return {
+      street: 'BRC Airport',
+      hour: null,
+      minute: null,
+      quarter: null,
+      isPlaza: false,
+      isAirport: true
+    };
+  }
+  
   // Handle new geographic plaza quarter format like "5:59 & A+", "7:29 & G-"
   const geographicPlazaMatch = address.match(/(\d{1,2}):(\d{2})\s*&\s*([A-G])([+-])/);
   if (geographicPlazaMatch) {
@@ -184,7 +196,8 @@ const parseAddress = (address) => {
       minute: parseInt(minute),
       quarter: null,
       isPlaza: true,
-      isGeographicPlaza: true
+      isGeographicPlaza: true,
+      geographicName: `${hour}:${minute} & ${street}${direction}`
     };
   }
   
@@ -264,11 +277,16 @@ export const campInBlock = (campAddress, blockId) => {
   
   if (!parsedAddress) return false;
   
+  // Handle BRC Airport
+  if (parsedAddress.isAirport) {
+    return blockId === 'nimue-artist-credit';
+  }
+  
   // Handle plaza blocks with new quarter system
   if (parsedAddress.isPlaza) {
     // Handle new geographic plaza quarter format
     if (parsedAddress.isGeographicPlaza) {
-      const geographicAddress = `${parsedAddress.hour}:${parsedAddress.minute.toString().padStart(2, '0')} & ${parsedAddress.street}`;
+      const geographicAddress = parsedAddress.geographicName;
       const matchingBlockId = getBlockIdFromGeographicName(geographicAddress);
       return matchingBlockId === blockId;
     }
