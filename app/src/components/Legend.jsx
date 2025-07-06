@@ -5,7 +5,7 @@ import { StatusIcon } from './PlayaIcons';
 const Legend = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   
   const items = [
     { 

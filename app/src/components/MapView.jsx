@@ -34,7 +34,7 @@ const MapView = () => {
   const [tooltip, setTooltip] = useState({ visible: false, content: null, position: { x: 0, y: 0 } });
   const [hoveredBlock, setHoveredBlock] = useState(null);
   const [searchVisible, setSearchVisible] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(true);
   const [shareVisible, setShareVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);
@@ -784,27 +784,18 @@ const MapView = () => {
   };
 
   const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsPanning(true);
-    setLastPanPoint({ x: e.clientX, y: e.clientY });
+    // Panning disabled
+    return;
   };
 
   const handleMouseMove = (e) => {
-    if (!isPanning) return;
-    
-    const deltaX = e.clientX - lastPanPoint.x;
-    const deltaY = e.clientY - lastPanPoint.y;
-    
-    setPan(prevPan => ({
-      x: prevPan.x + deltaX,
-      y: prevPan.y + deltaY
-    }));
-    
-    setLastPanPoint({ x: e.clientX, y: e.clientY });
+    // Panning disabled
+    return;
   };
 
   const handleMouseUp = () => {
-    setIsPanning(false);
+    // Panning disabled
+    return;
   };
 
   const handleWheel = (e) => {
@@ -1128,7 +1119,7 @@ const MapView = () => {
               : `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: 'center center',
             transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
-            cursor: isPanning ? 'grabbing' : 'grab',
+            cursor: 'default',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             MozUserSelect: 'none',
