@@ -249,44 +249,6 @@ const SharePanel = ({
           </button>
         </div>
         
-        {/* Current State Info */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          borderRadius: '0.5rem',
-          backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-          border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-        }}>
-          <div style={{
-            fontSize: '0.75rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            color: themeConfig.textColor,
-            opacity: 0.7,
-            marginBottom: '0.5rem',
-            fontWeight: '600'
-          }}>
-            Current View:
-          </div>
-          <div style={{
-            fontSize: '0.7rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            color: themeConfig.textColor,
-            opacity: 0.6,
-            lineHeight: '1.3',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.25rem'
-          }}>
-            <div>🎨 Theme: {currentState.theme === '2024' ? '2024 Vibrant' : '2025 Professional'}</div>
-            <div>🔍 Zoom: {(currentState.zoom || 1).toFixed(1)}x</div>
-            {currentState.selectedBlock && (
-              <div>📍 Block: {currentState.selectedBlock}</div>
-            )}
-            {currentState.search && (
-              <div>🔎 Search: "{currentState.search}"</div>
-            )}
-          </div>
-        </div>
       </div>
       
       {/* CSS Animations */}

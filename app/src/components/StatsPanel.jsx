@@ -110,11 +110,6 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
   
   const statusItems = [
     {
-      status: 'none',
-      label: 'Not Registered',
-      count: stats.blocksWithoutCamps
-    },
-    {
       status: 'registered',
       label: 'Registered and started BEDucator program',
       count: stats.byStatus.registered
@@ -314,9 +309,7 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {statusItems.map((item, index) => {
-              const percentage = item.status === 'none' 
-                ? (item.count / stats.totalBlocks) * 100 
-                : (item.count / stats.total) * 100;
+              const percentage = (item.count / stats.total) * 100;
               
               return (
                 <div
@@ -368,25 +361,6 @@ const StatsPanel = ({ camps, theme = '2025', isVisible = false, onToggle }) => {
                 </div>
               );
             })}
-          </div>
-        </div>
-        
-        {/* Active Blocks */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          borderRadius: '0.5rem',
-          backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-          border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          textAlign: 'center'
-        }}>
-          <div style={{
-            fontSize: '0.8rem',
-            fontFamily: themeConfig.typography.primaryFont,
-            color: themeConfig.textColor,
-            opacity: 0.8
-          }}>
-            <PlayaIcons.Camp size="0.8rem" /> Active Blocks: <strong>{stats.activeBlocks}</strong>
           </div>
         </div>
       </div>
