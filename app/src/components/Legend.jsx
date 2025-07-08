@@ -7,6 +7,9 @@ const Legend = ({ theme = '2025' }) => {
   const colors = getThemeColors(theme);
   const [isExpanded, setIsExpanded] = useState(true);
   
+  // Get the build-time git timestamp
+  const lastUpdated = typeof __GIT_LAST_UPDATED__ !== 'undefined' ? __GIT_LAST_UPDATED__ : '07/08/2025';
+  
   const items = [
     { 
       status: 'registered', 
@@ -74,7 +77,7 @@ const Legend = ({ theme = '2025' }) => {
           color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
           opacity: 0.6
         }}>
-          Last Updated: 06/30/2025
+          Last Updated: {lastUpdated}
         </div>
       </div>
       
@@ -181,7 +184,7 @@ const Legend = ({ theme = '2025' }) => {
               color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
               opacity: 0.6
             }}>
-              Last Updated: 06/30/2025
+              Last Updated: {lastUpdated}
             </div>
           </div>
           
