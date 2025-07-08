@@ -230,27 +230,31 @@ const parseAddress = (address) => {
     };
   }
   
-  // Handle regular street addresses like "3:45 & C" or "3:45 & Esplanade" (new format)
-  const timeStreetMatch = address.match(/(\d{1,2}):(\d{2})\s*&\s*(Esplanade|[A-K])/);
+  // Handle regular street addresses like "3:45 & C", "9 & C", or "3:45 & Esplanade" (new format)
+  const timeStreetMatch = address.match(/(\d{1,2})(?::(\d{2}))?\s*&\s*(Esplanade|[A-K])/i);
   if (timeStreetMatch) {
     const [_, hour, minute, street] = timeStreetMatch;
+    // Normalize street case to match polygon IDs (Esplanade not ESPLANADE)
+    const normalizedStreet = street.charAt(0).toUpperCase() + street.slice(1).toLowerCase();
     return {
-      street,
+      street: normalizedStreet,
       hour: parseInt(hour),
-      minute: parseInt(minute),
+      minute: parseInt(minute || '0'), // Default to 0 if no minutes specified
       quarter: null,
       isPlaza: false
     };
   }
   
-  // Also handle old format for backward compatibility "C & 3:45"
-  const streetTimeMatch = address.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2}):(\d{2})/);
+  // Also handle old format for backward compatibility "C & 3:45" or "C & 9"
+  const streetTimeMatch = address.match(/(Esplanade|[A-K])\s*&\s*(\d{1,2})(?::(\d{2}))?/i);
   if (streetTimeMatch) {
     const [_, street, hour, minute] = streetTimeMatch;
+    // Normalize street case to match polygon IDs (Esplanade not ESPLANADE)
+    const normalizedStreet = street.charAt(0).toUpperCase() + street.slice(1).toLowerCase();
     return {
-      street,
+      street: normalizedStreet,
       hour: parseInt(hour),
-      minute: parseInt(minute),
+      minute: parseInt(minute || '0'), // Default to 0 if no minutes specified
       quarter: null,
       isPlaza: false
     };

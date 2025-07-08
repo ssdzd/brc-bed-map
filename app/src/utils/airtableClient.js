@@ -146,7 +146,13 @@ const normalizeAddress = (address) => {
 const transformRecord = (record) => {
   const fields = record.fields;
   
-  // Get the camp address, trying multiple field names
+  // Get the original address from user input
+  const originalAddress = fields['Camp Address'] || 
+                         fields['Placement Address'] || 
+                         fields.placement_address || 
+                         fields.address || '';
+  
+  // Get the processed address, trying multiple field names
   let rawAddress = fields['Matched Polygon'] || 
                    fields['Camp Address copy'] || 
                    fields['Camp Address'] || 
@@ -165,6 +171,7 @@ const transformRecord = (record) => {
     id: record.id,
     camp_name: fields['Camp Name'] || fields.camp_name || fields['Preferred Name'] || '',
     placement_address: normalizedAddress,
+    original_address: originalAddress,
     bed_status: mapStatusToBedStatus(fields['Status'] || fields.bed_status || fields['BED Status']),
     user_name: fields['Preferred Name'] || fields['Full Name'] || fields.user_name || fields['Contact Name'] || '',
     email: fields['Email'] || fields.email || '',
@@ -295,16 +302,16 @@ export const getValidAddresses = () => {
 export const isValidAddress = (address) => {
   if (!address || typeof address !== 'string') return false;
   
-  // Check for time & street addresses (e.g., "3:45 & C")
-  const timeStreetPattern = /^(\d{1,2}:[0-5]\d)\s*&\s*(Esplanade|[A-L])$/;
+  // Check for time & street addresses (e.g., "3:45 & C" or "9 & C")
+  const timeStreetPattern = /^(\d{1,2}(?::[0-5]\d)?)\s*&\s*(Esplanade|[A-L])$/i;
   if (timeStreetPattern.test(address.trim())) return true;
   
-  // Check for street & time addresses (e.g., "C & 3:45") - also valid
-  const streetTimePattern = /^(Esplanade|[A-L])\s*&\s*(\d{1,2}:[0-5]\d)$/;
+  // Check for street & time addresses (e.g., "C & 3:45" or "C & 9") - also valid
+  const streetTimePattern = /^(Esplanade|[A-L])\s*&\s*(\d{1,2}(?::[0-5]\d)?)$/i;
   if (streetTimePattern.test(address.trim())) return true;
   
   // Check for geographic plaza quarter names (e.g., "9:01 & B+", "7:29 & G-")
-  const geographicQuarterPattern = /^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/;
+  const geographicQuarterPattern = /^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/i;
   if (geographicQuarterPattern.test(address.trim())) return true;
   
   // Check for plaza addresses (e.g., "3:00 Plaza", "3:00 Plaza Quarter A")
@@ -319,7 +326,7 @@ export const parseAddress = (address) => {
   if (!isValidAddress(address)) return null;
   
   // Parse geographic plaza quarter names (e.g., "9:01 & B+", "7:29 & G-")
-  const geographicQuarterMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/);
+  const geographicQuarterMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/i);
   if (geographicQuarterMatch) {
     const [_, time, street, direction] = geographicQuarterMatch;
     const geographicName = `${time} & ${street}${direction}`;
@@ -335,24 +342,32 @@ export const parseAddress = (address) => {
     };
   }
   
-  // Parse time & street addresses (e.g., "3:45 & C")
-  const timeStreetMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*(Esplanade|[A-L])$/);
+  // Parse time & street addresses (e.g., "3:45 & C" or "9 & C")
+  const timeStreetMatch = address.trim().match(/^(\d{1,2}(?::[0-5]\d)?)\s*&\s*(Esplanade|[A-L])$/i);
   if (timeStreetMatch) {
+    // Normalize time format (add :00 if missing)
+    const normalizedTime = timeStreetMatch[1].includes(':') ? timeStreetMatch[1] : `${timeStreetMatch[1]}:00`;
+    // Normalize street case for block ID
+    const normalizedStreet = timeStreetMatch[2].charAt(0).toUpperCase() + timeStreetMatch[2].slice(1).toLowerCase();
     return {
-      street: timeStreetMatch[2],
-      time: timeStreetMatch[1],
-      blockId: `polygon_${timeStreetMatch[2]}_${timeStreetMatch[1]}`,
+      street: normalizedStreet,
+      time: normalizedTime,
+      blockId: `polygon_${normalizedStreet}_${normalizedTime}`,
       type: 'street'
     };
   }
   
-  // Parse street & time addresses (e.g., "C & 3:45") 
-  const streetTimeMatch = address.trim().match(/^(Esplanade|[A-L])\s*&\s*(\d{1,2}:[0-5]\d)$/);
+  // Parse street & time addresses (e.g., "C & 3:45" or "C & 9") 
+  const streetTimeMatch = address.trim().match(/^(Esplanade|[A-L])\s*&\s*(\d{1,2}(?::[0-5]\d)?)$/i);
   if (streetTimeMatch) {
+    // Normalize time format (add :00 if missing)
+    const normalizedTime = streetTimeMatch[2].includes(':') ? streetTimeMatch[2] : `${streetTimeMatch[2]}:00`;
+    // Normalize street case for block ID
+    const normalizedStreet = streetTimeMatch[1].charAt(0).toUpperCase() + streetTimeMatch[1].slice(1).toLowerCase();
     return {
-      street: streetTimeMatch[1],
-      time: streetTimeMatch[2],
-      blockId: `polygon_${streetTimeMatch[1]}_${streetTimeMatch[2]}`,
+      street: normalizedStreet,
+      time: normalizedTime,
+      blockId: `polygon_${normalizedStreet}_${normalizedTime}`,
       type: 'street'
     };
   }

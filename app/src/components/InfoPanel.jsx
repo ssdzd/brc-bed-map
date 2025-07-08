@@ -50,7 +50,7 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
             color: themeConfig.isDark ? '#FFFFFF' : '#000000',
             fontFamily: themeConfig.typography.displayFont
           }}>
-            {customTitle || (blockId ? blockIdToDisplayAddress(blockId) : 'Select a Block')}
+            {customTitle || (blockId ? `${blockIdToDisplayAddress(blockId)} Sector` : 'Select a Block')}
           </h2>
           {blockId && (
             <p style={{
@@ -146,12 +146,20 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
                   <h2 style={{
                     fontSize: '1.25rem',
                     fontWeight: '600',
-                    margin: '0',
+                    margin: '0 0 0.25rem 0',
                     color: themeConfig.isDark ? '#FFFFFF' : '#000000',
                     fontFamily: themeConfig.typography.displayFont
                   }}>
                     {camp.camp_name}
                   </h2>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                    margin: '0',
+                    fontFamily: themeConfig.typography.bodyFont
+                  }}>
+                    {camp.original_address || camp.placement_address}
+                  </p>
                 </div>
               </div>
             </div>
