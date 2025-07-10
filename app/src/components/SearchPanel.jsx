@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { THEMES } from '../utils/blockUtils';
-import { PlayaIcons } from './PlayaIcons';
+import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
 const SearchPanel = ({ 
   camps, 
@@ -9,14 +9,23 @@ const SearchPanel = ({
   onFilterChange,
   onFilterButtonClick,
   isVisible = false,
-  onToggle 
+  onToggle,
+  resetFilter = false
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('none');
   const [filteredCamps, setFilteredCamps] = useState([]);
   const [isExpanded, setIsExpanded] = useState(true);
   
   const themeConfig = THEMES[theme];
+  
+  // Reset filter when resetFilter prop changes
+  useEffect(() => {
+    if (resetFilter) {
+      setSelectedFilter('none');
+      setSearchTerm('');
+    }
+  }, [resetFilter]);
   
   const filterOptions = [
     { value: 'all', label: 'All Camps', icon: PlayaIcons.Camp },
@@ -29,7 +38,17 @@ const SearchPanel = ({
     let filtered = camps;
     
     // Apply status filter
-    if (selectedFilter !== 'all') {
+    if (selectedFilter === 'all') {
+      // "All Camps" shows only camps with BED progress (orange/purple/pink)
+      filtered = filtered.filter(camp => 
+        camp.bed_status === 'registered' || 
+        camp.bed_status === 'consent_policy' || 
+        camp.bed_status === 'bed_talk'
+      );
+    } else if (selectedFilter === 'none') {
+      // "None" shows no camps (empty state)
+      filtered = [];
+    } else {
       filtered = filtered.filter(camp => camp.bed_status === selectedFilter);
     }
     
@@ -191,8 +210,8 @@ const SearchPanel = ({
       {/* Filter Buttons */}
       <div style={{ padding: '0 1rem 0.5rem' }}>
         <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           gap: '0.375rem',
           marginBottom: '0.5rem'
         }}>
@@ -217,7 +236,9 @@ const SearchPanel = ({
               <button
                 key={option.value}
                 onClick={() => {
-                  setSelectedFilter(option.value);
+                  // Toggle functionality - clicking same filter deselects it to 'none' state
+                  const newValue = selectedFilter === option.value ? 'none' : option.value;
+                  setSelectedFilter(newValue);
                   if (onFilterButtonClick) onFilterButtonClick();
                 }}
                 style={{
@@ -254,17 +275,16 @@ const SearchPanel = ({
                   }
                 }}
               >
-                {/* Color indicator dot for non-'all' options */}
-                {option.value !== 'all' && (
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: statusColor,
-                    marginRight: '0.25rem'
-                  }} />
+                {/* Use StatusIcon for non-'all' options, PlayaIcon for 'all' */}
+                {option.value === 'all' ? (
+                  <IconComponent size="0.875rem" />
+                ) : (
+                  <StatusIcon 
+                    status={option.value} 
+                    size="1rem" 
+                    animated={false}
+                  />
                 )}
-                <IconComponent size="0.75rem" />
                 {option.label}
               </button>
             );
@@ -303,70 +323,84 @@ const SearchPanel = ({
       
       {/* Results List */}
       {isExpanded && filteredCamps.length > 0 && (
-        <div style={{
-          maxHeight: '200px',
-          overflowY: 'auto',
-          borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          padding: '0.75rem 1.25rem',
-          scrollBehavior: 'smooth'
-        }}>
-          {filteredCamps.slice(0, 20).map((camp, index) => (
-            <div
-              key={camp.id}
-              onClick={() => onCampSelect && onCampSelect(camp)}
-              style={{
-                padding: '0.5rem',
-                borderRadius: '0.5rem',
-                border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                marginBottom: '0.5rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                animation: `fadeInUp 0.3s ease-out ${index * 0.05}s both`
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
-                e.target.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.transform = 'translateY(0)';
-              }}
-            >
-              <div style={{
-                fontWeight: '600',
-                fontSize: '0.875rem',
-                color: themeConfig.textColor,
-                fontFamily: themeConfig.typography.primaryFont,
-                marginBottom: '0.25rem'
-              }}>
-                {camp.camp_name}
+        <div 
+          style={{
+            height: '200px',
+            maxHeight: '200px',
+            overflowY: 'scroll', // Force scrollbar to always be visible
+            overflowX: 'hidden',
+            borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+            padding: '0.75rem 1.25rem',
+            position: 'relative'
+          }}
+          className="search-results-container"
+        >
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '0.5rem'
+          }}>
+            {filteredCamps.slice(0, 30).map((camp, index) => (
+              <div
+                key={camp.id}
+                onClick={() => onCampSelect && onCampSelect(camp)}
+                style={{
+                  padding: '0.5rem',
+                  borderRadius: '0.5rem',
+                  border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  animation: `fadeInUp 0.3s ease-out ${index * 0.02}s both`,
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{
+                  fontWeight: '600',
+                  fontSize: '0.8rem',
+                  color: themeConfig.textColor,
+                  fontFamily: themeConfig.typography.primaryFont,
+                  marginBottom: '0.25rem',
+                  lineHeight: '1.2'
+                }}>
+                  {camp.camp_name}
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: themeConfig.textColor,
+                  opacity: 0.7,
+                  fontFamily: themeConfig.typography.primaryFont,
+                  lineHeight: '1.1'
+                }}>
+                  📍 {camp.placement_address}
+                </div>
               </div>
-              <div style={{
-                fontSize: '0.75rem',
-                color: themeConfig.textColor,
-                opacity: 0.7,
-                fontFamily: themeConfig.typography.primaryFont
-              }}>
-                📍 {camp.placement_address}
-              </div>
-            </div>
-          ))}
-          {filteredCamps.length > 20 && (
+            ))}
+          </div>
+          {filteredCamps.length > 30 && (
             <div style={{
               textAlign: 'center',
               fontSize: '0.75rem',
               color: themeConfig.textColor,
               opacity: 0.6,
               fontFamily: themeConfig.typography.primaryFont,
-              marginTop: '0.5rem'
+              marginTop: '0.75rem',
+              gridColumn: '1 / -1'
             }}>
-              Showing first 20 of {filteredCamps.length} results
+              Showing first 30 of {filteredCamps.length} results
             </div>
           )}
         </div>
       )}
       
-      {/* CSS Animations */}
+      {/* CSS Animations and Scrolling */}
       <style>{`
         @keyframes slideDown {
           from {
@@ -388,6 +422,41 @@ const SearchPanel = ({
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        
+        .search-results-container {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(254,136,3,0.8) rgba(0,0,0,0.2);
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        .search-results-container::-webkit-scrollbar {
+          width: 12px;
+          background: rgba(0,0,0,0.1);
+        }
+        
+        .search-results-container::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.1);
+          border-radius: 6px;
+        }
+        
+        .search-results-container::-webkit-scrollbar-thumb {
+          background-color: rgba(254,136,3,0.8);
+          border-radius: 6px;
+          border: 2px solid rgba(255,255,255,0.3);
+          min-height: 20px;
+        }
+        
+        .search-results-container::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(254,136,3,0.9);
+        }
+        
+        .search-results-container::-webkit-scrollbar-thumb:active {
+          background-color: rgba(254,136,3,1.0);
+        }
+        
+        .search-results-container::-webkit-scrollbar-corner {
+          background: rgba(0,0,0,0.1);
         }
       `}</style>
     </div>

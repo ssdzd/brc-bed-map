@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
-const Legend = ({ theme = '2025' }) => {
+const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -52,16 +52,19 @@ const Legend = ({ theme = '2025' }) => {
           ? '1px solid rgba(255,255,255,0.2)' 
           : '1px solid rgba(0,0,0,0.1)',
       backdropFilter: 'blur(10px)',
-      transition: 'all 0.3s ease',
-      cursor: 'pointer'
-    }}
-    onClick={() => setIsExpanded(!isExpanded)}>
-      <div className="legend-header" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: isExpanded ? '0.5rem' : '0.25rem',
-      }}>
+      transition: 'all 0.3s ease'
+    }}>
+      <div 
+        className="legend-header" 
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: isExpanded ? '0.5rem' : '0.25rem',
+          cursor: 'pointer'
+        }}
+      >
         <h4 style={{
           fontWeight: 'bold',
           fontSize: '0.875rem',
@@ -82,14 +85,18 @@ const Legend = ({ theme = '2025' }) => {
       </div>
       
       {!isExpanded && (
-        <div style={{
-          fontSize: '0.7rem',
-          fontFamily: themeConfig.typography.primaryFont,
-          color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
-          opacity: 0.7,
-          textAlign: 'center',
-          fontStyle: 'italic'
-        }}>
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            fontSize: '0.7rem',
+            fontFamily: themeConfig.typography.primaryFont,
+            color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+            opacity: 0.7,
+            textAlign: 'center',
+            fontStyle: 'italic',
+            cursor: 'pointer'
+          }}
+        >
           Click to expand
         </div>
       )}
@@ -97,71 +104,92 @@ const Legend = ({ theme = '2025' }) => {
       {isExpanded && (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {items.map(item => (
-          <div 
-            key={item.status} 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.75rem',
-              padding: '0.5rem',
-              borderRadius: '0.375rem',
-              backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-              border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
-              e.currentTarget.style.transform = 'translateX(2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
-              e.currentTarget.style.transform = 'translateX(0px)';
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <StatusIcon 
-                status={item.status} 
-                size="1.75rem" 
-                animated={theme === '2024'}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ 
-                fontSize: '0.8rem',
-                fontFamily: themeConfig.typography.primaryFont,
-                fontWeight: '500',
-                color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
-                lineHeight: '1.2'
-              }}>
-                {item.label}
-              </div>
-              <div style={{ 
-                fontSize: '0.7rem',
-                fontFamily: themeConfig.typography.primaryFont,
-                color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
-                opacity: 0.6,
-                lineHeight: '1.1',
-                marginTop: '0.125rem'
-              }}>
-                {item.description}
-              </div>
-            </div>
-          </div>
-            ))}
+            {items.map(item => {
+              const isActive = activeFilter === item.status;
+              return (
+                <div 
+                  key={item.status} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusFilter && onStatusFilter(item.status);
+                  }}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.75rem',
+                    padding: '0.5rem',
+                    borderRadius: '0.375rem',
+                    backgroundColor: isActive 
+                      ? (themeConfig.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)')
+                      : (themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)'),
+                    border: isActive 
+                      ? `2px solid ${colors[item.status]}`
+                      : `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                    transform: isActive ? 'translateX(2px)' : 'translateX(0px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+                      e.currentTarget.style.transform = 'translateX(2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
+                      e.currentTarget.style.transform = 'translateX(0px)';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <StatusIcon 
+                      status={item.status} 
+                      size="1.75rem" 
+                      animated={theme === '2024'}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ 
+                      fontSize: '0.8rem',
+                      fontFamily: themeConfig.typography.primaryFont,
+                      fontWeight: '500',
+                      color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+                      lineHeight: '1.2'
+                    }}>
+                      {item.label}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.7rem',
+                      fontFamily: themeConfig.typography.primaryFont,
+                      color: themeConfig.isOfficial ? '#FFFFFF' : themeConfig.textColor,
+                      opacity: 0.6,
+                      lineHeight: '1.1',
+                      marginTop: '0.125rem'
+                    }}>
+                      {item.description}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           
           {/* Last Updated - Desktop only */}
-          <div className="legend-footer-date" style={{
-            marginTop: '1rem',
-            padding: '0.5rem',
-            borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem'
-          }}>
+          <div 
+            className="legend-footer-date" 
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem',
+              borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer'
+            }}
+          >
             <div className="legend-desert-icon" style={{ fontSize: '1rem' }}>🏜️</div>
             <div style={{
               fontSize: '0.7rem',

@@ -38,7 +38,9 @@ const MapView = () => {
   const [shareVisible, setShareVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);
+  const [legendFilter, setLegendFilter] = useState(null);
   const [currentFilter, setCurrentFilter] = useState({ statusFilter: 'all', filteredCamps: [] });
+  const [resetSearchFilter, setResetSearchFilter] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
   console.log('MapView rendering, loading:', loading, 'camps:', camps);
@@ -106,8 +108,11 @@ const MapView = () => {
       const isSelected = selectedBlock === block.id;
       
       // Check if this block should be highlighted due to filtering
-      const shouldHighlight = currentFilter.statusFilter !== 'all' && 
-        currentFilter.filteredCamps.some(camp => campInBlock(camp.placement_address, block.id));
+      // Priority: Legend filter overrides search filter (mutual exclusion)
+      const shouldHighlight = legendFilter 
+        ? campsInBlock.some(camp => camp.bed_status === legendFilter)
+        : (currentFilter.filteredCamps.length > 0 && 
+           currentFilter.filteredCamps.some(camp => campInBlock(camp.placement_address, block.id)));
       
       // Use BED status color as fill if present, otherwise use gradient
       if (color !== THEMES[currentTheme].colors.none) {
@@ -751,6 +756,24 @@ const MapView = () => {
     setPan({ x: 0, y: 84 });
   };
 
+  const handleLegendFilter = (statusFilter) => {
+    // Toggle filter - if same status clicked, clear filter
+    const newFilter = legendFilter === statusFilter ? null : statusFilter;
+    setLegendFilter(newFilter);
+    
+    // Clear search panel filter when using legend filter
+    if (newFilter !== null) {
+      setCurrentFilter({ statusFilter: 'all', filteredCamps: [] });
+      setResetSearchFilter(true);
+      
+      // Reset the flag after a brief delay
+      setTimeout(() => setResetSearchFilter(false), 100);
+    }
+    
+    // Clear any selected block when filtering
+    setSelectedBlock(null);
+  };
+
   const handleCampSelect = (camp) => {
     setSearchVisible(false);
     
@@ -781,6 +804,11 @@ const MapView = () => {
     
     // Store the current filter for highlighting blocks
     setCurrentFilter(filterData);
+    
+    // Clear legend filter when using search panel filter (only if there are filtered camps or not in 'none' state)
+    if (filterData.filteredCamps.length > 0 || (filterData.statusFilter !== 'all' && filterData.statusFilter !== 'none')) {
+      setLegendFilter(null);
+    }
   };
 
   const handleDataSourceChange = (newSource) => {
@@ -890,6 +918,7 @@ const MapView = () => {
           onFilterButtonClick={() => setSelectedBlock(null)}
           isVisible={searchVisible}
           onToggle={() => setSearchVisible(!searchVisible)}
+          resetFilter={resetSearchFilter}
         />
       </div>
       
@@ -1166,7 +1195,11 @@ const MapView = () => {
       </div>
       
       <div className="legend-container">
-        <Legend theme={currentTheme} />
+        <Legend 
+          theme={currentTheme} 
+          onStatusFilter={handleLegendFilter}
+          activeFilter={legendFilter}
+        />
       </div>
       
       {selectedBlock && (
