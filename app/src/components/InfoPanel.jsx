@@ -1,5 +1,5 @@
 import React from 'react';
-import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress } from '../utils/blockUtils';
+import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
 const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false }) => {
@@ -50,7 +50,11 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
             color: themeConfig.isDark ? '#FFFFFF' : '#000000',
             fontFamily: themeConfig.typography.displayFont
           }}>
-            {customTitle || (blockId ? `${blockIdToDisplayAddress(blockId)} Sector` : 'Select a Block')}
+            {customTitle || (blockId ? 
+              (shouldAddSectorSuffix(blockId) 
+                ? `${simplifyPlazaName(blockIdToDisplayAddress(blockId))} Sector`
+                : simplifyPlazaName(blockIdToDisplayAddress(blockId))
+              ) : 'Select a Block')}
           </h2>
           {blockId && (
             <p style={{
@@ -224,9 +228,9 @@ const getBEDColor = (status, theme = '2025') => {
 const getStatusIcon = (status) => {
   const icons = {
     none: '○',
-    registered: '▶',
-    consent_policy: '📜',
-    bed_talk: '🗣️'
+    registered: '🧡',
+    consent_policy: '💜',
+    bed_talk: '💖'
   };
   return icons[status] || icons.none;
 };

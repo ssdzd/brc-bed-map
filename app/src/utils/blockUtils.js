@@ -137,6 +137,73 @@ const PLAZA_QUARTER_MAPPING = {
   'plaza_4:30_G_Quarter_D': '4:31 & G-'
 };
 
+// Helper function to determine if a block should have "Sector" suffix
+export const shouldAddSectorSuffix = (blockId) => {
+  // Add "Sector" for normal city polygons (IDs starting with 'polygon_')
+  if (blockId && blockId.startsWith('polygon_')) {
+    return true;
+  }
+  
+  // Don't add "Sector" for plaza quarters, special locations, etc.
+  return false;
+};
+
+// Convert granular plaza quarter name to simplified plaza name for display
+export const simplifyPlazaName = (displayAddress) => {
+  // Handle BRC Airport
+  if (displayAddress === 'BRC Airport') {
+    return displayAddress;
+  }
+  
+  // Handle Center Camp
+  if (displayAddress === 'Center Camp') {
+    return displayAddress;
+  }
+  
+  // Convert granular plaza quarter coordinates to simplified plaza names
+  // Examples: "2:59 & B+" -> "3 & B Plaza", "7:29 & G-" -> "7:30 & G Plaza", "5:59 & A+" -> "6 & A Plaza"
+  const plazaQuarterMatch = displayAddress.match(/(\d{1,2}):(\d{2})\s*&\s*([A-G])([+-])/);
+  if (plazaQuarterMatch) {
+    const [_, hour, minute, ring] = plazaQuarterMatch;
+    const hourNum = parseInt(hour);
+    const minuteNum = parseInt(minute);
+    
+    // Map granular coordinates back to main plaza time
+    let mainHour = hourNum;
+    let mainMinute = 0;
+    
+    if (minuteNum === 59) {
+      // :59 means just before the hour, so the plaza is at the next hour
+      mainHour = (hourNum + 1) % 12;
+      if (mainHour === 0) mainHour = 12;
+    } else if (minuteNum === 1) {
+      // :01 means just after the hour, so the plaza is at this hour
+      mainHour = hourNum;
+    } else if (minuteNum === 29) {
+      // :29 means just before :30, so the plaza is at :30
+      mainHour = hourNum;
+      mainMinute = 30;
+    } else if (minuteNum === 31) {
+      // :31 means just after :30, so the plaza is at :30
+      mainHour = hourNum;
+      mainMinute = 30;
+    }
+    
+    // Format the simplified plaza name
+    const timeStr = mainMinute === 0 ? `${mainHour}` : `${mainHour}:30`;
+    
+    // Special case: 6 & A Plaza is called "Center Camp Plaza"
+    if (timeStr === '6' && ring === 'A') {
+      return 'Center Camp Plaza';
+    }
+    
+    return `${timeStr} & ${ring} Plaza`;
+  }
+  
+  // Return original address if not a plaza quarter
+  return displayAddress;
+};
+
 // Convert block ID back to display format (handles both street blocks and plaza quarters)
 export const blockIdToDisplayAddress = (blockId) => {
   // Handle special locations

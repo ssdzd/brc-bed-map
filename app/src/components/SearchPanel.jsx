@@ -14,13 +14,12 @@ const SearchPanel = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [filteredCamps, setFilteredCamps] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   
   const themeConfig = THEMES[theme];
   
   const filterOptions = [
     { value: 'all', label: 'All Camps', icon: PlayaIcons.Camp },
-    { value: 'none', label: 'Not Registered', icon: PlayaIcons.Camp },
     { value: 'registered', label: 'Started BEDucator program', icon: PlayaIcons.VideoPlay },
     { value: 'consent_policy', label: 'Distributed Consent Policy', icon: PlayaIcons.Buddy },
     { value: 'bed_talk', label: 'Scheduled BED talk', icon: PlayaIcons.CheckMark }
@@ -305,12 +304,13 @@ const SearchPanel = ({
       {/* Results List */}
       {isExpanded && filteredCamps.length > 0 && (
         <div style={{
-          maxHeight: '150px',
+          maxHeight: '200px',
           overflowY: 'auto',
           borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          padding: '0.75rem 1.25rem'
+          padding: '0.75rem 1.25rem',
+          scrollBehavior: 'smooth'
         }}>
-          {filteredCamps.slice(0, 10).map((camp, index) => (
+          {filteredCamps.slice(0, 20).map((camp, index) => (
             <div
               key={camp.id}
               onClick={() => onCampSelect && onCampSelect(camp)}
@@ -351,7 +351,7 @@ const SearchPanel = ({
               </div>
             </div>
           ))}
-          {filteredCamps.length > 10 && (
+          {filteredCamps.length > 20 && (
             <div style={{
               textAlign: 'center',
               fontSize: '0.75rem',
@@ -360,7 +360,7 @@ const SearchPanel = ({
               fontFamily: themeConfig.typography.primaryFont,
               marginTop: '0.5rem'
             }}>
-              Showing first 10 of {filteredCamps.length} results
+              Showing first 20 of {filteredCamps.length} results
             </div>
           )}
         </div>

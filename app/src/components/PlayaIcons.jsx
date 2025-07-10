@@ -166,24 +166,29 @@ export const AnimatedIcon = ({
 // Icon status indicator component
 export const StatusIcon = ({ status, size = '1rem', animated = false }) => {
   const statusConfig = {
-    none: { icon: PlayaIcons.Camp, animation: 'none' },
-    registered: { icon: PlayaIcons.VideoPlay, animation: 'pulse' },
-    consent_policy: { icon: PlayaIcons.Buddy, animation: 'bounce' },
-    bed_talk: { icon: PlayaIcons.CheckMark, animation: 'spin' }
+    none: { emoji: '○', animation: 'none' },
+    registered: { emoji: '🧡', animation: 'spin' },
+    consent_policy: { emoji: '💜', animation: 'bounce' },
+    bed_talk: { emoji: '💖', animation: 'pulse' }
   };
   
   const config = statusConfig[status] || statusConfig.none;
-  const IconComponent = config.icon;
+  
+  const iconElement = (
+    <span style={{ fontSize: size, display: 'inline-block' }}>
+      {config.emoji}
+    </span>
+  );
   
   if (animated) {
     return (
       <AnimatedIcon animation={config.animation} duration="2s">
-        <IconComponent size={size} />
+        {iconElement}
       </AnimatedIcon>
     );
   }
   
-  return <IconComponent size={size} />;
+  return iconElement;
 };
 
 // Direction indicator component

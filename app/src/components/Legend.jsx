@@ -120,27 +120,12 @@ const Legend = ({ theme = '2025' }) => {
               e.currentTarget.style.transform = 'translateX(0px)';
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div 
-                style={{ 
-                  width: '1.25rem', 
-                  height: '1.25rem', 
-                  borderRadius: '0.375rem',
-                  backgroundColor: colors[item.status],
-                  border: themeConfig.isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: `0 2px 4px ${colors[item.status]}40`
-                }}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <StatusIcon 
+                status={item.status} 
+                size="1.75rem" 
+                animated={theme === '2024'}
               />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <StatusIcon 
-                  status={item.status} 
-                  size="0.875rem" 
-                  animated={theme === '2024'}
-                />
-              </div>
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ 

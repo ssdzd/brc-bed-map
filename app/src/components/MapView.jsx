@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useMapData } from '../hooks/useMapData';
-import { getBlockColor, THEMES, campInBlock, blockIdToDisplayAddress } from '../utils/blockUtils';
+import { getBlockColor, THEMES, campInBlock, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import InfoPanel from './InfoPanel';
 import Legend from './Legend';
 import ZoomControls from './ZoomControls';
@@ -216,8 +216,13 @@ const MapView = () => {
           coordinates = `(${centerX.toFixed(1)}, ${centerY.toFixed(1)})`;
         }
         
+        const simplifiedName = simplifyPlazaName(displayAddress);
+        const tooltipTitle = shouldAddSectorSuffix(block.id) 
+          ? `${simplifiedName} Sector`
+          : simplifiedName;
+        
         const tooltipContent = {
-          title: displayAddress,
+          title: tooltipTitle,
           description: campsInBlock.length > 0 
             ? `${campsInBlock.length} camp${campsInBlock.length > 1 ? 's' : ''} registered`
             : 'No camps registered',
