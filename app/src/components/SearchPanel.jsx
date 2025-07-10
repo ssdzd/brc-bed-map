@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { THEMES } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
@@ -10,12 +10,19 @@ const SearchPanel = ({
   onFilterButtonClick,
   isVisible = false,
   onToggle,
-  resetFilter = false
+  resetFilter = false,
+  currentFilter = { statusFilter: 'none', filteredCamps: [] }
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('none');
   const [filteredCamps, setFilteredCamps] = useState([]);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(200);
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const themeConfig = THEMES[theme];
   
@@ -26,6 +33,18 @@ const SearchPanel = ({
       setSearchTerm('');
     }
   }, [resetFilter]);
+  
+  // Sync search panel filter with external filter changes (from legend)
+  useEffect(() => {
+    if (currentFilter && currentFilter.statusFilter !== selectedFilter && !resetFilter && !isSyncing) {
+      // Only sync if not in middle of a reset or already syncing to prevent loops
+      setIsSyncing(true);
+      setSelectedFilter(currentFilter.statusFilter);
+      // Also sync the filtered camps from external source
+      setFilteredCamps(currentFilter.filteredCamps);
+      setTimeout(() => setIsSyncing(false), 50); // Short delay to prevent immediate re-sync
+    }
+  }, [currentFilter.statusFilter, selectedFilter, resetFilter, isSyncing]);
   
   const filterOptions = [
     { value: 'all', label: 'All Camps', icon: PlayaIcons.Camp },
@@ -64,15 +83,27 @@ const SearchPanel = ({
     
     setFilteredCamps(filtered);
     
-    // Notify parent of filter changes
-    if (onFilterChange) {
-      onFilterChange({
+    // Notify parent of filter changes only if not syncing from external changes
+    if (onFilterChange && !isSyncing && !resetFilter) {
+      const newFilterData = {
         searchTerm,
         statusFilter: selectedFilter,
         filteredCamps: filtered
-      });
+      };
+      
+      onFilterChange(newFilterData);
     }
-  }, [searchTerm, selectedFilter, camps, onFilterChange]);
+  }, [searchTerm, selectedFilter, camps]);
+  
+  // Update dimensions when content changes
+  useEffect(() => {
+    if (containerRef.current && contentRef.current) {
+      const newContainerHeight = containerRef.current.clientHeight;
+      const newContentHeight = contentRef.current.scrollHeight;
+      setContainerHeight(newContainerHeight);
+      setContentHeight(newContentHeight);
+    }
+  }, [filteredCamps, isExpanded]);
   
   if (!isVisible) {
     return (
@@ -321,80 +352,123 @@ const SearchPanel = ({
         </div>
       </div>
       
-      {/* Results List */}
+      {/* Results List with Custom Scrolling */}
       {isExpanded && filteredCamps.length > 0 && (
-        <div 
-          style={{
-            height: '200px',
-            maxHeight: '200px',
-            overflowY: 'scroll', // Force scrollbar to always be visible
-            overflowX: 'hidden',
-            borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            padding: '0.75rem 1.25rem',
-            position: 'relative'
-          }}
-          className="search-results-container"
-        >
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '0.5rem'
-          }}>
-            {filteredCamps.slice(0, 30).map((camp, index) => (
-              <div
-                key={camp.id}
-                onClick={() => onCampSelect && onCampSelect(camp)}
+        <div style={{ position: 'relative' }}>
+          {/* Scrollable Container */}
+          <div 
+            ref={containerRef}
+            onWheel={(e) => {
+              e.preventDefault();
+              const newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY, contentHeight - containerHeight));
+              setScrollTop(newScrollTop);
+            }}
+            style={{
+              height: '200px',
+              overflow: 'hidden',
+              borderTop: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              padding: '0.75rem 1.25rem',
+              position: 'relative'
+            }}
+          >
+            <div 
+              ref={contentRef}
+              style={{
+                transform: `translateY(-${scrollTop}px)`,
+                transition: 'transform 0.1s ease'
+              }}>
+              <div 
+                className="search-results-grid"
                 style={{
-                  padding: '0.5rem',
-                  borderRadius: '0.5rem',
-                  border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  animation: `fadeInUp 0.3s ease-out ${index * 0.02}s both`,
-                  backgroundColor: 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <div style={{
-                  fontWeight: '600',
-                  fontSize: '0.8rem',
-                  color: themeConfig.textColor,
-                  fontFamily: themeConfig.typography.primaryFont,
-                  marginBottom: '0.25rem',
-                  lineHeight: '1.2'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '0.5rem'
                 }}>
-                  {camp.camp_name}
+                {filteredCamps.slice(0, 30).map((camp, index) => (
+                <div
+                  key={camp.id}
+                  onClick={() => onCampSelect && onCampSelect(camp)}
+                  style={{
+                    padding: '0.5rem',
+                    borderRadius: '0.5rem',
+                    border: `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    animation: `fadeInUp 0.3s ease-out ${index * 0.02}s both`,
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <div style={{
+                    fontWeight: '600',
+                    fontSize: '0.8rem',
+                    color: themeConfig.textColor,
+                    fontFamily: themeConfig.typography.primaryFont,
+                    marginBottom: '0.25rem',
+                    lineHeight: '1.2'
+                  }}>
+                    {camp.camp_name}
+                  </div>
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: themeConfig.textColor,
+                    opacity: 0.7,
+                    fontFamily: themeConfig.typography.primaryFont,
+                    lineHeight: '1.1'
+                  }}>
+                    📍 {camp.placement_address}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: '0.7rem',
-                  color: themeConfig.textColor,
-                  opacity: 0.7,
-                  fontFamily: themeConfig.typography.primaryFont,
-                  lineHeight: '1.1'
-                }}>
-                  📍 {camp.placement_address}
-                </div>
+                ))}
               </div>
-            ))}
+              {filteredCamps.length > 30 && (
+                <div style={{
+                  textAlign: 'center',
+                  fontSize: '0.75rem',
+                  color: themeConfig.textColor,
+                  opacity: 0.6,
+                  fontFamily: themeConfig.typography.primaryFont,
+                  marginTop: '0.75rem'
+                }}>
+                  Showing first 30 of {filteredCamps.length} results
+                </div>
+              )}
+            </div>
           </div>
-          {filteredCamps.length > 30 && (
+          
+          {/* Custom Scrollbar */}
+          {contentHeight > containerHeight && (
             <div style={{
-              textAlign: 'center',
-              fontSize: '0.75rem',
-              color: themeConfig.textColor,
-              opacity: 0.6,
-              fontFamily: themeConfig.typography.primaryFont,
-              marginTop: '0.75rem',
-              gridColumn: '1 / -1'
+              position: 'absolute',
+              right: '5px',
+              top: '5px',
+              bottom: '5px',
+              width: '12px',
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '6px'
             }}>
-              Showing first 30 of {filteredCamps.length} results
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: `${(scrollTop / (contentHeight - containerHeight)) * (containerHeight - 40)}px`,
+                  width: '12px',
+                  height: '40px',
+                  backgroundColor: '#FE8803',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  // Add drag functionality if needed
+                }}
+              />
             </div>
           )}
         </div>
@@ -424,39 +498,18 @@ const SearchPanel = ({
           }
         }
         
-        .search-results-container {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(254,136,3,0.8) rgba(0,0,0,0.2);
-          -webkit-overflow-scrolling: touch;
+        
+        /* Responsive grid columns */
+        @media (max-width: 768px) {
+          .search-results-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
         }
         
-        .search-results-container::-webkit-scrollbar {
-          width: 12px;
-          background: rgba(0,0,0,0.1);
-        }
-        
-        .search-results-container::-webkit-scrollbar-track {
-          background: rgba(0,0,0,0.1);
-          border-radius: 6px;
-        }
-        
-        .search-results-container::-webkit-scrollbar-thumb {
-          background-color: rgba(254,136,3,0.8);
-          border-radius: 6px;
-          border: 2px solid rgba(255,255,255,0.3);
-          min-height: 20px;
-        }
-        
-        .search-results-container::-webkit-scrollbar-thumb:hover {
-          background-color: rgba(254,136,3,0.9);
-        }
-        
-        .search-results-container::-webkit-scrollbar-thumb:active {
-          background-color: rgba(254,136,3,1.0);
-        }
-        
-        .search-results-container::-webkit-scrollbar-corner {
-          background: rgba(0,0,0,0.1);
+        @media (max-width: 480px) {
+          .search-results-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

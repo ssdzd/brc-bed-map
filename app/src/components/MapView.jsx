@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useMapData } from '../hooks/useMapData';
 import { getBlockColor, THEMES, campInBlock, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import InfoPanel from './InfoPanel';
@@ -43,7 +43,7 @@ const MapView = () => {
   const [resetSearchFilter, setResetSearchFilter] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
-  console.log('MapView rendering, loading:', loading, 'camps:', camps);
+  // console.log('MapView rendering, loading:', loading, 'camps:', camps);
 
   // Initialize state from URL on mount (only once)
   const [initializedFromUrl, setInitializedFromUrl] = useState(false);
@@ -73,31 +73,31 @@ const MapView = () => {
   }, [currentTheme, zoom, pan, selectedBlock, updateUrl, initializedFromUrl]);
 
   useEffect(() => {
-    console.log('MapView useEffect triggered');
+    // console.log('MapView useEffect triggered');
     if (!svgRef.current || loading) {
-      console.log('Early return - svgRef:', svgRef.current, 'loading:', loading);
+      // console.log('Early return - svgRef:', svgRef.current, 'loading:', loading);
       return;
     }
 
     const svgDoc = svgRef.current.contentDocument;
-    console.log('SVG doc:', svgDoc);
+    // console.log('SVG doc:', svgDoc);
     if (!svgDoc) return;
 
     // Extend SVG viewBox to accommodate invisible balancing element and airport
     const svgElement = svgDoc.documentElement;
     if (svgElement && svgElement.getAttribute('viewBox') === '0 0 1160.17 861.54') {
       svgElement.setAttribute('viewBox', '0 0 1240 1011.54');
-      console.log('Extended SVG viewBox to accommodate balancing element and airport');
+      // console.log('Extended SVG viewBox to accommodate balancing element and airport');
     }
 
 
     // Update gradient references based on current theme
     const gradientId = currentTheme.includes('2024') ? 'cityGradient-2024' : 'cityGradient-2025';
-    console.log('Using gradient ID:', gradientId, 'for theme:', currentTheme);
+    // console.log('Using gradient ID:', gradientId, 'for theme:', currentTheme);
 
     // Color all blocks and plaza quarters based on camp data - BED colors override gradient
     const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
-    console.log('Found blocks and plaza-quarters:', blocks.length);
+    // console.log('Found blocks and plaza-quarters:', blocks.length);
     blocks.forEach(block => {
       const color = getBlockColor(block.id, camps, currentTheme);
       const campsInBlock = camps.filter(camp => 
@@ -121,13 +121,13 @@ const MapView = () => {
         let fillOpacity = isSelected ? '1.0' : '0.7';
         
         block.style.setProperty('fill-opacity', fillOpacity, 'important');
-        console.log(`Block ${block.id} - BED status color:`, color);
+        // console.log(`Block ${block.id} - BED status color:`, color);
       } else {
         // No BED status - show gradient with full opacity
         const gradientFill = `url(#${gradientId})`;
         block.style.setProperty('fill', gradientFill, 'important');
         block.style.setProperty('fill-opacity', '1.0', 'important');
-        console.log(`Block ${block.id} - Using gradient:`, gradientFill);
+        // console.log(`Block ${block.id} - Using gradient:`, gradientFill);
       }
       
       block.style.setProperty('cursor', 'pointer', 'important');
@@ -757,18 +757,38 @@ const MapView = () => {
   };
 
   const handleLegendFilter = (statusFilter) => {
+    console.log('Legend filter clicked:', statusFilter, 'current:', legendFilter);
     // Toggle filter - if same status clicked, clear filter
     const newFilter = legendFilter === statusFilter ? null : statusFilter;
+    console.log('Setting legend filter to:', newFilter);
     setLegendFilter(newFilter);
     
-    // Clear search panel filter when using legend filter
+    // Update search panel filter to match legend filter - create the filtered camps list
+    let filteredCamps = [];
     if (newFilter !== null) {
-      setCurrentFilter({ statusFilter: 'all', filteredCamps: [] });
-      setResetSearchFilter(true);
-      
-      // Reset the flag after a brief delay
-      setTimeout(() => setResetSearchFilter(false), 100);
+      // Filter camps based on the legend selection
+      if (newFilter === 'all') {
+        filteredCamps = camps.filter(camp => 
+          camp.bed_status === 'registered' || 
+          camp.bed_status === 'consent_policy' || 
+          camp.bed_status === 'bed_talk'
+        );
+      } else {
+        filteredCamps = camps.filter(camp => camp.bed_status === newFilter);
+      }
     }
+    
+    // Set the filter state that search panel will sync to
+    const filterState = {
+      statusFilter: newFilter === null ? 'none' : newFilter,
+      filteredCamps: filteredCamps
+    };
+    
+    setCurrentFilter(filterState);
+    
+    // Trigger search panel reset to sync UI
+    setResetSearchFilter(true);
+    setTimeout(() => setResetSearchFilter(false), 100);
     
     // Clear any selected block when filtering
     setSelectedBlock(null);
@@ -799,17 +819,22 @@ const MapView = () => {
     }
   };
   
-  const handleFilterChange = (filterData) => {
+  const handleFilterChange = useCallback((filterData) => {
     console.log('Filter changed:', filterData);
     
     // Store the current filter for highlighting blocks
     setCurrentFilter(filterData);
     
-    // Clear legend filter when using search panel filter (only if there are filtered camps or not in 'none' state)
-    if (filterData.filteredCamps.length > 0 || (filterData.statusFilter !== 'all' && filterData.statusFilter !== 'none')) {
+    // Set legend filter to match search filter for map highlighting
+    // Only set legend filter for specific status filters, not 'all' or 'none'
+    if (filterData.statusFilter === 'none' || filterData.statusFilter === 'all') {
       setLegendFilter(null);
+    } else {
+      // Set legend filter to highlight matching camps on map
+      setLegendFilter(filterData.statusFilter);
     }
-  };
+  }, []);
+
 
   const handleDataSourceChange = (newSource) => {
     setDataSource(newSource);
@@ -919,6 +944,7 @@ const MapView = () => {
           isVisible={searchVisible}
           onToggle={() => setSearchVisible(!searchVisible)}
           resetFilter={resetSearchFilter}
+          currentFilter={currentFilter}
         />
       </div>
       
