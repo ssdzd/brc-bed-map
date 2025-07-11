@@ -373,6 +373,8 @@ const getStatusIcon = (status) => {
   return icons[status] || icons.none;
 };
 
+}; // Close renderInfoPanelContent function
+
 const formatStatus = (status) => {
   const statusLabels = {
     none: 'Not Registered',
