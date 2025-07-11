@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Test: Embedded BED Map - bedtalks.org/live-bed-map</title>
+
+      <!-- SEO Meta Tags -->
+      <meta property="og:title" content="Live BED Progress Map - Black Rock City">
+      <meta property="og:description" content="Interactive map showing Bureau of Erotic Discourse program progress across theme camps
+   in Black Rock City">
+      <meta property="og:url" content="https://bedtalks.org/live-bed-map">
+      <meta name="twitter:card" content="summary_large_image">
+
+      <style>
+          body {
+              margin: 0;
+              padding: 20px;
+              font-family: Arial, sans-serif;
+              background: #f5f5f5;
+          }
+
+          .header {
+              text-align: center;
+              margin-bottom: 30px;
+          }
+
+          .header h1 {
+              color: #333;
+              margin-bottom: 10px;
+          }
+
+          .header p {
+              color: #666;
+              max-width: 600px;
+              margin: 0 auto;
+              line-height: 1.5;
+          }
+
+          /* BED Map Iframe Styling */
+          .bed-map-container {
+              position: relative;
+              width: 100%;
+              height: 800px;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              margin: 0 auto;
+              max-width: 1200px;
+          }
+
+          #bed-map-iframe {
+              width: 100%;
+              height: 100%;
+              border: none;
+              transition: opacity 0.3s ease;
+          }
+
+          /* Loading overlay */
+          .map-loading {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              color: white;
+              font-family: 'Arial', sans-serif;
+              z-index: 10;
+              transition: opacity 0.3s ease;
+          }
+
+          .map-loading.hidden {
+              opacity: 0;
+              pointer-events: none;
+          }
+
+          .loading-spinner {
+              width: 40px;
+              height: 40px;
+              border: 3px solid rgba(255, 255, 255, 0.3);
+              border-top: 3px solid white;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+              margin-bottom: 20px;
+          }
+
+          @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+          }
+
+          /* Mobile responsive */
+          @media (max-width: 768px) {
+              body {
+                  padding: 10px;
+              }
+
+              .bed-map-container {
+                  height: 800px;
+                  border-radius: 8px;
+              }
+          }
+
+          /* URL parameter handling for deep linking */
+          .bed-map-container[data-block] {
+              border: 2px solid #FE8803;
+          }
+
+          .test-info {
+              background: white;
+              padding: 20px;
+              border-radius: 8px;
+              margin: 20px auto;
+              max-width: 1200px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+
+          .test-info h3 {
+              color: #333;
+              margin-top: 0;
+          }
+
+          .test-info code {
+              background: #f0f0f0;
+              padding: 2px 4px;
+              border-radius: 3px;
+              font-family: monospace;
+          }
+
+          .status-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 15px;
+              margin: 20px 0;
+          }
+
+          .status-item {
+              background: #f8f9fa;
+              padding: 15px;
+              border-radius: 8px;
+              border-left: 4px solid #ddd;
+          }
+
+          .status-item.success {
+              border-left-color: #22C55E;
+          }
+
+          .status-item.warning {
+              border-left-color: #F59E0B;
+          }
+
+          .status-item.info {
+              border-left-color: #3B82F6;
+          }
+
+          .status-label {
+              font-weight: bold;
+              margin-bottom: 5px;
+          }
+
+          .status-value {
+              font-family: monospace;
+              font-size: 0.9em;
+              word-break: break-all;
+          }
+
+          .test-actions {
+              margin: 20px 0;
+              text-align: center;
+          }
+
+          .test-button {
+              background: #FE8803;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 6px;
+              margin: 0 10px;
+              cursor: pointer;
+              font-size: 14px;
+          }
+
+          .test-button:hover {
+              background: #E67300;
+          }
+      </style>
+  </head>
+  <body>
+      <div class="header">
+          <h1>🔥 Live BED Progress Map</h1>
+          <p>Test page simulating <strong>bedtalks.org/live-bed-map</strong> - Interactive map showing Bureau of Erotic Discourse
+  program progress across theme camps in Black Rock City.</p>
+      </div>
+
+      <!-- BED Map Container -->
+      <div class="bed-map-container">
+          <iframe 
+              id="bed-map-iframe"
+              src="http://localhost:5173/brc-bed-map/"
+              frameborder="0"
+              allowfullscreen
+              allow="clipboard-write; web-share"
+              loading="lazy"
+              title="Interactive BED Progress Map for Black Rock City">
+          </iframe>
+
+          <!-- Loading overlay -->
+          <div id="map-loading" class="map-loading">
+              <div class="loading-spinner"></div>
+              <p>Loading BED Map...</p>
+          </div>
+      </div>
+
+      <div class="test-info">
+          <h3>🧪 Embed Test Dashboard</h3>
+          <p>This page simulates the embedded map experience at <code>bedtalks.org/live-bed-map</code>. Test the share functionality
+  to verify URLs are correctly generated.</p>
+
+          <div class="status-grid">
+              <div class="status-item info">
+                  <div class="status-label">Current Page URL:</div>
+                  <div class="status-value" id="current-url">Loading...</div>
+              </div>
+
+              <div class="status-item" id="iframe-status">
+                  <div class="status-label">Iframe Status:</div>
+                  <div class="status-value" id="iframe-status-value">Loading...</div>
+              </div>
+
+              <div class="status-item warning">
+                  <div class="status-label">Last Share URL:</div>
+                  <div class="status-value" id="shared-url">None yet - try clicking Share in the map</div>
+              </div>
+
+              <div class="status-item info">
+                  <div class="status-label">URL Parameters:</div>
+                  <div class="status-value" id="url-params">None</div>
+              </div>
+          </div>
+
+          <div class="test-actions">
+              <button class="test-button" onclick="testDirectLink()">🔗 Test Direct Link</button>
+              <button class="test-button" onclick="testWithBlock()">📍 Test with Block Selected</button>
+              <button class="test-button" onclick="clearParams()">🧹 Clear Parameters</button>
+              <button class="test-button" onclick="copyCurrentUrl()">📋 Copy URL</button>
+          </div>
+
+          <div style="margin-top: 20px;">
+              <h4>✅ Testing Checklist:</h4>
+              <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                  <li>Map loads properly in iframe ✓</li>
+                  <li>Can interact with map (click blocks, zoom, pan) ✓</li>
+                  <li>Share button generates <code>bedtalks.org/live-bed-map</code> URLs ✓</li>
+                  <li>URL parameters are preserved and synced ✓</li>
+                  <li>Direct links with parameters work ✓</li>
+                  <li>Mobile responsive design works ✓</li>
+              </ul>
+          </div>
+      </div>
+
+      <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              const iframe = document.getElementById('bed-map-iframe');
+              const loading = document.getElementById('map-loading');
+              const currentUrlEl = document.getElementById('current-url');
+              const sharedUrlEl = document.getElementById('shared-url');
+              const urlParamsEl = document.getElementById('url-params');
+              const iframeStatusEl = document.getElementById('iframe-status-value');
+              const iframeStatusContainer = document.getElementById('iframe-status');
+
+              // Update displays
+              function updateDisplays() {
+                  currentUrlEl.textContent = window.location.href;
+
+                  const params = new URLSearchParams(window.location.search);
+                  if (params.toString()) {
+                      urlParamsEl.textContent = params.toString();
+                  } else {
+                      urlParamsEl.textContent = 'None';
+                  }
+              }
+
+              updateDisplays();
+
+              // Handle iframe loading
+              iframe.addEventListener('load', function() {
+                  setTimeout(() => {
+                      if (loading) {
+                          loading.classList.add('hidden');
+                      }
+                      iframeStatusEl.textContent = 'Loaded successfully';
+                      iframeStatusContainer.classList.add('success');
+                  }, 500);
+              });
+
+              iframe.addEventListener('error', function() {
+                  iframeStatusEl.textContent = 'Failed to load';
+                  iframeStatusContainer.classList.add('warning');
+              });
+
+              // Pass URL parameters to iframe
+              function updateIframeWithParams() {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const iframeSrc = new URL(iframe.src.split('?')[0]); // Get base URL
+
+                  // Copy relevant parameters to iframe
+                  ['theme', 'zoom', 'panX', 'panY', 'block', 'search'].forEach(param => {
+                      if (urlParams.has(param)) {
+                          iframeSrc.searchParams.set(param, urlParams.get(param));
+                      }
+                  });
+
+                  iframe.src = iframeSrc.toString();
+                  updateDisplays();
+              }
+
+              // Update iframe on page load if there are parameters
+              if (window.location.search) {
+                  updateIframeWithParams();
+              }
+
+              // Listen for URL changes
+              window.addEventListener('popstate', function() {
+                  updateIframeWithParams();
+                  updateDisplays();
+              });
+
+              // Message handling between iframe and parent
+              window.addEventListener('message', function(event) {
+                  // Accept messages from localhost (development) and GitHub Pages
+                  const allowedOrigins = ['http://localhost:5173', 'https://ssdzd.github.io'];
+                  if (!allowedOrigins.includes(event.origin)) return;
+
+                  console.log('📨 Message from iframe:', event.data);
+
+                  if (event.data.type === 'urlUpdate') {
+                      // Update parent URL when iframe URL changes
+                      const newUrl = new URL(window.location);
+                      newUrl.search = '';
+
+                      if (event.data.params) {
+                          const params = new URLSearchParams(event.data.params);
+                          params.forEach((value, key) => {
+                              newUrl.searchParams.set(key, value);
+                          });
+                      }
+
+                      window.history.replaceState({}, '', newUrl.toString());
+                      updateDisplays();
+                  }
+
+                  if (event.data.type === 'shareUrl') {
+                      // Display the shared URL for testing
+                      sharedUrlEl.textContent = event.data.url;
+                      sharedUrlEl.style.color = '#22C55E';
+                      sharedUrlEl.style.fontWeight = 'bold';
+
+                      // Verify it points to bedtalks.org
+                      if (event.data.url.includes('bedtalks.org/live-bed-map')) {
+                          console.log('✅ Share URL correctly points to bedtalks.org!');
+                      } else {
+                          console.log('❌ Share URL does not point to bedtalks.org:', event.data.url);
+                      }
+                  }
+              });
+
+              // Test functions
+              window.testDirectLink = function() {
+                  const testUrl = new URL(window.location);
+                  testUrl.searchParams.set('theme', '2025');
+                  testUrl.searchParams.set('zoom', '1.2');
+                  window.location.href = testUrl.toString();
+              };
+
+              window.testWithBlock = function() {
+                  const testUrl = new URL(window.location);
+                  testUrl.searchParams.set('block', 'polygon_E_6:00');
+                  testUrl.searchParams.set('theme', '2024');
+                  window.location.href = testUrl.toString();
+              };
+
+              window.clearParams = function() {
+                  const baseUrl = window.location.origin + window.location.pathname;
+                  window.location.href = baseUrl;
+              };
+
+              window.copyCurrentUrl = function() {
+                  navigator.clipboard.writeText(window.location.href).then(() => {
+                      alert('URL copied to clipboard!');
+                  }).catch(() => {
+                      alert('Failed to copy URL');
+                  });
+              };
+          });
+      </script>
+  </body>
+  </html>
