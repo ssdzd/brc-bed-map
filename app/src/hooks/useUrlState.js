@@ -112,11 +112,8 @@ export const useUrlState = () => {
 
   // Generate shareable URL
   const generateShareUrl = useCallback((state) => {
-    // Check if we're running on GitHub Pages or in test environment and redirect to bedtalks.org
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const isTestEnvironment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const shouldRedirectToBedtalks = isGitHubPages || isTestEnvironment;
-    const baseUrl = shouldRedirectToBedtalks ? 'https://bedtalks.org/live-bed-map' : window.location.origin + window.location.pathname;
+    // Always use bedtalks.org as the base URL for sharing
+    const baseUrl = 'https://bedtalks.org/live-bed-map';
     
     const url = new URL(baseUrl);
     const params = url.searchParams;
