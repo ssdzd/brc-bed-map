@@ -14,7 +14,7 @@ const BEDmapHeader = ({ theme = '2024' }) => {
       className="bed-header-container"
       style={{
         position: 'absolute',
-        top: '-15rem',
+        top: '-13.5rem',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -31,7 +31,7 @@ const BEDmapHeader = ({ theme = '2024' }) => {
         alt="BED Map"
         className="bed-header-image"
         style={{
-          width: '800px',
+          width: '700px',
           height: 'auto',
           objectFit: 'contain',
           filter: 'drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.6))',

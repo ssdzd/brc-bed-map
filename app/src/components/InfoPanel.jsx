@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
@@ -20,6 +20,32 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
   
   const themeConfig = THEMES[theme];
   const colors = getThemeColors(theme);
+  
+  // Custom scrolling state for camps list
+  const [scrollTop, setScrollTop] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  
+  // Calculate max height based on screen size
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const totalMaxHeight = isMobile ? 300 : 500;
+  
+  // Account for header and padding in InfoPanel
+  // Header (~60px) + padding (1.5rem top + bottom = ~48px) + margins = ~120px
+  const headerAndPaddingHeight = 120;
+  const maxContentHeight = totalMaxHeight - headerAndPaddingHeight;
+  
+  // Update dimensions when content changes
+  useEffect(() => {
+    if (containerRef.current && contentRef.current) {
+      const newContainerHeight = Math.min(maxContentHeight, contentRef.current.scrollHeight);
+      const newContentHeight = contentRef.current.scrollHeight;
+      setContainerHeight(newContainerHeight);
+      setContentHeight(newContentHeight);
+    }
+  }, [campsInBlock, maxContentHeight]);
 
   return (
     <div
@@ -118,56 +144,107 @@ const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customT
           </div>
         </div>
       ) : campsInBlock.length > 0 ? (
-        <div style={{ maxHeight: 'calc(100vh - 12rem)', overflowY: 'auto' }}>
-          {campsInBlock.map((camp, index) => (
-            <div
-              key={camp.id}
+        <div style={{ position: 'relative' }}>
+          {/* Scrollable Container */}
+          <div 
+            ref={containerRef}
+            onWheel={(e) => {
+              e.preventDefault();
+              const newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY, contentHeight - containerHeight));
+              setScrollTop(newScrollTop);
+            }}
+            style={{
+              height: `${containerHeight}px`,
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            <div 
+              ref={contentRef}
               style={{
-                padding: '1rem',
-                backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                borderRadius: '0.75rem',
-                marginBottom: index < campsInBlock.length - 1 ? '1rem' : 0
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: themeConfig.isDark 
-                    ? `${getBEDColor(camp.bed_status, theme)}20`  // 20% opacity background
-                    : `${getBEDColor(camp.bed_status, theme)}10`, // 10% opacity background
-                  border: `2px solid ${getBEDColor(camp.bed_status, theme)}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  color: getBEDColor(camp.bed_status, theme)
-                }}>
-                  {getStatusIcon(camp.bed_status)}
+                transform: `translateY(-${scrollTop}px)`,
+                transition: 'transform 0.1s ease'
+              }}>
+              {campsInBlock.map((camp, index) => (
+                <div
+                  key={camp.id}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: themeConfig.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                    borderRadius: '0.75rem',
+                    marginBottom: index < campsInBlock.length - 1 ? '1rem' : 0
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                    <div style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      borderRadius: '0.5rem',
+                      backgroundColor: themeConfig.isDark 
+                        ? `${getBEDColor(camp.bed_status, theme)}20`  // 20% opacity background
+                        : `${getBEDColor(camp.bed_status, theme)}10`, // 10% opacity background
+                      border: `2px solid ${getBEDColor(camp.bed_status, theme)}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.5rem',
+                      color: getBEDColor(camp.bed_status, theme)
+                    }}>
+                      {getStatusIcon(camp.bed_status)}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h2 style={{
+                        fontSize: '1.25rem',
+                        fontWeight: '600',
+                        margin: '0 0 0.25rem 0',
+                        color: themeConfig.isDark ? '#FFFFFF' : '#000000',
+                        fontFamily: themeConfig.typography.displayFont
+                      }}>
+                        {camp.camp_name}
+                      </h2>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                        margin: '0',
+                        fontFamily: themeConfig.typography.bodyFont
+                      }}>
+                        {camp.original_address || camp.placement_address}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    margin: '0 0 0.25rem 0',
-                    color: themeConfig.isDark ? '#FFFFFF' : '#000000',
-                    fontFamily: themeConfig.typography.displayFont
-                  }}>
-                    {camp.camp_name}
-                  </h2>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: themeConfig.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                    margin: '0',
-                    fontFamily: themeConfig.typography.bodyFont
-                  }}>
-                    {camp.original_address || camp.placement_address}
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+          
+          {/* Custom Scrollbar */}
+          {contentHeight > containerHeight && (
+            <div style={{
+              position: 'absolute',
+              right: '5px',
+              top: '5px',
+              bottom: '5px',
+              width: '12px',
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '6px'
+            }}>
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: `${(scrollTop / (contentHeight - containerHeight)) * (containerHeight - 40)}px`,
+                  width: '12px',
+                  height: '40px',
+                  backgroundColor: '#FE8803',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  // Add drag functionality if needed
+                }}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div style={{

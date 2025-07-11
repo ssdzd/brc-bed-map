@@ -12,17 +12,17 @@ const Tooltip = ({ theme = '2025', content, position, visible }) => {
         position: 'fixed',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
+        backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.85)',
         color: themeConfig.textColor,
         padding: '0.75rem 1rem',
-        borderRadius: '0.5rem',
+        borderRadius: '1rem',
         fontSize: '0.8rem',
         fontFamily: themeConfig.typography.primaryFont,
         boxShadow: themeConfig.isDark 
-          ? '0 10px 25px rgba(255, 105, 180, 0.2), 0 4px 10px rgba(0, 0, 0, 0.6)'
-          : '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1)',
-        border: themeConfig.isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
-        backdropFilter: 'blur(10px)',
+          ? '0 25px 50px rgba(255, 105, 180, 0.1), 0 10px 20px rgba(0, 0, 0, 0.3)'
+          : '0 25px 50px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04)',
+        border: themeConfig.isDark ? '2px solid rgba(255,255,255,0.15)' : '2px solid rgba(0,0,0,0.06)',
+        backdropFilter: 'blur(20px)',
         zIndex: 1000,
         pointerEvents: 'none',
         maxWidth: '200px',

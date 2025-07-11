@@ -26,7 +26,7 @@ const MapView = () => {
   const [dataSource, setDataSource] = useState('airtable');
   const { camps, loading, error, mockDataStats, refresh } = useMapData(dataSource);
   const [selectedBlock, setSelectedBlock] = useState(null);
-  const [zoom, setZoom] = useState(0.67);
+  const [zoom, setZoom] = useState(0.8);
   const [pan, setPan] = useState({ x: 0, y: 84 });
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
@@ -41,6 +41,7 @@ const MapView = () => {
   const [legendFilter, setLegendFilter] = useState(null);
   const [currentFilter, setCurrentFilter] = useState({ statusFilter: 'all', filteredCamps: [] });
   const [resetSearchFilter, setResetSearchFilter] = useState(false);
+  const [legendExpanded, setLegendExpanded] = useState(true);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
 
   // console.log('MapView rendering, loading:', loading, 'camps:', camps);
@@ -71,6 +72,13 @@ const MapView = () => {
       updateUrl(newState);
     }
   }, [currentTheme, zoom, pan, selectedBlock, updateUrl, initializedFromUrl]);
+
+  // Mobile legend behavior: collapse when block is selected
+  useEffect(() => {
+    if (window.innerWidth <= 768 && selectedBlock) {
+      setLegendExpanded(false);
+    }
+  }, [selectedBlock]);
 
   useEffect(() => {
     // console.log('MapView useEffect triggered');
@@ -247,12 +255,58 @@ const MapView = () => {
         const transformedX = (blockCenterX * zoom) + svgRect.left + pan.x;
         const transformedY = (blockCenterY * zoom) + svgRect.top + pan.y;
         
+        // Calculate radial offset based on time designation
+        let offsetX = 0;
+        
+        // Parse time from block ID (e.g., "polygon_E_6:30" -> "6:30")
+        const timeMatch = block.id.match(/_(\d{1,2}):(\d{2})$/);
+        if (timeMatch) {
+          const hour = parseInt(timeMatch[1]);
+          const minute = parseInt(timeMatch[2]);
+          
+          // Convert time to total minutes from 12:00
+          const totalMinutes = ((hour === 12 ? 0 : hour) * 60) + minute;
+          
+          // Calculate angle: each hour = 30°, each 30 min = 15°
+          // 2:00 = 22.5°, 2:30 = 7.5°, 3:00 = 352.5°, 3:30 = 337.5°
+          let theta;
+          if (hour === 2 && minute === 0) theta = 22.5;
+          else if (hour === 2 && minute === 30) theta = 7.5;
+          else if (hour === 3 && minute === 0) theta = 352.5;
+          else if (hour === 3 && minute === 30) theta = 337.5;
+          else {
+            // General formula: start from 3:00 = 352.5°, adjust by time difference
+            const minutesFrom3 = totalMinutes - 180; // 3:00 = 180 minutes from 12:00
+            theta = 352.5 + (minutesFrom3 * 0.5); // 0.5° per minute
+          }
+          
+          // Convert to radians and calculate X offset with r = 50
+          const r = 50;
+          const thetaRad = theta * (Math.PI / 180);
+          offsetX = r * Math.cos(thetaRad);
+        }
+        
+        // Calculate maximum Y coordinate based on 6:00 & E polygon position
+        // Find the 6:00 & E block to get its Y position
+        const sixOClockEBlock = svgRef.current?.contentDocument?.getElementById('polygon_E_6:00');
+        let maxTooltipY = transformedY; // fallback to current position
+        
+        if (sixOClockEBlock) {
+          const sixBbox = sixOClockEBlock.getBBox();
+          const sixCenterY = sixBbox.y + sixBbox.height / 2;
+          const sixTransformedY = (sixCenterY * zoom) + svgRect.top + pan.y;
+          maxTooltipY = sixTransformedY;
+        }
+        
+        // Use the minimum of current Y position and max Y coordinate
+        const finalY = Math.min(transformedY, maxTooltipY);
+        
         setTooltip({
           visible: true,
           content: tooltipContent,
           position: {
-            x: transformedX,
-            y: transformedY - 10
+            x: transformedX + offsetX + 100,
+            y: finalY
           }
         });
       };
@@ -600,10 +654,25 @@ const MapView = () => {
         const transformedX = (blockCenterX * zoom) + svgRect.left + pan.x;
         const transformedY = (blockCenterY * zoom) + svgRect.top + pan.y;
         
+        // Calculate angle-based offset for tooltip positioning
+        // Use The Man's coordinates as the center point
+        const mapCenterX = 622.5;
+        const mapCenterY = 272.04;
+        
+        // Calculate angle from map center to block center
+        const deltaX = blockCenterX - mapCenterX;
+        const deltaY = blockCenterY - mapCenterY;
+        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        
+        // Calculate radial offset distance (80px) in the direction away from center
+        const offsetDistance = 80;
+        const offsetX = Math.cos(angle * (Math.PI / 180)) * offsetDistance;
+        const offsetY = Math.sin(angle * (Math.PI / 180)) * offsetDistance;
+        
         setTooltip({
           visible: true,
           content: { title: displayAddress, description: "Black Rock City Airport" },
-          position: { x: transformedX, y: transformedY - 10 }
+          position: { x: transformedX + offsetX, y: transformedY + offsetY }
         });
       };
       
@@ -752,7 +821,7 @@ const MapView = () => {
   };
 
   const handleResetZoom = () => {
-    setZoom(0.67);
+    setZoom(0.8);
     setPan({ x: 0, y: 84 });
   };
 
@@ -839,6 +908,16 @@ const MapView = () => {
   const handleDataSourceChange = (newSource) => {
     setDataSource(newSource);
     console.log('Data source changed to:', newSource);
+  };
+
+  const handleLegendToggle = () => {
+    const newExpanded = !legendExpanded;
+    setLegendExpanded(newExpanded);
+    
+    // On mobile, close InfoPanel if legend is being expanded
+    if (window.innerWidth <= 768 && newExpanded && selectedBlock) {
+      setSelectedBlock(null);
+    }
   };
 
   const handleMouseDown = (e) => {
@@ -1174,8 +1253,9 @@ const MapView = () => {
             display: 'block',
             overflow: 'visible',
             boxSizing: 'border-box',
+            top: window.innerWidth <= 768 ? '-5em' : '0',
             transform: window.innerWidth <= 768 
-              ? `translate(${pan.x}px, -30px) scale(1)`
+              ? `scale(1)`
               : `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: 'center center',
             transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
@@ -1225,11 +1305,22 @@ const MapView = () => {
           theme={currentTheme} 
           onStatusFilter={handleLegendFilter}
           activeFilter={legendFilter}
+          isExpanded={window.innerWidth <= 768 ? legendExpanded : undefined}
+          onToggleExpanded={window.innerWidth <= 768 ? handleLegendToggle : undefined}
         />
       </div>
       
       {selectedBlock && (
-        <div className="info-panel">
+        <div 
+          className="info-panel"
+          style={{
+            position: window.innerWidth <= 768 ? 'fixed' : 'static',
+            bottom: window.innerWidth <= 768 ? '25.5rem' : 'auto',
+            left: window.innerWidth <= 768 ? '0rem' : 'auto',
+            right: window.innerWidth <= 768 ? '-0.25rem' : 'auto',
+            zIndex: window.innerWidth <= 768 ? 40 : 'auto'
+          }}
+        >
           <InfoPanel 
             blockId={selectedBlock} 
             camps={camps}
@@ -1299,10 +1390,10 @@ const MapView = () => {
           /* Center legend on mobile and raise it slightly */
           .legend-container {
             position: fixed !important;
-            bottom: 1.5rem !important; /* Raised from 1rem to 1.5rem */
+            bottom: 1rem !important; /* Moved down to 1rem */
             left: 50% !important;
             transform: translateX(-50%) !important;
-            z-index: 20 !important;
+            z-index: 40 !important; /* Increased to be above SearchPanel */
             width: auto !important;
           }
           

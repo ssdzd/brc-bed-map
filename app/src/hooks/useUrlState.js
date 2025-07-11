@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 export const useUrlState = () => {
   const [urlState, setUrlState] = useState({
     theme: '2024',
-    zoom: 0.67,
+    zoom: 0.8,
     pan: { x: 0, y: 84 },
     selectedBlock: null,
     search: ''
@@ -14,7 +14,7 @@ export const useUrlState = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const newState = {
       theme: '2024',
-      zoom: 0.67,
+      zoom: 0.8,
       pan: { x: 0, y: 84 },
       selectedBlock: null,
       search: ''
@@ -74,7 +74,7 @@ export const useUrlState = () => {
     }
     
     // Update zoom
-    if (newState.zoom && newState.zoom !== 0.67) {
+    if (newState.zoom && newState.zoom !== 0.8) {
       params.set('zoom', newState.zoom.toFixed(2));
     } else {
       params.delete('zoom');
@@ -119,7 +119,7 @@ export const useUrlState = () => {
       params.set('theme', state.theme);
     }
     
-    if (state.zoom && state.zoom !== 0.67) {
+    if (state.zoom && state.zoom !== 0.8) {
       params.set('zoom', state.zoom.toFixed(2));
     }
     

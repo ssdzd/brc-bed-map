@@ -158,16 +158,6 @@ const SharePanel = ({
       
       {/* Content */}
       <div style={{ padding: '1rem 1.5rem' }}>
-        <p style={{
-          fontSize: '0.875rem',
-          fontFamily: themeConfig.typography.primaryFont,
-          color: themeConfig.textColor,
-          opacity: 0.8,
-          marginBottom: '1rem',
-          lineHeight: '1.4'
-        }}>
-          Share the current map view with others. The URL will include your current position, zoom level, and selected block.
-        </p>
         
         {/* Share Options */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

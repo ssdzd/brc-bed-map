@@ -347,6 +347,72 @@ export const generateMockData = () => {
   
   allCamps = allCamps.concat(landmarkCamps);
   
+  // Add test camps for InfoPanel scrollbar testing at 6:00 & E
+  const testCamps = [
+    {
+      id: 'test_scrollbar_1',
+      camp_name: 'Bureau of Erotic Discourse',
+      user_name: 'Sadie Lune',
+      email: 'sadie@bed.org',
+      placement_address: '6:00 & E',
+      original_address: '6:00 & E',
+      bed_status: 'bed_talk',
+      buddy_name: 'Alex Johnson',
+      last_updated: new Date().toISOString(),
+      notes: 'Test camp 1 for scrollbar testing'
+    },
+    {
+      id: 'test_scrollbar_2',
+      camp_name: 'BED Training Academy',
+      user_name: 'Jordan Smith',
+      email: 'jordan@bedacademy.org',
+      placement_address: '6:00 & E',
+      original_address: '6:00 & E',
+      bed_status: 'consent_policy',
+      buddy_name: 'Sam Wilson',
+      last_updated: new Date().toISOString(),
+      notes: 'Test camp 2 for scrollbar testing'
+    },
+    {
+      id: 'test_scrollbar_3',
+      camp_name: 'Intimacy Workshop Collective',
+      user_name: 'Casey Rodriguez',
+      email: 'casey@intimacyworkshop.org',
+      placement_address: '6:00 & E',
+      original_address: '6:00 & E',
+      bed_status: 'registered',
+      buddy_name: 'Morgan Lee',
+      last_updated: new Date().toISOString(),
+      notes: 'Test camp 3 for scrollbar testing'
+    },
+    {
+      id: 'test_scrollbar_4',
+      camp_name: 'Consensual Adventures Camp',
+      user_name: 'Riley Chen',
+      email: 'riley@consensualadventures.org',
+      placement_address: '6:00 & E',
+      original_address: '6:00 & E',
+      bed_status: 'bed_talk',
+      buddy_name: 'Avery Taylor',
+      last_updated: new Date().toISOString(),
+      notes: 'Test camp 4 for scrollbar testing'
+    },
+    {
+      id: 'test_scrollbar_5',
+      camp_name: 'Sacred Sexuality Sanctuary',
+      user_name: 'Quinn Parker',
+      email: 'quinn@sacredsexuality.org',
+      placement_address: '6:00 & E',
+      original_address: '6:00 & E',
+      bed_status: 'consent_policy',
+      buddy_name: 'River Davis',
+      last_updated: new Date().toISOString(),
+      notes: 'Test camp 5 for scrollbar testing'
+    }
+  ];
+  
+  allCamps = allCamps.concat(testCamps);
+  
   console.log('Generated mock data with exact proportions:', {
     totalCamps: allCamps.length,
     regularCamps: allCamps.filter(c => !c.isLandmark).length,

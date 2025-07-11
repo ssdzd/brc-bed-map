@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
-const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
+const Legend = ({ theme = '2025', onStatusFilter, activeFilter, isExpanded: externalIsExpanded, onToggleExpanded }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(true);
+  
+  // Use external control if provided, otherwise use internal state
+  const isExpanded = externalIsExpanded !== undefined ? externalIsExpanded : internalIsExpanded;
+  const toggleExpanded = onToggleExpanded || (() => setInternalIsExpanded(!internalIsExpanded));
   
   // Get the build-time git timestamp
   const lastUpdated = typeof __GIT_LAST_UPDATED__ !== 'undefined' ? __GIT_LAST_UPDATED__ : '07/08/2025';
@@ -52,11 +56,12 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
           ? '1px solid rgba(255,255,255,0.2)' 
           : '1px solid rgba(0,0,0,0.1)',
       backdropFilter: 'blur(10px)',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      zIndex: 30
     }}>
       <div 
         className="legend-header" 
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={toggleExpanded}
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -86,7 +91,7 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
       
       {!isExpanded && (
         <div 
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={toggleExpanded}
           style={{
             fontSize: '0.7rem',
             fontFamily: themeConfig.typography.primaryFont,
@@ -127,7 +132,11 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
                       : `1px solid ${themeConfig.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
                     transition: 'all 0.2s ease',
                     cursor: 'pointer',
-                    transform: isActive ? 'translateX(2px)' : 'translateX(0px)'
+                    transform: isActive ? 'translateX(2px)' : 'translateX(0px)',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    overflow: 'visible'
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
@@ -142,13 +151,11 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <StatusIcon 
-                      status={item.status} 
-                      size="1.75rem" 
-                      animated={theme === '2024'}
-                    />
-                  </div>
+                  <StatusIcon 
+                    status={item.status} 
+                    size="1.75rem" 
+                    animated={theme === '2024'}
+                  />
                   <div style={{ flex: 1 }}>
                     <div style={{ 
                       fontSize: '0.8rem',
@@ -178,7 +185,7 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter }) => {
           {/* Last Updated - Desktop only */}
           <div 
             className="legend-footer-date" 
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggleExpanded}
             style={{
               marginTop: '1rem',
               padding: '0.5rem',

@@ -61,7 +61,10 @@ const CentralLogo = ({ theme = '2025' }) => {
       </div>
 
       {/* BEDtalks.org Text - positioned below K ring using SVG coordinates */}
-      <div
+      <a
+        href="https://bedtalks.org/"
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
           position: 'absolute',
           top: `${bedtalksTopPercent}%`,
@@ -78,11 +81,19 @@ const CentralLogo = ({ theme = '2025' }) => {
           textShadow: theme === '2024' 
               ? '2px 2px 4px rgba(0, 0, 0, 0.5)'
               : '0px 0px 0px rgba(0, 0, 0, 0.3)',
-          transition: 'all 0.5s ease'
+          transition: 'all 0.5s ease',
+          textDecoration: 'none',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.opacity = '1';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.opacity = '0.9';
         }}
       >
         BEDtalks.org
-      </div>
+      </a>
     </>
   );
 };
