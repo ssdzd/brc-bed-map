@@ -259,19 +259,16 @@ export const usePerformanceMonitor = (options = {}) => {
   };
 };
 
-// Higher-order component for automatic component performance tracking
-export const withPerformanceTracking = (WrappedComponent, componentName) => {
-  return React.memo(function PerformanceTrackedComponent(props) {
-    const startTime = useRef(performance.now());
-    const { trackComponentRender } = usePerformanceMonitor();
-    
-    useEffect(() => {
-      const renderTime = performance.now() - startTime.current;
-      trackComponentRender(componentName || WrappedComponent.name, renderTime);
-    });
-    
-    return <WrappedComponent {...props} />;
-  });
+// Higher-order component factory for automatic component performance tracking
+// Note: This should be used in .jsx files that can handle JSX syntax
+export const createPerformanceTracker = (componentName) => {
+  return {
+    trackRender: (renderTime) => {
+      if (window.trackComponentRender) {
+        window.trackComponentRender(componentName, renderTime);
+      }
+    }
+  };
 };
 
 export default usePerformanceMonitor;
