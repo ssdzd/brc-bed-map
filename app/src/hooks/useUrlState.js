@@ -112,7 +112,13 @@ export const useUrlState = () => {
 
   // Generate shareable URL
   const generateShareUrl = useCallback((state) => {
-    const url = new URL(window.location.origin + window.location.pathname);
+    // Check if we're running on GitHub Pages or in test environment and redirect to bedtalks.org
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const isTestEnvironment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const shouldRedirectToBedtalks = isGitHubPages || isTestEnvironment;
+    const baseUrl = shouldRedirectToBedtalks ? 'https://bedtalks.org/live-bed-map' : window.location.origin + window.location.pathname;
+    
+    const url = new URL(baseUrl);
     const params = url.searchParams;
     
     if (state.theme && state.theme !== '2024') {
@@ -136,7 +142,21 @@ export const useUrlState = () => {
       params.set('search', encodeURIComponent(state.search));
     }
     
-    return url.toString();
+    const shareUrl = url.toString();
+    
+    // Send message to parent window for iframe testing
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({
+          type: 'shareUrl',
+          url: shareUrl
+        }, '*');
+      } catch (error) {
+        console.log('Could not send message to parent window:', error);
+      }
+    }
+    
+    return shareUrl;
   }, []);
 
   // Copy URL to clipboard
