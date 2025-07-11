@@ -1,4 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { THEMES } from '../utils/blockUtils';
 import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
 
@@ -312,5 +313,23 @@ const PerformanceDashboard = memo(({
 });
 
 PerformanceDashboard.displayName = 'PerformanceDashboard';
+
+PerformanceDashboard.propTypes = {
+  /** Theme variant for styling */
+  theme: PropTypes.oneOf(['2024', '2025']),
+  /** Visibility state of the dashboard */
+  isVisible: PropTypes.bool,
+  /** Callback function to toggle visibility */
+  onToggle: PropTypes.func,
+  /** Position of the dashboard on screen */
+  position: PropTypes.oneOf(['bottom-right', 'bottom-left', 'top-right', 'top-left'])
+};
+
+PerformanceDashboard.defaultProps = {
+  theme: '2025',
+  isVisible: false,
+  onToggle: null,
+  position: 'bottom-right'
+};
 
 export default PerformanceDashboard;

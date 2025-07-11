@@ -1,7 +1,26 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
+import PropTypes from 'prop-types';
 import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
+/**
+ * InfoPanel Component - Block Details and Camp Information
+ * 
+ * Displays detailed information about selected map blocks including:
+ * - Camp names and BED participation status
+ * - Block address and sector information
+ * - Special landmark information (Airport, Ranger HQ, etc.)
+ * - Scrollable list with custom scrollbar
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.blockId - Unique identifier for the selected block
+ * @param {Array} props.camps - Array of camp objects with status information
+ * @param {string} [props.theme='2025'] - Theme variant ('2024' or '2025')
+ * @param {Function} props.onClose - Callback function to close the panel
+ * @param {boolean} [props.loading=false] - Loading state indicator
+ * @returns {JSX.Element} Info panel with block and camp details
+ */
 const InfoPanel = memo(({ blockId, camps, theme = '2025', onClose, loading = false }) => {
   // Handle special landmark selections
   if (blockId === 'airport-polygon') {
@@ -456,5 +475,28 @@ const renderLandmarkPanel = (landmarkType, theme, onClose) => {
 });
 
 InfoPanel.displayName = 'InfoPanel';
+
+InfoPanel.propTypes = {
+  /** Unique identifier for the selected block */
+  blockId: PropTypes.string.isRequired,
+  /** Array of camp objects with status information */
+  camps: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    camp_name: PropTypes.string.isRequired,
+    placement_address: PropTypes.string.isRequired,
+    bed_status: PropTypes.oneOf(['none', 'registered', 'consent_policy', 'bed_talk']).isRequired
+  })).isRequired,
+  /** Theme variant for styling */
+  theme: PropTypes.oneOf(['2024', '2025']),
+  /** Callback function to close the panel */
+  onClose: PropTypes.func.isRequired,
+  /** Loading state indicator */
+  loading: PropTypes.bool
+};
+
+InfoPanel.defaultProps = {
+  theme: '2025',
+  loading: false
+};
 
 export default InfoPanel;

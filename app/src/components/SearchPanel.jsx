@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { THEMES } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
-const SearchPanel = ({ 
+const SearchPanel = memo(({ 
   camps, 
   theme = '2025', 
   onCampSelect, 
@@ -514,6 +514,8 @@ const SearchPanel = ({
       `}</style>
     </div>
   );
-};
+});
+
+SearchPanel.displayName = 'SearchPanel';
 
 export default SearchPanel;

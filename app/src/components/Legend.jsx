@@ -1,7 +1,23 @@
 import React, { useState, memo } from 'react';
+import PropTypes from 'prop-types';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
+/**
+ * Legend Component - BED Status Legend with Filtering
+ * 
+ * Displays the color-coded legend for BED (Bureau of Erotic Discourse) program
+ * participation status with interactive filtering capabilities.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} [props.theme='2025'] - Theme variant ('2024' or '2025')
+ * @param {Function} [props.onStatusFilter] - Callback for status filtering
+ * @param {string} [props.activeFilter] - Currently active filter
+ * @param {boolean} [props.isExpanded] - External control for expanded state
+ * @param {Function} [props.onToggleExpanded] - Callback for expand/collapse
+ * @returns {JSX.Element} Legend component with status indicators and update button
+ */
 const Legend = memo(({ theme = '2025', onStatusFilter, activeFilter, isExpanded: externalIsExpanded, onToggleExpanded }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
@@ -36,7 +52,10 @@ const Legend = memo(({ theme = '2025', onStatusFilter, activeFilter, isExpanded:
   ];
 
   return (
-    <div style={{
+    <div 
+      role="region"
+      aria-label="BED program status legend"
+      style={{
       position: 'absolute',
       bottom: '1rem',
       left: '1rem',
@@ -265,5 +284,26 @@ const Legend = memo(({ theme = '2025', onStatusFilter, activeFilter, isExpanded:
 });
 
 Legend.displayName = 'Legend';
+
+Legend.propTypes = {
+  /** Theme variant for styling */
+  theme: PropTypes.oneOf(['2024', '2025']),
+  /** Callback function for status filtering */
+  onStatusFilter: PropTypes.func,
+  /** Currently active filter status */
+  activeFilter: PropTypes.string,
+  /** External control for expanded state */
+  isExpanded: PropTypes.bool,
+  /** Callback for expand/collapse toggle */
+  onToggleExpanded: PropTypes.func
+};
+
+Legend.defaultProps = {
+  theme: '2025',
+  onStatusFilter: null,
+  activeFilter: null,
+  isExpanded: undefined,
+  onToggleExpanded: null
+};
 
 export default Legend;

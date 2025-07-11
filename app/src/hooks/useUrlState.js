@@ -1,5 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 
+/**
+ * Custom hook for URL state management and sharing
+ * 
+ * Manages map state persistence in URL parameters for sharing and bookmarking.
+ * Handles theme, zoom, pan, selected blocks, and search terms.
+ * 
+ * @returns {Object} Hook return object
+ * @returns {Object} returns.urlState - Current URL state object
+ * @returns {string} returns.urlState.theme - Current theme ('2024' or '2025')
+ * @returns {number} returns.urlState.zoom - Zoom level (0.5-5.0)
+ * @returns {Object} returns.urlState.pan - Pan position {x, y}
+ * @returns {string|null} returns.urlState.selectedBlock - Selected block ID
+ * @returns {string} returns.urlState.search - Search query
+ * @returns {Function} returns.updateUrl - Function to update URL with new state
+ * @returns {Function} returns.generateShareUrl - Function to generate shareable URL
+ * @returns {Function} returns.copyToClipboard - Function to copy URL to clipboard
+ */
 export const useUrlState = () => {
   const [urlState, setUrlState] = useState({
     theme: '2024',

@@ -20,8 +20,27 @@ import ErrorDisplay from './ErrorDisplay';
 import PerformanceDashboard from './PerformanceDashboard';
 import { useUrlState } from '../hooks/useUrlState';
 import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
+import { logger } from '../utils/logger';
 import mapSvg from '/brc_combined_validation.svg';
 
+/**
+ * Main MapView Component - Interactive BED Map for Black Rock City
+ * 
+ * This is the primary component that renders the interactive map showing
+ * Bureau of Erotic Discourse (BED) program progress across theme camps.
+ * 
+ * Features:
+ * - Interactive SVG map with zoom/pan controls
+ * - Block coloring based on BED participation status
+ * - Real-time data from Airtable with mock data fallback
+ * - Theme switching (2024 Vibrant / 2025 Professional)
+ * - URL state persistence for sharing
+ * - Mobile-responsive design
+ * - Performance monitoring in development
+ * 
+ * @component
+ * @returns {JSX.Element} The complete interactive map interface
+ */
 const MapView = () => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
@@ -62,6 +81,67 @@ const MapView = () => {
       delete window.trackSvgLoad;
     };
   }, [trackDataFetch, trackMapLoad, trackSvgLoad]);
+
+  // Keyboard accessibility handlers
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Don't interfere with input fields
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      const { key, ctrlKey, metaKey } = event;
+      const isModifier = ctrlKey || metaKey;
+
+      switch (key) {
+        case '+':
+        case '=':
+          if (isModifier) {
+            event.preventDefault();
+            setZoom(prev => Math.min(prev * 1.2, 5));
+            logger.ui.action('keyboard zoom in', 'Ctrl/Cmd + +');
+          }
+          break;
+        case '-':
+          if (isModifier) {
+            event.preventDefault();
+            setZoom(prev => Math.max(prev * 0.8, 0.5));
+            logger.ui.action('keyboard zoom out', 'Ctrl/Cmd + -');
+          }
+          break;
+        case '0':
+          if (isModifier) {
+            event.preventDefault();
+            setZoom(0.8);
+            setPan({ x: 0, y: 84 });
+            logger.ui.action('keyboard reset zoom', 'Ctrl/Cmd + 0');
+          }
+          break;
+        case 'Escape':
+          event.preventDefault();
+          setSelectedBlock(null);
+          setSearchVisible(false);
+          setStatsVisible(false);
+          setShareVisible(false);
+          setUpdateVisible(false);
+          logger.ui.action('keyboard close panels', 'Escape');
+          break;
+        case 'f':
+        case 'F':
+          if (isModifier) {
+            event.preventDefault();
+            setSearchVisible(true);
+            logger.ui.action('keyboard open search', 'Ctrl/Cmd + F');
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [setZoom, setPan, setSelectedBlock, setSearchVisible, setStatsVisible, setShareVisible, setUpdateVisible]);
 
   // console.log('MapView rendering, loading:', loading, 'camps:', camps);
 
@@ -213,7 +293,10 @@ const MapView = () => {
           'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3))'
         ].join(' ');
         block.style.setProperty('filter', glowFilter, 'important');
-        console.log(`Applied selection styling to block ${block.id} with ${isUnregisteredBlock ? 'gray' : 'white'} stroke`);
+        logger.ui.debug(`Applied selection styling to block ${block.id}`, { 
+          blockId: block.id, 
+          strokeColor: isUnregisteredBlock ? 'gray' : 'white' 
+        });
       } else if (!shouldHighlight) {
         // Only remove stroke/filter if block is not highlighted by filter
         if (!block.classList.contains('plaza-quarter')) {
@@ -477,7 +560,7 @@ const MapView = () => {
       // Add the icon group to the SVG
       svgDoc.documentElement.appendChild(iconGroup);
       
-      console.log('Medical icon added to SVG at (943, 271)');
+      logger.map.debug('Medical icon added to SVG', { position: '(943, 271)' });
     }
 
     // Add medical icon directly to SVG at coordinates (301, 271) for 9:00 & C plaza
@@ -534,7 +617,7 @@ const MapView = () => {
       // Add the icon group to the SVG
       svgDoc.documentElement.appendChild(iconGroup);
       
-      console.log('Medical icon added to SVG at (301, 271) for 9:00 & C plaza');
+      logger.map.debug('Medical icon added to SVG', { position: '(301, 271)', location: '9:00 & C plaza' });
     }
 
     // Add medical icon directly to SVG at coordinates (712, 487) for 5:15 & Esplanade
@@ -591,7 +674,7 @@ const MapView = () => {
       // Add the icon group to the SVG
       svgDoc.documentElement.appendChild(iconGroup);
       
-      console.log('Medical icon added to SVG at (712, 487) for 5:15 & Esplanade');
+      logger.map.debug('Medical icon added to SVG', { position: '(712, 487)', location: '5:15 & Esplanade' });
     }
 
     // Add Ranger HQ icon at 5:45 & Esplanade
@@ -845,10 +928,10 @@ const MapView = () => {
   };
 
   const handleLegendFilter = (statusFilter) => {
-    console.log('Legend filter clicked:', statusFilter, 'current:', legendFilter);
+    logger.ui.action('legend filter clicked', statusFilter, { current: legendFilter });
     // Toggle filter - if same status clicked, clear filter
     const newFilter = legendFilter === statusFilter ? null : statusFilter;
-    console.log('Setting legend filter to:', newFilter);
+    logger.ui.debug('Setting legend filter', { filter: newFilter });
     setLegendFilter(newFilter);
     
     // Update search panel filter to match legend filter - create the filtered camps list

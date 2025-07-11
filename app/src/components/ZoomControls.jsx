@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { THEMES } from '../utils/blockUtils';
 
-const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '2024' }) => {
+const ZoomControls = memo(({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '2024' }) => {
   const currentTheme = THEMES[theme];
   
   const containerStyle = {
@@ -52,13 +52,18 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '
   };
 
   return (
-    <div style={containerStyle}>
+    <div 
+      style={containerStyle}
+      role="group"
+      aria-label="Map zoom controls"
+    >
       <button
         onClick={onZoomIn}
         style={buttonStyle}
         onMouseEnter={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
-        title="Zoom In"
+        title="Zoom In (Ctrl + +)"
+        aria-label="Zoom in"
       >
         +
       </button>
@@ -68,7 +73,8 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '
         style={buttonStyle}
         onMouseEnter={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
-        title="Zoom Out"
+        title="Zoom Out (Ctrl + -)"
+        aria-label="Zoom out"
       >
         −
       </button>
@@ -81,7 +87,8 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '
         }}
         onMouseEnter={(e) => Object.assign(e.target.style, {...buttonStyle, fontSize: '14px', ...hoverStyle})}
         onMouseLeave={(e) => Object.assign(e.target.style, {...buttonStyle, fontSize: '14px'})}
-        title="Reset Zoom"
+        title="Reset Zoom (Ctrl + 0)"
+        aria-label="Reset zoom to default"
       >
         ⌂
       </button>
@@ -99,6 +106,8 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onResetZoom, currentZoom, theme = '
       </div>
     </div>
   );
-};
+});
+
+ZoomControls.displayName = 'ZoomControls';
 
 export default ZoomControls;

@@ -1,6 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { generateMockData, validateDistributions } from '../utils/mockData';
 import { fetchCamps, testConnection, parseAddress } from '../utils/airtableClient';
+import { logger } from '../utils/logger';
+
+/**
+ * Custom hook for managing BED Map data
+ * 
+ * Handles data fetching from Airtable with automatic fallback to mock data.
+ * Provides loading states, error handling, and data validation.
+ * 
+ * @param {string} [dataSource='airtable'] - Data source ('airtable' or 'mock')
+ * @returns {Object} Hook return object
+ * @returns {Array} returns.camps - Array of camp objects with BED status
+ * @returns {boolean} returns.loading - Loading state
+ * @returns {string|null} returns.error - Error message if any
+ * @returns {Object|null} returns.mockDataStats - Statistics when using mock data
+ * @returns {Function} returns.refresh - Function to refresh data
+ */
 
 // Original mock data for backward compatibility
 const originalMockCamps = [
@@ -26,11 +42,16 @@ export const useMapData = (dataSource = 'airtable') => {
       // Test connection first
       const connectionTest = await testConnection();
       if (!connectionTest.success) {
-        console.warn('Airtable connection failed, falling back to generated mock data:', connectionTest.message);
+        logger.data.warn('Airtable connection failed, falling back to mock data', { 
+          reason: connectionTest.message 
+        });
         // Use generated mock data instead of original mock data for better coverage
         const mockCamps = generateMockData();
         const validation = validateDistributions(mockCamps);
-        console.log('Mock data validation (fallback):', validation);
+        logger.data.info('Generated mock data for fallback', { 
+          camps: mockCamps.length, 
+          validation 
+        });
         
         setCamps(mockCamps);
         setMockDataStats({
@@ -78,7 +99,10 @@ export const useMapData = (dataSource = 'airtable') => {
         console.warn('Found potential duplicate camp names:', duplicates.map(([name, count]) => `"${name}" (${count}x)`));
       }
       
-      console.log(`Loaded ${validCamps.length} valid camps from Airtable (${airtableCamps.length} total)`);
+      logger.data.info('Loaded camps from Airtable', { 
+        valid: validCamps.length, 
+        total: airtableCamps.length 
+      });
       setCamps(validCamps);
       setMockDataStats(null);
       setLoading(false);
