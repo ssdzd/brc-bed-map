@@ -32,39 +32,81 @@ const InfoPanel = memo(({ blockId, camps, theme = '2025', onClose, loading = fal
     campInBlock(camp.placement_address, blockId)
   );
   
-  return renderInfoPanel(blockId, campsInBlock, theme, onClose, loading);
-};
-
-const renderInfoPanel = (blockId, campsInBlock, theme, onClose, loading, customTitle = null) => {
-  
-  const themeConfig = THEMES[theme];
-  const colors = getThemeColors(theme);
-  
-  // Custom scrolling state for camps list
+  // React hooks for the InfoPanel functionality
   const [scrollTop, setScrollTop] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   
+  const themeConfig = THEMES[theme];
+  const colors = getThemeColors(theme);
+  
   // Calculate max height based on screen size
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   const totalMaxHeight = isMobile ? 300 : 500;
+  
+  // Handle scroll container setup
+  useEffect(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerEl = containerRef.current;
+      const contentEl = contentRef.current;
+      
+      setContainerHeight(containerEl.offsetHeight);
+      setContentHeight(contentEl.scrollHeight);
+    }
+  }, [campsInBlock, setContainerHeight, setContentHeight]);
+  
+  // Custom scroll handler
+  const handleScroll = useCallback((deltaY) => {
+    if (contentHeight <= containerHeight) return;
+    
+    const maxScroll = contentHeight - containerHeight;
+    const newScrollTop = Math.max(0, Math.min(maxScroll, scrollTop + deltaY));
+    setScrollTop(newScrollTop);
+  }, [contentHeight, containerHeight, scrollTop, setScrollTop]);
+  
+  // Wheel event handler
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    handleScroll(e.deltaY * 0.5);
+  }, [handleScroll]);
+  return renderInfoPanelContent(blockId, campsInBlock, theme, onClose, loading, {
+    scrollTop,
+    setScrollTop,
+    contentHeight,
+    setContentHeight,
+    containerHeight,
+    setContainerHeight,
+    containerRef,
+    contentRef,
+    themeConfig,
+    colors,
+    totalMaxHeight,
+    handleWheel
+  });
+});
+
+const renderInfoPanelContent = (blockId, campsInBlock, theme, onClose, loading, state) => {
+  const {
+    scrollTop,
+    setScrollTop,
+    contentHeight,
+    setContentHeight,
+    containerHeight,
+    setContainerHeight,
+    containerRef,
+    contentRef,
+    themeConfig,
+    colors,
+    totalMaxHeight,
+    handleWheel
+  } = state;
   
   // Account for header and padding in InfoPanel
   // Header (~60px) + padding (1.5rem top + bottom = ~48px) + margins = ~120px
   const headerAndPaddingHeight = 120;
   const maxContentHeight = totalMaxHeight - headerAndPaddingHeight;
-  
-  // Update dimensions when content changes
-  useEffect(() => {
-    if (containerRef.current && contentRef.current) {
-      const newContainerHeight = Math.min(maxContentHeight, contentRef.current.scrollHeight);
-      const newContentHeight = contentRef.current.scrollHeight;
-      setContainerHeight(newContainerHeight);
-      setContentHeight(newContentHeight);
-    }
-  }, [campsInBlock, maxContentHeight]);
 
   return (
     <div
