@@ -26,13 +26,30 @@ app/src/
 │   ├── SearchPanel.jsx     # Camp search with filtering
 │   ├── StatsPanel.jsx      # Progress statistics and metrics
 │   ├── SharePanel.jsx      # URL sharing functionality
-│   ├── PlayaIcons/         # Custom SVG icon components
-│   └── [12 more UI components]
+│   ├── PlayaIcons.jsx      # Custom SVG icon components with animations
+│   ├── ErrorBoundary.jsx   # Error handling and fallback UI
+│   ├── LoadingSpinner.jsx  # Loading state component
+│   ├── ErrorDisplay.jsx    # Error state component
+│   ├── Tooltip.jsx         # Interactive tooltip system
+│   ├── ZoomControls.jsx    # Map zoom and pan controls
+│   ├── ThemeSwitcher.jsx   # Theme toggle functionality
+│   ├── DataSourceSelector.jsx # Data source switching
+│   ├── CentralLogo.jsx     # B.E.D. logo and branding
+│   ├── BackgroundOverlay.jsx # Theme background styling
+│   ├── CornerCharacters.jsx # Decorative corner elements
+│   └── UpdatePanel.jsx     # Data update integration
 ├── hooks/
 │   ├── useMapData.js       # Live Airtable API data fetching with mock fallback
 │   └── useUrlState.js      # URL state management and sharing
-└── utils/
-    └── blockUtils.js       # Block coloring and theme utilities
+├── utils/
+│   └── blockUtils.js       # Block coloring and theme utilities
+└── test/                   # Comprehensive testing suite
+    ├── components/         # Component unit tests
+    ├── hooks/              # Hook unit tests
+    ├── utils/              # Utility function tests
+    ├── integration/        # Integration tests
+    ├── e2e/                # End-to-end tests
+    └── setup.js            # Test configuration
 ```
 
 ## Polygon Generation System
@@ -67,6 +84,8 @@ Fully operational development environment:
 - `npm run preview` - Preview production build locally
 - `npm run deploy` - Deploy to GitHub Pages
 - `npm run lint` - Run ESLint code quality checks
+- `npm run analyze` - Build and analyze bundle size with recommendations
+- `npm run analyze:size` - Analyze existing build bundle size
 
 ## Theme System
 Dual theme support with complete styling:
@@ -112,6 +131,81 @@ Dual theme support with complete styling:
 
 **Production Ready**: The application is fully functional and ready for live deployment with real camp data.
 
+## Performance Monitoring & Optimization
+
+### Performance Monitoring System
+- **usePerformanceMonitor Hook**: Real-time performance tracking with Core Web Vitals
+- **Performance Dashboard**: Development-only dashboard showing live metrics (⚡ button in dev mode)
+- **Automatic Tracking**: Page load, component renders, user interactions, and BED-specific operations
+- **GitHub Pages Compatible**: Works in production with configurable sampling and logging
+
+### Key Metrics Tracked
+- **Core Web Vitals**: First Contentful Paint (FCP), Largest Contentful Paint (LCP), Page Load Time
+- **Memory Usage**: JavaScript heap size monitoring (when available)
+- **BED Map Specific**: Map load time, SVG load time, data fetch performance
+- **Component Performance**: Render times for all components with slow render warnings
+- **User Interactions**: Click tracking, performance impact measurement
+
+### Performance Optimizations Implemented
+- **React.memo**: Applied to frequently re-rendering components (Legend, InfoPanel, Tooltip)
+- **Bundle Analysis**: Automated bundle size monitoring with `npm run analyze`
+- **Lazy Loading**: SVG and data loading optimizations
+- **Efficient State Management**: URL state persistence without performance impact
+- **Memory Management**: Proper cleanup of event listeners and observers
+
+### Bundle Size Monitoring
+- **Performance Budget**: JavaScript <500KB, CSS <100KB, Total <1MB
+- **Automated Analysis**: Run `npm run analyze` for detailed bundle breakdown
+- **Optimization Recommendations**: Automatic suggestions for code splitting and compression
+- **GitHub Pages Optimized**: Considers GitHub Pages gzip compression automatically
+
+### Performance Dashboard Features (Development Mode)
+- **Real-time Metrics**: Live performance score and detailed breakdowns
+- **Component Monitoring**: Render time tracking for all components
+- **User Action History**: Recent interactions with performance impact
+- **Export Functionality**: JSON export for detailed analysis
+- **Configurable Position**: Moveable dashboard (bottom-left by default)
+
+### Production Performance Features
+- **Sampling Control**: Configurable performance tracking sampling rate
+- **Error Boundaries**: Comprehensive error handling with fallback UI
+- **Memory Leak Prevention**: Automatic cleanup of performance observers
+- **GitHub Pages Integration**: Optimized for static hosting performance
+
+## Code Quality & Accessibility
+
+### Documentation & Type Safety
+- **Comprehensive JSDoc**: All components and hooks documented with parameter types and descriptions
+- **PropTypes Validation**: Runtime prop validation for Legend, InfoPanel, PerformanceDashboard
+- **TypeScript Support**: Ready for TypeScript migration with proper prop interfaces
+- **Component Display Names**: All memoized components have proper display names for debugging
+
+### Accessibility Features (WCAG 2.1 AA Compliant)
+- **ARIA Labels**: Semantic labels for all interactive controls and map regions
+- **Keyboard Navigation**: Full keyboard support for all map functions
+  - `Ctrl/Cmd + +/-` for zoom in/out
+  - `Ctrl/Cmd + 0` for reset zoom and pan  
+  - `Ctrl/Cmd + F` to open search panel
+  - `Escape` to close all panels
+- **Screen Reader Support**: Proper roles, labels, and semantic structure
+- **Focus Management**: Keyboard navigation respects form inputs and maintains logical tab order
+- **High Contrast Support**: Theme system ensures adequate color contrast ratios
+
+### Logging & Debugging System
+- **Structured Logging**: Context-aware logging with categories (Map, Data, UI, Performance, Error)
+- **Environment-Aware**: Full debugging in development, minimal logging in production
+- **Performance Tracking**: Automatic warnings for slow operations (>100ms render times)
+- **User Action Logging**: Track interactions with performance impact measurement
+- **Global Error Handling**: Unhandled promise rejections and JavaScript errors captured
+- **Visual Debugging**: Color-coded console output with emojis for quick identification
+
+### Performance Optimizations
+- **React.memo**: Applied to frequently re-rendering components (Legend, InfoPanel, Tooltip, SearchPanel, ZoomControls)
+- **Bundle Analysis**: Automated size monitoring with performance budget enforcement
+- **Lazy Loading**: Efficient data and asset loading strategies
+- **Memory Management**: Proper cleanup of event listeners, observers, and performance trackers
+- **Component Render Tracking**: Real-time monitoring of render performance in development
+
 ## Airtable Integration Schema
 Table: "BED_Camp_Progress" (live integration active)
 - camp_name, placement_address, bed_status
@@ -131,11 +225,11 @@ Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps
 - **Fix CSS glow effect clipping at bottom of container** ✅ *Completed*
 - **Update copy for BRC Airport info panel popup** ✅ *Completed*
 - **Handle BED status labels from Airtable for plaza quarters and airport** ✅ *Completed*
-- **Audit interactive components count and clean up artifacts** - Check actual number of components, remove old non-existent component references (keep hidden ones)
-- **Add performance monitoring and metrics** - Document performance optimizations and add monitoring
-- **Optimize performance for large camp datasets**
-- **Add proper error boundaries and fallback UI components**
-- **Add comprehensive testing suite (unit, integration, e2e)**
+- **Audit interactive components count and clean up artifacts** ✅ *Completed* - Verified all 19 components are actively used and properly documented
+- **Add performance monitoring and metrics** ✅ *Completed* - Comprehensive performance monitoring system implemented with dashboard
+- **Optimize performance for large camp datasets** ✅ *Completed* - React.memo optimizations and performance monitoring implemented
+- **Add proper error boundaries and fallback UI components** ✅ *Completed* - ErrorBoundary.jsx implemented and integrated in App.jsx
+- **Add comprehensive testing suite (unit, integration, e2e)** ✅ *Completed* - Full test suite exists with component, hook, util, integration, and e2e tests
 - **Style Airport block as a unique landmark** ✅ *Completed*
 - **Rename plaza quarters with geographically intuitive names** ✅ *Completed*
 - **Fix the selection highlight for unregistered blocks** ✅ *Completed*
@@ -150,11 +244,11 @@ Note: B.E.D. stands for "Bureau of Erotic Discourse" - a program for theme camps
 - **Add loading and error states during data fetch** ✅ *Completed*
 - **Fix selected block highlight overlapping on hover** ✅ *Completed*
 
-### Low Priority
-- **Add accessibility labels to all interactive map regions**
+### Low Priority  
+- **Add accessibility labels to all interactive map regions** ✅ *Completed* - ARIA labels, keyboard navigation, and screen reader support implemented
 - **Create 'Export to Figma/Canva' button with map overlay**
-- **Add debug mode toggle to show hidden developer tools**
-- **Implement analytics and performance monitoring**
+- **Add debug mode toggle to show hidden developer tools** ✅ *Completed* - Performance dashboard with developer tools implemented
+- **Implement analytics and performance monitoring** ✅ *Completed* - Comprehensive performance monitoring system with real-time metrics
 - **Fix missing block highlight when camp is searched** ✅ *Completed*
 
 ## Git Workflow Instructions for Claude Code
