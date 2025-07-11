@@ -17,7 +17,9 @@ import SharePanel from './SharePanel';
 import UpdatePanel from './UpdatePanel';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorDisplay from './ErrorDisplay';
+import PerformanceDashboard from './PerformanceDashboard';
 import { useUrlState } from '../hooks/useUrlState';
+import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
 import mapSvg from '/brc_combined_validation.svg';
 
 const MapView = () => {
@@ -42,7 +44,24 @@ const MapView = () => {
   const [currentFilter, setCurrentFilter] = useState({ statusFilter: 'all', filteredCamps: [] });
   const [resetSearchFilter, setResetSearchFilter] = useState(false);
   const [legendExpanded, setLegendExpanded] = useState(true);
+  const [perfDashVisible, setPerfDashVisible] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
+  const { trackMapLoad, trackSvgLoad, trackDataFetch, trackUserInteraction, trackComponentRender } = usePerformanceMonitor({
+    enableLogging: process.env.NODE_ENV === 'development',
+    trackUserInteractions: true
+  });
+
+  // Expose performance tracking to global scope for other hooks
+  useEffect(() => {
+    window.trackDataFetch = trackDataFetch;
+    window.trackMapLoad = trackMapLoad;
+    window.trackSvgLoad = trackSvgLoad;
+    return () => {
+      delete window.trackDataFetch;
+      delete window.trackMapLoad; 
+      delete window.trackSvgLoad;
+    };
+  }, [trackDataFetch, trackMapLoad, trackSvgLoad]);
 
   // console.log('MapView rendering, loading:', loading, 'camps:', camps);
 
@@ -1480,6 +1499,16 @@ const MapView = () => {
         }
       `}</style>
     </div>
+
+    {/* Performance Dashboard - Development Only */}
+    {process.env.NODE_ENV === 'development' && (
+      <PerformanceDashboard
+        theme={currentTheme}
+        isVisible={perfDashVisible}
+        onToggle={() => setPerfDashVisible(!perfDashVisible)}
+        position="bottom-left"
+      />
+    )}
     </>
   );
 };

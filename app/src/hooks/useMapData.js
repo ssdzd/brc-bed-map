@@ -18,6 +18,7 @@ export const useMapData = (dataSource = 'airtable') => {
   const [mockDataStats, setMockDataStats] = useState(null);
 
   const fetchAirtableData = useCallback(async () => {
+    const startTime = performance.now();
     try {
       setLoading(true);
       setError(null);
@@ -82,6 +83,12 @@ export const useMapData = (dataSource = 'airtable') => {
       setMockDataStats(null);
       setLoading(false);
       
+      // Track performance
+      const fetchTime = performance.now() - startTime;
+      if (window.trackDataFetch) {
+        window.trackDataFetch(fetchTime, 'airtable');
+      }
+      
     } catch (err) {
       console.error('Error fetching Airtable data:', err);
       setError(`Failed to load Airtable data: ${err.message}`);
@@ -102,6 +109,12 @@ export const useMapData = (dataSource = 'airtable') => {
         validation
       });
       setLoading(false);
+      
+      // Track performance for fallback
+      const fetchTime = performance.now() - startTime;
+      if (window.trackDataFetch) {
+        window.trackDataFetch(fetchTime, 'mock-fallback');
+      }
     }
   }, []);
 

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { parseBlockId, campInBlock, THEMES, getThemeColors, blockIdToDisplayAddress, simplifyPlazaName, shouldAddSectorSuffix } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 
-const InfoPanel = ({ blockId, camps, theme = '2025', onClose, loading = false }) => {
+const InfoPanel = memo(({ blockId, camps, theme = '2025', onClose, loading = false }) => {
   // Handle special landmark selections
   if (blockId === 'airport-polygon') {
     return renderLandmarkPanel('airport', theme, onClose);
@@ -453,6 +453,8 @@ const renderLandmarkPanel = (landmarkType, theme, onClose) => {
       `}</style>
     </div>
   );
-};
+});
+
+InfoPanel.displayName = 'InfoPanel';
 
 export default InfoPanel;

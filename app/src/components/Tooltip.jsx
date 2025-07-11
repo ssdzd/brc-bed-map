@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { THEMES } from '../utils/blockUtils';
 
-const Tooltip = ({ theme = '2025', content, position, visible }) => {
+const Tooltip = memo(({ theme = '2025', content, position, visible }) => {
   const themeConfig = THEMES[theme];
 
   if (!visible || !content) return null;
@@ -87,6 +87,8 @@ const Tooltip = ({ theme = '2025', content, position, visible }) => {
       `}</style>
     </div>
   );
-};
+});
+
+Tooltip.displayName = 'Tooltip';
 
 export default Tooltip;

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { StatusIcon } from './PlayaIcons';
 
-const Legend = ({ theme = '2025', onStatusFilter, activeFilter, isExpanded: externalIsExpanded, onToggleExpanded }) => {
+const Legend = memo(({ theme = '2025', onStatusFilter, activeFilter, isExpanded: externalIsExpanded, onToggleExpanded }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];
   const colors = getThemeColors(theme);
   const [internalIsExpanded, setInternalIsExpanded] = useState(true);
@@ -262,6 +262,8 @@ const Legend = ({ theme = '2025', onStatusFilter, activeFilter, isExpanded: exte
       )}
     </div>
   );
-};
+});
+
+Legend.displayName = 'Legend';
 
 export default Legend;
