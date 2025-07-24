@@ -34,6 +34,13 @@ const SearchPanel = memo(({
     }
   }, [resetFilter]);
   
+  // Set 'All Camps' as default when panel becomes visible
+  useEffect(() => {
+    if (isVisible && selectedFilter === 'none') {
+      setSelectedFilter('all');
+    }
+  }, [isVisible]);
+  
   // Sync search panel filter with external filter changes (from legend)
   useEffect(() => {
     if (currentFilter && currentFilter.statusFilter !== selectedFilter && !resetFilter && !isSyncing) {
@@ -56,7 +63,22 @@ const SearchPanel = memo(({
   useEffect(() => {
     let filtered = camps;
     
-    // Only apply search term for filtering results, not status filter
+    // Apply status filter
+    if (selectedFilter === 'all') {
+      // "All Camps" shows only camps with BED progress (orange/purple/pink)
+      filtered = filtered.filter(camp => 
+        camp.bed_status === 'registered' || 
+        camp.bed_status === 'consent_policy' || 
+        camp.bed_status === 'bed_talk'
+      );
+    } else if (selectedFilter === 'none') {
+      // "None" shows no camps (empty state)
+      filtered = [];
+    } else {
+      filtered = filtered.filter(camp => camp.bed_status === selectedFilter);
+    }
+    
+    // Apply search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(camp => 
