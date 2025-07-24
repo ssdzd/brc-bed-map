@@ -22,40 +22,42 @@ import { PlayaIcons, StatusIcon } from './PlayaIcons';
  * @returns {JSX.Element} Info panel with block and camp details
  */
 const InfoPanel = memo(({ blockId, camps, theme = '2025', onClose, loading = false }) => {
-  // Handle special landmark selections
-  if (blockId === 'airport-polygon') {
-    return renderLandmarkPanel('airport', theme, onClose);
-  }
-  
-  const { street, approximateTime } = parseBlockId(blockId);
-  const campsInBlock = camps.filter(camp => 
-    campInBlock(camp.placement_address, blockId)
-  );
-  
-  // React hooks for the InfoPanel functionality
+  // React hooks must be called first, before any conditional logic
   const [scrollTop, setScrollTop] = useState(0);
-  const [contentHeight, setContentHeight] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(0);
+  const [contentHeight, _setContentHeight] = useState(0);
+  const [containerHeight, _setContainerHeight] = useState(0);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   
   const themeConfig = THEMES[theme];
-  const colors = getThemeColors(theme);
+  const _colors = getThemeColors(theme);
   
   // Calculate max height based on screen size
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-  const totalMaxHeight = isMobile ? 300 : 500;
+  const totalMaxHeight = isMobile ? 350 : 400;
   
-  // Handle scroll container setup
+  // Calculate available content height (account for header and padding)
+  const headerAndPaddingHeight = 120;
+  const maxContentHeight = totalMaxHeight - headerAndPaddingHeight;
+  
+  // All hooks must be called before any conditional returns
   useEffect(() => {
-    if (containerRef.current && contentRef.current) {
-      const containerEl = containerRef.current;
-      const contentEl = contentRef.current;
-      
-      setContainerHeight(containerEl.offsetHeight);
-      setContentHeight(contentEl.scrollHeight);
-    }
-  }, [campsInBlock, setContainerHeight, setContentHeight]);
+    const updateDimensions = () => {
+      if (containerRef.current && contentRef.current) {
+        const containerEl = containerRef.current;
+        const contentEl = contentRef.current;
+        
+        // Use the available content height instead of actual container height
+        const availableHeight = Math.min(maxContentHeight, containerEl.offsetHeight);
+        _setContainerHeight(availableHeight);
+        _setContentHeight(contentEl.scrollHeight);
+      }
+    };
+    
+    // Small delay to ensure DOM is rendered
+    const timeout = setTimeout(updateDimensions, 50);
+    return () => clearTimeout(timeout);
+  }, [blockId, camps, maxContentHeight]);
   
   // Custom scroll handler
   const handleScroll = useCallback((deltaY) => {
@@ -64,26 +66,39 @@ const InfoPanel = memo(({ blockId, camps, theme = '2025', onClose, loading = fal
     const maxScroll = contentHeight - containerHeight;
     const newScrollTop = Math.max(0, Math.min(maxScroll, scrollTop + deltaY));
     setScrollTop(newScrollTop);
-  }, [contentHeight, containerHeight, scrollTop, setScrollTop]);
+  }, [contentHeight, containerHeight, scrollTop]);
   
   // Wheel event handler
-  const handleWheel = useCallback((e) => {
+  const _handleWheel = useCallback((e) => {
     e.preventDefault();
     handleScroll(e.deltaY * 0.5);
   }, [handleScroll]);
+  
+  // Handle special landmark selections after all hooks
+  if (blockId === 'airport-polygon') {
+    return renderLandmarkPanel('airport', theme, onClose);
+  }
+  
+  const { street: _street, approximateTime: _approximateTime } = parseBlockId(blockId);
+  const campsInBlock = camps.filter(camp => 
+    campInBlock(camp.placement_address, blockId)
+  );
+  
   return renderInfoPanelContent(blockId, campsInBlock, theme, onClose, loading, {
     scrollTop,
     setScrollTop,
     contentHeight,
-    setContentHeight,
+    _setContentHeight,
     containerHeight,
-    setContainerHeight,
+    _setContainerHeight,
     containerRef,
     contentRef,
     themeConfig,
-    colors,
+    _colors,
     totalMaxHeight,
-    handleWheel
+    maxContentHeight,
+    isMobile,
+    _handleWheel
   });
 });
 
@@ -92,29 +107,30 @@ const renderInfoPanelContent = (blockId, campsInBlock, theme, onClose, loading, 
     scrollTop,
     setScrollTop,
     contentHeight,
-    setContentHeight,
+    _setContentHeight,
     containerHeight,
-    setContainerHeight,
+    _setContainerHeight,
     containerRef,
     contentRef,
     themeConfig,
-    colors,
+    _colors,
     totalMaxHeight,
-    handleWheel
+    maxContentHeight,
+    isMobile,
+    _handleWheel
   } = state;
   
-  // Account for header and padding in InfoPanel
-  // Header (~60px) + padding (1.5rem top + bottom = ~48px) + margins = ~120px
-  const headerAndPaddingHeight = 120;
-  const maxContentHeight = totalMaxHeight - headerAndPaddingHeight;
+  // maxContentHeight is now passed from parent component
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: '1rem',
-        right: '1rem',
-        width: '280px',
+        top: isMobile ? '0.5rem' : '1rem',
+        right: isMobile ? '0.5rem' : '1rem',
+        left: isMobile ? '0.5rem' : 'auto',
+        width: isMobile ? 'auto' : '280px',
+        maxHeight: `${totalMaxHeight}px`,
         backgroundColor: themeConfig.isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.98)',
         borderRadius: '1rem',
         boxShadow: themeConfig.isDark 
@@ -125,7 +141,10 @@ const renderInfoPanelContent = (blockId, campsInBlock, theme, onClose, loading, 
         zIndex: 35,
         transition: 'all 0.3s ease',
         animation: 'slideInRight 0.3s ease-out',
-        padding: '1.5rem'
+        padding: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
@@ -137,11 +156,11 @@ const renderInfoPanelContent = (blockId, campsInBlock, theme, onClose, loading, 
             color: themeConfig.isDark ? '#FFFFFF' : '#000000',
             fontFamily: themeConfig.typography.displayFont
           }}>
-            {customTitle || (blockId ? 
+            {blockId ? 
               (shouldAddSectorSuffix(blockId) 
                 ? `${simplifyPlazaName(blockIdToDisplayAddress(blockId))} Sector`
                 : simplifyPlazaName(blockIdToDisplayAddress(blockId))
-              ) : 'Select a Block')}
+              ) : 'Select a Block'}
           </h2>
           {blockId && (
             <p style={{
@@ -211,13 +230,15 @@ const renderInfoPanelContent = (blockId, campsInBlock, theme, onClose, loading, 
             ref={containerRef}
             onWheel={(e) => {
               e.preventDefault();
-              const newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY, contentHeight - containerHeight));
+              const maxScroll = Math.max(0, contentHeight - containerHeight);
+              const newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY * 0.5, maxScroll));
               setScrollTop(newScrollTop);
             }}
             style={{
-              height: `${containerHeight}px`,
+              maxHeight: `${maxContentHeight}px`,
               overflow: 'hidden',
-              position: 'relative'
+              position: 'relative',
+              flex: 1
             }}
           >
             <div 
@@ -373,9 +394,7 @@ const getStatusIcon = (status) => {
   return icons[status] || icons.none;
 };
 
-}; // Close renderInfoPanelContent function
-
-const formatStatus = (status) => {
+const _formatStatus = (status) => {
   const statusLabels = {
     none: 'Not Registered',
     registered: 'Registered and started BEDucator program',
@@ -516,7 +535,7 @@ const renderLandmarkPanel = (landmarkType, theme, onClose) => {
       `}</style>
     </div>
   );
-});
+};
 
 InfoPanel.displayName = 'InfoPanel';
 

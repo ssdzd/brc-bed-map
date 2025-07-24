@@ -49,11 +49,11 @@ const MapView = () => {
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [zoom, setZoom] = useState(0.8);
   const [pan, setPan] = useState({ x: 0, y: 84 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
+  const [_isPanning, _setIsPanning] = useState(false);
+  const [_lastPanPoint, _setLastPanPoint] = useState({ x: 0, y: 0 });
   const [currentTheme, setCurrentTheme] = useState('2024');
   const [tooltip, setTooltip] = useState({ visible: false, content: null, position: { x: 0, y: 0 } });
-  const [hoveredBlock, setHoveredBlock] = useState(null);
+  const [_hoveredBlock, setHoveredBlock] = useState(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const [shareVisible, setShareVisible] = useState(false);
@@ -65,7 +65,7 @@ const MapView = () => {
   const [legendExpanded, setLegendExpanded] = useState(true);
   const [perfDashVisible, setPerfDashVisible] = useState(false);
   const { urlState, updateUrl, copyToClipboard } = useUrlState();
-  const { trackMapLoad, trackSvgLoad, trackDataFetch, trackUserInteraction, trackComponentRender } = usePerformanceMonitor({
+  const { trackMapLoad, trackSvgLoad, trackDataFetch, _trackUserInteraction, _trackComponentRender } = usePerformanceMonitor({
     enableLogging: process.env.NODE_ENV === 'development',
     trackUserInteractions: true
   });
@@ -307,7 +307,7 @@ const MapView = () => {
       }
       
       // Enhanced hover effect with tooltip
-      block.onmouseenter = (e) => {
+      block.onmouseenter = (_e) => {
         // Only apply hover effects if block is not already selected
         if (selectedBlock !== block.id) {
           const hoverOpacity = '1.0';
@@ -318,7 +318,7 @@ const MapView = () => {
         setHoveredBlock(block.id);
         
         // Show tooltip with display address
-        const rect = svgRef.current.getBoundingClientRect();
+        const _rect = svgRef.current.getBoundingClientRect();
         const displayAddress = blockIdToDisplayAddress(block.id);
         
         // Calculate SVG coordinates if enabled
@@ -459,9 +459,9 @@ const MapView = () => {
           return;
         }
         
-        const currentCamps = camps;
-        const currentThemeValue = currentTheme;
-        const currentGradientId = gradientId;
+        const _currentCamps = camps;
+        const _currentThemeValue = currentTheme;
+        const _currentGradientId = gradientId;
         
         // Selection styling is now handled by the main useEffect when selectedBlock changes
         
@@ -736,7 +736,7 @@ const MapView = () => {
       airportPolygon.style.setProperty('transition', 'all 0.3s ease', 'important');
       
       // Add hover effects like other blocks
-      airportPolygon.onmouseenter = (e) => {
+      airportPolygon.onmouseenter = (_e) => {
         airportPolygon.style.setProperty('stroke', 'rgba(255, 105, 180, 1.0)', 'important');
         airportPolygon.style.setProperty('stroke-width', '3', 'important');
         airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.8))', 'important');
@@ -1022,12 +1022,12 @@ const MapView = () => {
     }
   };
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (_e) => {
     // Panning disabled
     return;
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (_e) => {
     // Panning disabled
     return;
   };
@@ -1063,7 +1063,7 @@ const MapView = () => {
       document.removeEventListener('mouseup', handleMouseUpEvent);
       container.removeEventListener('wheel', handleWheelEvent);
     };
-  }, [isPanning, lastPanPoint]);
+  }, [_isPanning, _lastPanPoint]);
 
   const theme = THEMES[currentTheme];
 
@@ -1360,7 +1360,7 @@ const MapView = () => {
               ? `scale(1)`
               : `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: 'center center',
-            transition: isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
+            transition: _isPanning ? 'none' : 'transform 0.2s ease-out, opacity 0.3s ease',
             cursor: 'default',
             userSelect: 'none',
             WebkitUserSelect: 'none',

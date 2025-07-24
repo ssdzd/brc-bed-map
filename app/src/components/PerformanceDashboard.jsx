@@ -16,7 +16,7 @@ const PerformanceDashboard = memo(({
 }) => {
   const themeConfig = THEMES[theme];
   const { metrics, getPerformanceScore, exportMetrics } = usePerformanceMonitor();
-  const [refreshCount, setRefreshCount] = useState(0);
+  const [_refreshCount, setRefreshCount] = useState(0);
 
   // Auto-refresh metrics every 2 seconds
   useEffect(() => {

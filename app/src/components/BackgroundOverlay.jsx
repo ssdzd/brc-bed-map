@@ -2,7 +2,7 @@ import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 
 const BackgroundOverlay = ({ theme = '2025' }) => {
-  const themeConfig = THEMES[theme];
+  const _themeConfig = THEMES[theme];
   
   if (theme === '2025') {
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { THEMES, getThemeColors } from '../utils/blockUtils';
 import { PlayaIcons, StatusIcon } from './PlayaIcons';
 

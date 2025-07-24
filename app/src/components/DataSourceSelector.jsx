@@ -15,7 +15,7 @@ const DataSourceSelector = ({
     }
   };
 
-  const formatPercentage = (value) => `${Math.round(value * 100)}%`;
+  const _formatPercentage = (value) => `${Math.round(value * 100)}%`;
 
   return (
     <div 

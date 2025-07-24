@@ -19,7 +19,7 @@ import { logger } from '../utils/logger';
  */
 
 // Original mock data for backward compatibility
-const originalMockCamps = [
+const _originalMockCamps = [
   { id: 1, camp_name: "Dusty Data", placement_address: "A & 3:00", bed_status: "registered" },
   { id: 2, camp_name: "Consent Camp", placement_address: "C & 4:30", bed_status: "consent_policy" },
   { id: 3, camp_name: "Starr's Oasis", placement_address: "E & 7:30", bed_status: "bed_talk" },

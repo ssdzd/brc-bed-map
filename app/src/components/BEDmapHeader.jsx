@@ -2,7 +2,7 @@ import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 
 const BEDmapHeader = ({ theme = '2024' }) => {
-  const themeConfig = THEMES[theme];
+  const _themeConfig = THEMES[theme];
   
   // Show the BED map header for 2024 theme
   if (theme !== '2024') {

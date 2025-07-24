@@ -115,7 +115,7 @@ const generateBuddyName = (bedStatus) => {
 };
 
 // Legacy function - now replaced by generateCampsForBlocks but kept for compatibility
-const generateCampsForStreet = (street, campCount = 8) => {
+const _generateCampsForStreet = (street, campCount = 8) => {
   console.warn('generateCampsForStreet is deprecated, use generateCampsForBlocks instead');
   const distribution = DISTRIBUTIONS[getDistributionCategory(street)];
   const camps = [];

@@ -13,7 +13,7 @@ const getGitTimestamp = () => {
       day: '2-digit', 
       year: 'numeric' 
     })
-  } catch (error) {
+  } catch (_error) {
     // Fallback if git is not available
     return new Date().toLocaleDateString('en-US', { 
       month: '2-digit', 

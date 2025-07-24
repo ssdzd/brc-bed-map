@@ -21,7 +21,7 @@ const SharePanel = ({
         setCopyStatus('Failed to copy');
         setTimeout(() => setCopyStatus(''), 3000);
       }
-    } catch (error) {
+    } catch (_error) {
       setCopyStatus('Error');
       setTimeout(() => setCopyStatus(''), 3000);
     }
@@ -36,7 +36,7 @@ const SharePanel = ({
           text: 'Check out this interactive Bureau of Erotic Discourse progress map for Black Rock City!',
           url: result.url
         });
-      } catch (error) {
+      } catch (_error) {
         // If sharing fails, fall back to copying
         handleCopyUrl();
       }

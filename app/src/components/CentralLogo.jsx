@@ -1,7 +1,7 @@
 import React from 'react';
 import { THEMES } from '../utils/blockUtils';
 import logoImage from '../assets/logo-4x.png';
-import fullnameImage from '../assets/fullname@4x.png';
+import _fullnameImage from '../assets/fullname@4x.png';
 
 const CentralLogo = ({ theme = '2025' }) => {
   const themeConfig = THEMES[theme] || THEMES['2025'];

@@ -59,9 +59,9 @@ Object.defineProperty(SVGElement.prototype, 'getBBox', {
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {
   value: {
-    getItem: (key) => null,
-    setItem: (key, value) => {},
-    removeItem: (key) => {},
+    getItem: (_key) => null,
+    setItem: (_key, _value) => {},
+    removeItem: (_key) => {},
     clear: () => {},
   },
   writable: true,

@@ -3,7 +3,7 @@ import { THEMES } from '../utils/blockUtils';
 import dkImage from '../assets/DK-large@3x.png';
 
 const CornerCharacters = ({ theme = '2025' }) => {
-  const themeConfig = THEMES[theme];
+  const _themeConfig = THEMES[theme];
   
   // Only show characters in 2024 theme to match original design
   if (theme !== '2024') {

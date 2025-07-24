@@ -30,7 +30,7 @@ const TestMapApp = ({ dataSource = 'mock' }) => {
 
 // Mock the utility modules
 vi.mock('../../utils/mockData', () => ({
-  generateMockData: vi.fn(() => [
+  _generateMockData: vi.fn(() => [
     { id: 1, camp_name: 'Integration Camp 1', placement_address: 'A & 3:00', bed_status: 'registered' },
     { id: 2, camp_name: 'Integration Camp 2', placement_address: 'B & 4:30', bed_status: 'bed_talk' },
     { id: 3, camp_name: 'Integration Camp 3', placement_address: 'C & 6:00', bed_status: 'consent_policy' }
@@ -117,8 +117,8 @@ describe('Map Data Flow Integration', () => {
   })
 
   it('should handle error states in data flow', async () => {
-    const { generateMockData } = await import('../../utils/mockData')
-    generateMockData.mockImplementation(() => {
+    const { _generateMockData } = await import('../../utils/mockData')
+    _generateMockData.mockImplementation(() => {
       throw new Error('Data generation failed')
     })
     
@@ -136,7 +136,7 @@ describe('Map Data Flow Integration', () => {
   })
 
   it('should integrate airtable fallback with mock data', async () => {
-    const { testConnection, generateMockData } = await import('../../utils/airtableClient')
+    const { testConnection, _generateMockData } = await import('../../utils/airtableClient')
     
     testConnection.mockResolvedValue({ success: false, message: 'Connection failed' })
     

@@ -29,7 +29,6 @@ export const usePerformanceMonitor = (options = {}) => {
   });
 
   const performanceObserver = useRef(null);
-  const navigationStartTime = useRef(performance.now());
   const componentRenderTimes = useRef({});
 
   // Initialize performance monitoring
