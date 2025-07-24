@@ -56,22 +56,7 @@ const SearchPanel = ({
   useEffect(() => {
     let filtered = camps;
     
-    // Apply status filter
-    if (selectedFilter === 'all') {
-      // "All Camps" shows only camps with BED progress (orange/purple/pink)
-      filtered = filtered.filter(camp => 
-        camp.bed_status === 'registered' || 
-        camp.bed_status === 'consent_policy' || 
-        camp.bed_status === 'bed_talk'
-      );
-    } else if (selectedFilter === 'none') {
-      // "None" shows no camps (empty state)
-      filtered = [];
-    } else {
-      filtered = filtered.filter(camp => camp.bed_status === selectedFilter);
-    }
-    
-    // Apply search term
+    // Only apply search term for filtering results, not status filter
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(camp => 
