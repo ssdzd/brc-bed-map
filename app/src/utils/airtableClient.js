@@ -219,7 +219,7 @@ export const fetchCamps = async () => {
     return allRecords.map(transformRecord);
     
   } catch (error) {
-    console.error('Error fetching camps from Airtable:', error);
+    // Error is propagated to caller for handling
     throw error;
   }
 };

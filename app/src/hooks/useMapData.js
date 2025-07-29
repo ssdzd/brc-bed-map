@@ -73,13 +73,13 @@ export const useMapData = (dataSource = 'airtable') => {
       const validCamps = airtableCamps.filter(camp => {
         // Skip camps with empty or invalid addresses
         if (!camp.placement_address || camp.placement_address.trim() === '') {
-          console.warn(`Empty address for camp: ${camp.camp_name}`);
+          logger.data.warn(`Empty address for camp: ${camp.camp_name}`);
           return false;
         }
         
         const parsed = parseAddress(camp.placement_address);
         if (!parsed) {
-          console.warn(`Invalid address format: "${camp.placement_address}" for camp: ${camp.camp_name}`);
+          logger.data.warn(`Invalid address format: "${camp.placement_address}" for camp: ${camp.camp_name}`);
           return false;
         }
         return true;
@@ -96,7 +96,7 @@ export const useMapData = (dataSource = 'airtable') => {
       
       const duplicates = Object.entries(campNameCounts).filter(([, count]) => count > 1);
       if (duplicates.length > 0) {
-        console.warn('Found potential duplicate camp names:', duplicates.map(([name, count]) => `"${name}" (${count}x)`));
+        logger.data.warn('Found potential duplicate camp names:', duplicates.map(([name, count]) => `"${name}" (${count}x)`));
       }
       
       logger.data.info('Loaded camps from Airtable', { 
@@ -114,14 +114,14 @@ export const useMapData = (dataSource = 'airtable') => {
       }
       
     } catch (err) {
-      console.error('Error fetching Airtable data:', err);
+      logger.error.error('Error fetching Airtable data:', err);
       setError(`Failed to load Airtable data: ${err.message}`);
       
       // Fall back to generated mock data on error
-      console.log('Falling back to generated mock data');
+      logger.data.info('Falling back to generated mock data');
       const mockCamps = generateMockData();
       const validation = validateDistributions(mockCamps);
-      console.log('Mock data validation (error fallback):', validation);
+      logger.data.debug('Mock data validation (error fallback):', validation);
       
       setCamps(mockCamps);
       setMockDataStats({
@@ -152,7 +152,7 @@ export const useMapData = (dataSource = 'airtable') => {
         const mockCamps = generateMockData();
         const validation = validateDistributions(mockCamps);
         
-        console.log('Mock data validation:', validation);
+        logger.data.debug('Mock data validation:', validation);
         
         setCamps(mockCamps);
         setMockDataStats({
@@ -166,7 +166,7 @@ export const useMapData = (dataSource = 'airtable') => {
         setLoading(false);
       }, 300);
     } catch (err) {
-      console.error('Error generating mock data:', err);
+      logger.error.error('Error generating mock data:', err);
       setError('Failed to generate mock data');
       setLoading(false);
     }

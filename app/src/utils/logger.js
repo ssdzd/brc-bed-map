@@ -138,5 +138,3 @@ export const setupGlobalErrorHandling = () => {
     });
   });
 };
-
-export default logger;

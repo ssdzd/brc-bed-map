@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+// Check if we're in development mode
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 /**
  * Performance monitoring hook for BED Map
  * Collects and tracks various performance metrics
@@ -46,7 +49,7 @@ export const usePerformanceMonitor = (options = {}) => {
                 ...prev,
                 firstContentfulPaint: Math.round(entry.startTime)
               }));
-              if (enableLogging) {
+              if (isDevelopment && enableLogging) {
                 console.log(`🎨 FCP: ${Math.round(entry.startTime)}ms`);
               }
             }
@@ -55,7 +58,7 @@ export const usePerformanceMonitor = (options = {}) => {
                 ...prev,
                 largestContentfulPaint: Math.round(entry.startTime)
               }));
-              if (enableLogging) {
+              if (isDevelopment && enableLogging) {
                 console.log(`🖼️ LCP: ${Math.round(entry.startTime)}ms`);
               }
             }
@@ -66,7 +69,9 @@ export const usePerformanceMonitor = (options = {}) => {
           observer.observe({ entryTypes: ['paint', 'largest-contentful-paint'] });
           performanceObserver.current = observer;
         } catch (error) {
-          console.warn('Performance observer not supported:', error);
+          if (isDevelopment) {
+            console.warn('Performance observer not supported:', error);
+          }
         }
       }
 
@@ -80,7 +85,7 @@ export const usePerformanceMonitor = (options = {}) => {
             ...prev,
             pageLoad: pageLoadTime
           }));
-          if (enableLogging) {
+          if (isDevelopment && enableLogging) {
             console.log(`⚡ Page Load: ${pageLoadTime}ms`);
           }
         }
@@ -97,7 +102,7 @@ export const usePerformanceMonitor = (options = {}) => {
           ...prev,
           memoryUsage: memInfo
         }));
-        if (enableLogging) {
+        if (isDevelopment && enableLogging) {
           console.log(`🧠 Memory: ${memInfo.used}MB / ${memInfo.total}MB`);
         }
       }
@@ -136,7 +141,7 @@ export const usePerformanceMonitor = (options = {}) => {
 
     componentRenderTimes.current[componentName] = renderTime;
 
-    if (enableLogging && renderDuration > 16) { // More than one frame
+    if (isDevelopment && enableLogging && renderDuration > 16) { // More than one frame
       console.warn(`🐌 Slow render: ${componentName} took ${Math.round(renderDuration)}ms`);
     }
   }, [trackComponents, enableLogging]);
@@ -157,7 +162,7 @@ export const usePerformanceMonitor = (options = {}) => {
       userInteractions: [...prev.userInteractions.slice(-50), interaction] // Keep last 50
     }));
 
-    if (enableLogging) {
+    if (isDevelopment && enableLogging) {
       console.log(`👆 User action: ${action} on ${target}${duration ? ` (${Math.round(duration)}ms)` : ''}`);
     }
   }, [trackUserInteractions, enableLogging]);
@@ -168,7 +173,7 @@ export const usePerformanceMonitor = (options = {}) => {
       ...prev,
       mapLoadTime: Math.round(loadTime)
     }));
-    if (enableLogging) {
+    if (isDevelopment && enableLogging) {
       console.log(`🗺️ Map loaded: ${Math.round(loadTime)}ms`);
     }
   }, [enableLogging]);
@@ -178,7 +183,7 @@ export const usePerformanceMonitor = (options = {}) => {
       ...prev,
       svgLoadTime: Math.round(loadTime)
     }));
-    if (enableLogging) {
+    if (isDevelopment && enableLogging) {
       console.log(`📐 SVG loaded: ${Math.round(loadTime)}ms`);
     }
   }, [enableLogging]);
@@ -188,7 +193,7 @@ export const usePerformanceMonitor = (options = {}) => {
       ...prev,
       dataFetchTime: Math.round(fetchTime)
     }));
-    if (enableLogging) {
+    if (isDevelopment && enableLogging) {
       console.log(`📊 Data fetched (${source}): ${Math.round(fetchTime)}ms`);
     }
   }, [enableLogging]);
@@ -237,11 +242,13 @@ export const usePerformanceMonitor = (options = {}) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (enableLogging) {
+      if (isDevelopment && enableLogging) {
         console.log('📈 Metrics sent to:', endpoint);
       }
     } catch (error) {
-      console.warn('Failed to send metrics:', error);
+      if (isDevelopment) {
+        console.warn('Failed to send metrics:', error);
+      }
     }
   }, [exportMetrics, enableLogging]);
 
@@ -269,5 +276,3 @@ export const createPerformanceTracker = (componentName) => {
     }
   };
 };
-
-export default usePerformanceMonitor;
