@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { logger } from '../utils/logger';
 
 /**
  * Custom hook for URL state management and sharing
@@ -166,7 +167,7 @@ export const useUrlState = () => {
           url: shareUrl
         }, '*');
       } catch (error) {
-        console.log('Could not send message to parent window:', error);
+        logger.ui.debug('Could not send message to parent window:', error);
       }
     }
     
@@ -198,7 +199,7 @@ export const useUrlState = () => {
         return { success: successful, url: shareUrl };
       }
     } catch (err) {
-      console.error('Failed to copy URL:', err);
+      logger.error.error('Failed to copy URL:', err);
       return { success: false, url: shareUrl, error: err };
     }
   }, [generateShareUrl]);

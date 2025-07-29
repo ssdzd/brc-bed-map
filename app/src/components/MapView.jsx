@@ -143,7 +143,6 @@ const MapView = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [setZoom, setPan, setSelectedBlock, setSearchVisible, setStatsVisible, setShareVisible, setUpdateVisible]);
 
-  // console.log('MapView rendering, loading:', loading, 'camps:', camps);
 
   // Initialize state from URL on mount (only once)
   const [initializedFromUrl, setInitializedFromUrl] = useState(false);
@@ -180,31 +179,28 @@ const MapView = () => {
   }, [selectedBlock]);
 
   useEffect(() => {
-    // console.log('MapView useEffect triggered');
     if (!svgRef.current || loading) {
-      // console.log('Early return - svgRef:', svgRef.current, 'loading:', loading);
       return;
     }
 
     const svgDoc = svgRef.current.contentDocument;
-    // console.log('SVG doc:', svgDoc);
     if (!svgDoc) return;
 
     // Extend SVG viewBox to accommodate invisible balancing element and airport
     const svgElement = svgDoc.documentElement;
     if (svgElement && svgElement.getAttribute('viewBox') === '0 0 1160.17 861.54') {
       svgElement.setAttribute('viewBox', '0 0 1240 1011.54');
-      // console.log('Extended SVG viewBox to accommodate balancing element and airport');
+      logger.map.debug('Extended SVG viewBox to accommodate balancing element and airport');
     }
 
 
     // Update gradient references based on current theme
     const gradientId = currentTheme.includes('2024') ? 'cityGradient-2024' : 'cityGradient-2025';
-    // console.log('Using gradient ID:', gradientId, 'for theme:', currentTheme);
+    logger.map.debug('Using gradient ID', { gradientId, theme: currentTheme });
 
     // Color all blocks and plaza quarters based on camp data - BED colors override gradient
     const blocks = svgDoc.querySelectorAll('#BRC_Polygons_Overlay path, .plaza-quarter');
-    // console.log('Found blocks and plaza-quarters:', blocks.length);
+    logger.map.debug('Found blocks and plaza-quarters', { count: blocks.length });
     blocks.forEach(block => {
       const color = getBlockColor(block.id, camps, currentTheme);
       const campsInBlock = camps.filter(camp => 
@@ -228,13 +224,11 @@ const MapView = () => {
         let fillOpacity = isSelected ? '1.0' : '0.7';
         
         block.style.setProperty('fill-opacity', fillOpacity, 'important');
-        // console.log(`Block ${block.id} - BED status color:`, color);
       } else {
         // No BED status - show gradient with full opacity
         const gradientFill = `url(#${gradientId})`;
         block.style.setProperty('fill', gradientFill, 'important');
         block.style.setProperty('fill-opacity', '1.0', 'important');
-        // console.log(`Block ${block.id} - Using gradient:`, gradientFill);
       }
       
       block.style.setProperty('cursor', 'pointer', 'important');
@@ -453,7 +447,7 @@ const MapView = () => {
         
         // Safety check and capture current values
         if (!camps || !Array.isArray(camps)) {
-          console.warn('Camps data not available for click handler');
+          logger.map.warn('Camps data not available for click handler');
           setSelectedBlock(block.id);
           setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
           return;
@@ -712,7 +706,7 @@ const MapView = () => {
       rangerIcon.appendChild(rangerTitle);
       
       svgDoc.documentElement.appendChild(rangerIcon);
-      console.log("Added Ranger HQ icon at coordinates: 565, 495");
+      logger.map.debug('Added Ranger HQ icon', { coordinates: '565, 495' });
     }
     
     // Add Airport polygon at bottom right corner (off the map) - simplified Nimue airplane shape
@@ -796,7 +790,7 @@ const MapView = () => {
         setShareVisible(false);
         setUpdateVisible(false);
         
-        console.log("Airport polygon selected");
+        logger.map.debug('Airport polygon selected');
       };
       
       // Add tooltip title (will inherit camp name like other polygons)
@@ -805,7 +799,7 @@ const MapView = () => {
       airportPolygon.appendChild(title);
       
       svgDoc.documentElement.appendChild(airportPolygon);
-      console.log("Added Airport polygon at coordinates: 1100, 775");
+      logger.map.debug('Added Airport polygon', { coordinates: '1100, 775' });
     }
 
     // Add BED Logo directly to SVG at The Man's coordinates + 15px right
@@ -834,7 +828,7 @@ const MapView = () => {
       bedLogoGroup.appendChild(bedLogoTitle);
       
       svgDoc.documentElement.appendChild(bedLogoGroup);
-      console.log("Added BED Logo to SVG at coordinates: 612.5, 272.04");
+      logger.map.debug('Added BED Logo to SVG', { coordinates: '612.5, 272.04' });
     }
 
     // Add invisible balancing element to fix SVG centering (mirror of left outpost)
@@ -855,7 +849,7 @@ const MapView = () => {
       
       balancerGroup.appendChild(balancerCircle);
       svgDoc.documentElement.appendChild(balancerGroup);
-      console.log("Added invisible balancing element at coordinates: 1226.5, 92.04");
+      logger.map.debug('Added invisible balancing element', { coordinates: '1226.5, 92.04' });
     }
 
 
@@ -888,7 +882,7 @@ const MapView = () => {
       bedTextGroup.appendChild(bedTextTitle);
       
       svgDoc.documentElement.appendChild(bedTextGroup);
-      console.log("Added BEDtalks.org text to SVG at coordinates: 622.5, 847.04");
+      logger.map.debug('Added BEDtalks.org text to SVG', { coordinates: '622.5, 847.04' });
     }
 
     // Add invisible bottom balancer 100px below airport to ensure glow effects aren't clipped
@@ -909,7 +903,7 @@ const MapView = () => {
       
       bottomBalancerGroup.appendChild(bottomBalancerCircle);
       svgDoc.documentElement.appendChild(bottomBalancerGroup);
-      console.log("Added bottom balancer element at coordinates: 1100, 875 to prevent glow clipping");
+      logger.map.debug('Added bottom balancer element to prevent glow clipping', { coordinates: '1100, 875' });
     }
   }, [camps, loading, currentTheme, selectedBlock, currentFilter]);
 
@@ -984,14 +978,21 @@ const MapView = () => {
     
     if (foundBlockId) {
       setSelectedBlock(foundBlockId);
-      console.log(`Selected block ${foundBlockId} for camp ${camp.camp_name} at ${camp.placement_address}`);
+      logger.ui.debug('Selected block for camp', { 
+        blockId: foundBlockId, 
+        campName: camp.camp_name, 
+        address: camp.placement_address 
+      });
     } else {
-      console.warn(`Could not find block for camp ${camp.camp_name} at ${camp.placement_address}`);
+      logger.ui.warn('Could not find block for camp', { 
+        campName: camp.camp_name, 
+        address: camp.placement_address 
+      });
     }
   };
   
   const handleFilterChange = useCallback((filterData) => {
-    console.log('Filter changed:', filterData);
+    logger.ui.debug('Filter changed', filterData);
     
     // Store the current filter for highlighting blocks
     setCurrentFilter(filterData);
@@ -1009,7 +1010,7 @@ const MapView = () => {
 
   const handleDataSourceChange = (newSource) => {
     setDataSource(newSource);
-    console.log('Data source changed to:', newSource);
+    logger.data.info('Data source changed', { newSource });
   };
 
   const handleLegendToggle = () => {
@@ -1193,7 +1194,7 @@ const MapView = () => {
           onClick={() => {
             const newState = !showCoordinates;
             setShowCoordinates(newState);
-            console.log('Coordinate toggle clicked, new state:', newState);
+            logger.ui.debug('Coordinate toggle clicked', { newState });
           }}
           style={{
             backgroundColor: showCoordinates 
@@ -1243,7 +1244,7 @@ const MapView = () => {
           onClick={() => {
             const newState = !showCoordinates;
             setShowCoordinates(newState);
-            console.log('Alternative coordinate toggle clicked, new state:', newState);
+            logger.ui.debug('Alternative coordinate toggle clicked', { newState });
           }}
           style={{
             backgroundColor: showCoordinates 
@@ -1390,8 +1391,9 @@ const MapView = () => {
             objectPosition: 'center center'
           }}
           onLoad={() => {
-            console.log('SVG loaded');
-            console.log('SVG contentDocument:', svgRef.current?.contentDocument);
+            logger.map.debug('SVG loaded', { 
+              hasContentDocument: !!svgRef.current?.contentDocument 
+            });
           }}
         />
         

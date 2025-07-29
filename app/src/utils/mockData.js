@@ -114,37 +114,6 @@ const generateBuddyName = (bedStatus) => {
   return null;
 };
 
-// Legacy function - now replaced by generateCampsForBlocks but kept for compatibility
-const _generateCampsForStreet = (street, campCount = 8) => {
-  console.warn('generateCampsForStreet is deprecated, use generateCampsForBlocks instead');
-  const distribution = DISTRIBUTIONS[getDistributionCategory(street)];
-  const camps = [];
-  
-  for (let i = 0; i < campCount; i++) {
-    const campName = CAMP_NAMES[Math.floor(Math.random() * CAMP_NAMES.length)] + ` ${street}${i + 1}`;
-    const bedStatus = selectBedStatus(distribution);
-    const userData = generateUserData(campName);
-    const time = generateRandomTime();
-    const placementAddress = generatePlacementAddress(street, time);
-    
-    const camp = {
-      id: `mock_${street}_${i + 1}`,
-      camp_name: campName,
-      user_name: userData.user_name,
-      email: userData.email,
-      placement_address: placementAddress,
-      bed_status: bedStatus,
-      buddy_name: generateBuddyName(bedStatus),
-      last_updated: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      notes: bedStatus === 'none' ? null : `Mock ${bedStatus.replace('_', ' ')} status for testing`
-    };
-    
-    camps.push(camp);
-  }
-  
-  return camps;
-};
-
 // Define exact block IDs for each ring (from SVG)
 const BLOCK_IDS = {
   Esplanade: [
@@ -413,16 +382,19 @@ export const generateMockData = () => {
   
   allCamps = allCamps.concat(testCamps);
   
-  console.log('Generated mock data with exact proportions:', {
-    totalCamps: allCamps.length,
-    regularCamps: allCamps.filter(c => !c.isLandmark).length,
-    landmarks: allCamps.filter(c => c.isLandmark).length,
-    byStatus: allCamps.reduce((acc, camp) => {
-      acc[camp.bed_status] = (acc[camp.bed_status] || 0) + 1;
-      return acc;
-    }, {}),
-    ringStats
-  });
+  // Only log in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Generated mock data with exact proportions:', {
+      totalCamps: allCamps.length,
+      regularCamps: allCamps.filter(c => !c.isLandmark).length,
+      landmarks: allCamps.filter(c => c.isLandmark).length,
+      byStatus: allCamps.reduce((acc, camp) => {
+        acc[camp.bed_status] = (acc[camp.bed_status] || 0) + 1;
+        return acc;
+      }, {}),
+      ringStats
+    });
+  }
   
   return allCamps;
 };

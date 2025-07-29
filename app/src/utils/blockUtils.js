@@ -15,8 +15,6 @@ export const BED_COLORS_2024 = {
 };
 
 
-// Default to 2024 theme
-export const BED_COLORS = BED_COLORS_2024;
 
 // Theme configurations
 export const THEMES = {
