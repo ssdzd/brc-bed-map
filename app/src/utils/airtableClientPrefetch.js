@@ -5,9 +5,9 @@ const AIRTABLE_BASE_URL = 'https://api.airtable.com/v0';
 
 // Airtable configuration from environment variables
 const AIRTABLE_CONFIG = {
-  baseId: import.meta.env.DEV ? import.meta.env.VITE_AIRTABLE_BASE_ID : null,
-  tableName: import.meta.env.DEV ? (import.meta.env.VITE_AIRTABLE_TABLE_NAME || 'BED_Camp_Progress') : null,
-  pat: import.meta.env.DEV ? import.meta.env.VITE_AIRTABLE_PAT : null
+  baseId: import.meta.env.VITE_AIRTABLE_BASE_ID,
+  tableName: import.meta.env.VITE_AIRTABLE_TABLE_NAME || 'BED_Camp_Progress',
+  pat: import.meta.env.VITE_AIRTABLE_PAT
 };
 
 // Validate configuration
@@ -188,14 +188,11 @@ const transformRecord = (record) => {
 
 // Fetch all camps from Airtable
 export const fetchCamps = async () => {
-  console.log('fetchCamps called, DEV mode:', import.meta.env.DEV);
-  
   // In production or when testing production mode, use pre-fetched data
   if (!import.meta.env.DEV || import.meta.env.VITE_USE_STATIC_DATA === 'true') {
     try {
       console.log('📁 Loading pre-fetched Airtable data...');
-      const basePath = import.meta.env.BASE_URL || '/';
-      const response = await fetch(`${basePath}airtable-camps.json`);
+      const response = await fetch('/airtable-camps.json');
       
       if (!response.ok) {
         throw new Error(`Failed to load static data: ${response.status}`);
@@ -218,8 +215,6 @@ export const fetchCamps = async () => {
   
   // In development, fetch directly from Airtable
   console.log('🔧 Development mode: Fetching from Airtable API...');
-  
-  // Only validate config when we actually need to use it
   validateConfig();
   
   const url = `${AIRTABLE_BASE_URL}/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableName}`;
@@ -457,15 +452,6 @@ export const parseAddress = (address) => {
 
 // Check Airtable connection
 export const testConnection = async () => {
-  // In production, we use static data so connection test always succeeds
-  if (!import.meta.env.DEV) {
-    return {
-      success: true,
-      message: 'Using pre-fetched static data',
-      recordCount: 0
-    };
-  }
-  
   try {
     validateConfig();
     

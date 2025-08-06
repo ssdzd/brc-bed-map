@@ -6,6 +6,8 @@
   "homepage": "https://ssdzd.github.io/brc-bed-map",
   "scripts": {
     "dev": "vite",
+    "fetch-data": "node scripts/fetch-airtable-data.js",
+    "prebuild": "npm run fetch-data",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
