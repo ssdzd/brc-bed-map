@@ -27,4 +27,7 @@ project_docs/BED_assets/
 
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log* 
+yarn-error.log*
+
+# Security and development notes
+SECURITY_FIX_ATTEMPT_NOTES.md 
