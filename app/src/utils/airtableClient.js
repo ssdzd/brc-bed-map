@@ -91,6 +91,11 @@ const normalizeAddress = (address) => {
     return '';
   }
   
+  // Handle Airport addresses - accept "BRC Airport", "4:30 & Airport", or just "Airport"
+  if (trimmed.toLowerCase().includes('airport')) {
+    return 'BRC Airport';
+  }
+  
   // Check if it's a geographic plaza quarter name (e.g., "9:01 & B+", "7:29 & G-")
   const geographicQuarterMatch = trimmed.match(/^(\d{1,2}:\d{2})\s*(&|and)\s*([A-G])([+-])$/i);
   if (geographicQuarterMatch) {
@@ -302,6 +307,9 @@ export const getValidAddresses = () => {
 export const isValidAddress = (address) => {
   if (!address || typeof address !== 'string') return false;
   
+  // Check for Airport addresses
+  if (address.trim().toLowerCase().includes('airport')) return true;
+  
   // Check for time & street addresses (e.g., "3:45 & C" or "9 & C")
   const timeStreetPattern = /^(\d{1,2}(?::[0-5]\d)?)\s*&\s*(Esplanade|[A-L])$/i;
   if (timeStreetPattern.test(address.trim())) return true;
@@ -324,6 +332,16 @@ export const isValidAddress = (address) => {
 // Parse placement address to extract street and time
 export const parseAddress = (address) => {
   if (!isValidAddress(address)) return null;
+  
+  // Handle Airport addresses
+  if (address.trim().toLowerCase().includes('airport')) {
+    return {
+      street: 'BRC Airport',
+      time: null,
+      blockId: 'nimue-artist-credit',
+      type: 'airport'
+    };
+  }
   
   // Parse geographic plaza quarter names (e.g., "9:01 & B+", "7:29 & G-")
   const geographicQuarterMatch = address.trim().match(/^(\d{1,2}:[0-5]\d)\s*&\s*([A-G])([+-])$/i);

@@ -476,22 +476,36 @@ const MapView = () => {
       };
     });
 
-    // Handle Airport polygon selection styling
+    // Handle Airport polygon selection styling and BED status coloring
     const airportPolygon = svgDoc.querySelector('#airport-polygon');
     
-    if (airportPolygon && selectedBlock === 'nimue-artist-credit') {
-      // Apply selection styling but keep the white stroke
-      airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
-      airportPolygon.style.setProperty('stroke-width', '6', 'important');
-      airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
-      airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.4))', 'important');
-    } else if (airportPolygon) {
-      // Reset to default styling (gradient fill with 70% opacity, white stroke like other city blocks)
-      airportPolygon.style.setProperty('stroke', 'white', 'important');
-      airportPolygon.style.setProperty('stroke-width', '2', 'important');
-      airportPolygon.style.setProperty('fill', `url(#${gradientId})`, 'important');
-      airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
-      airportPolygon.style.setProperty('filter', 'none', 'important');
+    if (airportPolygon) {
+      // Check for camps at the Airport location and apply BED status color
+      const airportColor = getBlockColor('nimue-artist-credit', camps, currentTheme);
+      
+      if (selectedBlock === 'nimue-artist-credit') {
+        // Apply selection styling but keep the white stroke
+        airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
+        airportPolygon.style.setProperty('stroke-width', '6', 'important');
+        airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
+        airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.4))', 'important');
+      } else {
+        // Reset to default styling with BED status color if available
+        airportPolygon.style.setProperty('stroke', 'white', 'important');
+        airportPolygon.style.setProperty('stroke-width', '2', 'important');
+        
+        if (airportColor !== THEMES[currentTheme].colors.none) {
+          // BED status override - use solid color fill
+          airportPolygon.style.setProperty('fill', airportColor, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
+        } else {
+          // No BED status - use gradient fill
+          airportPolygon.style.setProperty('fill', `url(#${gradientId})`, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
+        }
+        
+        airportPolygon.style.setProperty('filter', 'none', 'important');
+      }
     }
 
     // Remove any special SVG styling since we only use 2024 theme
@@ -721,8 +735,19 @@ const MapView = () => {
       const airplanePath = 'M 63.040 -139.830 C 51.411 -134.765, 50.791 -133.772, 36.504 -97.290 C 30.130 -81.012, 26.260 -72.405, 25.164 -72.066 C 24.249 -71.783, -9.561 -63.657, -49.968 -54.008 C -90.376 -44.358, -123.717 -36.134, -124.060 -35.732 C -125.096 -34.514, -135 -10.748, -135 -9.478 C -135 -8.629, -133.102 -8.460, -128.250 -8.878 C -124.537 -9.198, -95.175 -9.714, -63 -10.025 C -30.825 -10.336, -2.858 -10.827, -0.850 -11.116 L 2.800 -11.642 -14.093 31.089 C -23.384 54.591, -31.102 73.908, -31.243 74.016 C -31.384 74.125, -41.157 76.785, -52.961 79.928 C -78.478 86.723, -75.010 84.850, -78.995 93.989 C -83.090 103.380, -85.475 102.213, -56.666 104.915 L -32.111 107.217 -18.805 118.549 C -11.487 124.782, -2.908 132.117, 0.259 134.848 C 3.426 137.580, 6.212 139.621, 6.449 139.384 C 7.397 138.436, 13 125.223, 13 123.935 C 13 123.177, 8.275 114.065, 2.500 103.686 C -3.275 93.308, -8 84.162, -8 83.362 C -8 82.154, 28.308 1.859, 29.305 0.862 C 29.482 0.685, 50.720 23.037, 76.501 50.533 C 102.282 78.028, 123.669 100.182, 124.029 99.762 C 124.995 98.635, 135 74.828, 135 73.656 C 135 73.105, 117.401 42.893, 95.891 6.519 L 56.781 -59.615 69.641 -87.735 C 83.826 -118.755, 84.245 -120.412, 80.622 -131.193 C 77.186 -141.417, 72.251 -143.842, 63.040 -139.830';
       
       airportPolygon.setAttribute("d", airplanePath);
-      airportPolygon.setAttribute("fill", `url(#${gradientId})`);  // Use same gradient as city blocks
-      airportPolygon.setAttribute("fill-opacity", "0.7");  // 70% opacity
+      
+      // Check for camps at the Airport location and apply BED status color
+      const airportColor = getBlockColor('nimue-artist-credit', camps, currentTheme);
+      if (airportColor !== THEMES[currentTheme].colors.none) {
+        // BED status override - use solid color fill
+        airportPolygon.setAttribute("fill", airportColor);
+        airportPolygon.setAttribute("fill-opacity", "0.7");
+      } else {
+        // No BED status - use gradient fill
+        airportPolygon.setAttribute("fill", `url(#${gradientId})`);
+        airportPolygon.setAttribute("fill-opacity", "0.7");
+      }
+      
       airportPolygon.setAttribute("stroke", "#FFFFFF");
       airportPolygon.setAttribute("stroke-miterlimit", "10");
       airportPolygon.setAttribute("filter", "url(#plazaShadow)");

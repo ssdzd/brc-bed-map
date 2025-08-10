@@ -239,8 +239,8 @@ export const blockIdToDisplayAddress = (blockId) => {
 
 // Enhanced address parsing with plaza quarter support
 const parseAddress = (address) => {
-  // Handle BRC Airport as a special case
-  if (address.match(/BRC\s*Airport/i)) {
+  // Handle BRC Airport as a special case - accepts both "BRC Airport" and "4:30 & Airport"
+  if (address.match(/BRC\s*Airport/i) || address.match(/Airport/i)) {
     return {
       street: 'BRC Airport',
       hour: null,
