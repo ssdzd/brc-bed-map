@@ -482,17 +482,60 @@ const MapView = () => {
     if (airportPolygon) {
       // Check for camps at the Airport location and apply BED status color
       const airportColor = getBlockColor('nimue-artist-credit', camps, currentTheme);
+      const airportCamps = camps.filter(camp => 
+        campInBlock(camp.placement_address, 'nimue-artist-credit')
+      );
+      
+      // Check if Airport should be highlighted due to filtering
+      const shouldHighlightAirport = legendFilter 
+        ? airportCamps.some(camp => camp.bed_status === legendFilter)
+        : (currentFilter.filteredCamps.length > 0 && 
+           currentFilter.filteredCamps.some(camp => campInBlock(camp.placement_address, 'nimue-artist-credit')));
       
       if (selectedBlock === 'nimue-artist-credit') {
-        // Apply selection styling but keep the white stroke
+        // Apply selection styling but maintain BED status color
         airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
         airportPolygon.style.setProperty('stroke-width', '6', 'important');
-        airportPolygon.style.setProperty('fill', 'rgba(255, 105, 180, 0.3)', 'important');
+        
+        // Keep the BED status color or gradient
+        if (airportColor !== THEMES[currentTheme].colors.none) {
+          airportPolygon.style.setProperty('fill', airportColor, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '1.0', 'important'); // Full opacity when selected
+        } else {
+          airportPolygon.style.setProperty('fill', `url(#${gradientId})`, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '1.0', 'important');
+        }
+        
         airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.4))', 'important');
+      } else if (shouldHighlightAirport) {
+        // Apply filter highlighting (similar to other blocks)
+        airportPolygon.style.setProperty('stroke', '#FFFFFF', 'important');
+        airportPolygon.style.setProperty('stroke-width', '4', 'important');
+        airportPolygon.style.setProperty('stroke-opacity', '0.8', 'important');
+        
+        // Apply fill based on BED status
+        if (airportColor !== THEMES[currentTheme].colors.none) {
+          airportPolygon.style.setProperty('fill', airportColor, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
+        } else {
+          airportPolygon.style.setProperty('fill', `url(#${gradientId})`, 'important');
+          airportPolygon.style.setProperty('fill-opacity', '0.7', 'important');
+        }
+        
+        // Apply glow effect for highlighting
+        const filterGlowFilter = [
+          'brightness(1.2)',
+          'drop-shadow(0 0 15px rgba(255, 255, 255, 0.8))',
+          'drop-shadow(0 0 8px rgba(255, 255, 255, 0.7))',
+          'drop-shadow(0 0 4px rgba(255, 255, 255, 0.6))',
+          'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2))'
+        ].join(' ');
+        airportPolygon.style.setProperty('filter', filterGlowFilter, 'important');
       } else {
         // Reset to default styling with BED status color if available
         airportPolygon.style.setProperty('stroke', 'white', 'important');
-        airportPolygon.style.setProperty('stroke-width', '2', 'important');
+        airportPolygon.style.setProperty('stroke-width', '3', 'important');  // Increased for better visibility
+        airportPolygon.style.setProperty('stroke-opacity', '1', 'important');
         
         if (airportColor !== THEMES[currentTheme].colors.none) {
           // BED status override - use solid color fill
@@ -749,6 +792,7 @@ const MapView = () => {
       }
       
       airportPolygon.setAttribute("stroke", "#FFFFFF");
+      airportPolygon.setAttribute("stroke-width", "3");  // Increased from default for better visibility
       airportPolygon.setAttribute("stroke-miterlimit", "10");
       airportPolygon.setAttribute("filter", "url(#plazaShadow)");
       airportPolygon.style.setProperty('cursor', 'pointer', 'important');
@@ -757,7 +801,7 @@ const MapView = () => {
       // Add hover effects like other blocks
       airportPolygon.onmouseenter = (_e) => {
         airportPolygon.style.setProperty('stroke', 'rgba(255, 105, 180, 1.0)', 'important');
-        airportPolygon.style.setProperty('stroke-width', '3', 'important');
+        airportPolygon.style.setProperty('stroke-width', '4', 'important');  // Slightly thicker on hover
         airportPolygon.style.setProperty('filter', 'drop-shadow(0 0 10px rgba(255, 105, 180, 0.8))', 'important');
         
         // Show tooltip (will inherit camp name like other polygons)
@@ -799,7 +843,7 @@ const MapView = () => {
       
       airportPolygon.onmouseleave = () => {
         airportPolygon.style.setProperty('stroke', 'white', 'important');
-        airportPolygon.style.setProperty('stroke-width', '2', 'important');
+        airportPolygon.style.setProperty('stroke-width', '3', 'important');  // Reset to new default thickness
         airportPolygon.style.setProperty('filter', 'none', 'important');
         setTooltip({ visible: false, content: null, position: { x: 0, y: 0 } });
       };
@@ -930,7 +974,7 @@ const MapView = () => {
       svgDoc.documentElement.appendChild(bottomBalancerGroup);
       logger.map.debug('Added bottom balancer element to prevent glow clipping', { coordinates: '1100, 875' });
     }
-  }, [camps, loading, currentTheme, selectedBlock, currentFilter]);
+  }, [camps, loading, currentTheme, selectedBlock, currentFilter, legendFilter]);
 
   // Zoom and pan functions
   const handleZoomIn = () => {
